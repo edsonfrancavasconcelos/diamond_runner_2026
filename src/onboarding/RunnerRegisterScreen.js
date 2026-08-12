@@ -1,10 +1,10 @@
 // Arquivo: src/onboarding/RunnerRegisterScreen.js
 // Diamond Runner 2026
-// AUTO-FILL DO PATROCINADOR + VALIDAÇÃO SEGURA
+// Cadastro + patrocinador validado
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -35,15 +35,9 @@ export default function RunnerRegisterScreen() {
   const { theme, isDark } = useTheme();
 
   // ============================================================
-  // 1. RECEBE OS DADOS DA TELA ANTERIOR
+  // 1. DADOS RECEBIDOS DO HAS SPONSOR
   // ============================================================
-  //
-  // HasSponsorScreen deve enviar:
-  //
-  // sponsorUuid
-  // sponsorId
-  // sponsorName
-  //
+
   const {
     sponsorUuid: routeSponsorUuid = "",
     sponsorId: routeSponsorId = "",
@@ -51,11 +45,21 @@ export default function RunnerRegisterScreen() {
   } = route.params || {};
 
   // ============================================================
-  // 2. ESTADOS
+  // 2. CONTROLES
   // ============================================================
 
   const [loading, setLoading] = useState(false);
   const [isValidatingSponsor, setIsValidatingSponsor] = useState(false);
+
+  // Guarda o patrocinador originalmente validado.
+  //
+  // Isso é importante porque o patrocinador que veio do
+  // HasSponsorScreen JÁ FOI validado.
+  const initialSponsorRef = useRef({
+    uuid: routeSponsorUuid || "",
+    id: routeSponsorId || "",
+    name: routeSponsorName || "",
+  });
 
   // ============================================================
   // 3. FORMULÁRIO
@@ -74,7 +78,7 @@ export default function RunnerRegisterScreen() {
   });
 
   // ============================================================
-  // 4. ATUALIZA CAMPO DO FORMULÁRIO
+  // 4. ATUALIZA FORMULÁRIO
   // ============================================================
 
   const updateForm = (key, value) => {
@@ -85,49 +89,72 @@ export default function RunnerRegisterScreen() {
   };
 
   // ============================================================
-  // 5. MANTÉM O PATROCINADOR RECEBIDO PELA ROTA
+  // 5. GARANTE OS DADOS RECEBIDOS DA ROTA
   // ============================================================
   //
-  // Isso evita que o patrocinador apareça como "BUSCANDO..."
-  // novamente quando a tela for montada.
+  // NÃO faz consulta ao Supabase.
   //
-  useEffect(() => {
-    if (!routeSponsorId) {
-      return;
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      sponsorId: routeSponsorId.toUpperCase(),
-      sponsorName: routeSponsorName || prev.sponsorName,
-      sponsorUuid: routeSponsorUuid || prev.sponsorUuid,
-    }));
-  }, [routeSponsorId, routeSponsorName, routeSponsorUuid]);
-
-  // ============================================================
-  // 6. BUSCA PATROCINADOR SOMENTE QUANDO O USUÁRIO ALTERAR O ID
-  // ============================================================
+  // O HasSponsorScreen já fez a validação.
+  //
 
   useEffect(() => {
-    const currentId = (form.sponsorId || "").trim().toUpperCase();
-
-    // Não pesquisa se não houver ID.
-    if (!currentId) {
-      return;
-    }
-
-    // Se o ID atual é exatamente o ID que veio da tela anterior,
-    // NÃO precisamos consultar novamente.
     if (
-      routeSponsorId &&
-      currentId === routeSponsorId.trim().toUpperCase()
+      !routeSponsorId &&
+      !routeSponsorUuid &&
+      !routeSponsorName
     ) {
       return;
     }
 
-    // O usuário está alterando manualmente o patrocinador.
-    // Só pesquisa depois de pelo menos 4 caracteres.
-    if (currentId.length < 4) {
+    const sponsorId = routeSponsorId
+      ? routeSponsorId.trim().toUpperCase()
+      : "";
+
+    setForm((prev) => ({
+      ...prev,
+
+      sponsorId: sponsorId || prev.sponsorId,
+
+      sponsorName:
+        routeSponsorName || prev.sponsorName,
+
+      sponsorUuid:
+        routeSponsorUuid || prev.sponsorUuid,
+    }));
+  }, [
+    routeSponsorId,
+    routeSponsorUuid,
+    routeSponsorName,
+  ]);
+
+  // ============================================================
+  // 6. VALIDAÇÃO MANUAL DO PATROCINADOR
+  // ============================================================
+  //
+  // Só executa quando o usuário alterar o ID.
+  //
+  // Se o ID continuar sendo o mesmo que veio do
+  // HasSponsorScreen, NÃO consulta novamente.
+  //
+
+  useEffect(() => {
+    const currentId = (form.sponsorId || "")
+      .trim()
+      .toUpperCase();
+
+    const originalId = (
+      initialSponsorRef.current.id || ""
+    )
+      .trim()
+      .toUpperCase();
+
+    // ----------------------------------------------------------
+    // Sem ID
+    // ----------------------------------------------------------
+
+    if (!currentId) {
+      setIsValidatingSponsor(false);
+
       setForm((prev) => ({
         ...prev,
         sponsorName: "",
@@ -137,18 +164,80 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
+    // ----------------------------------------------------------
+    // ID original já validado
+    // ----------------------------------------------------------
+
+    if (
+      originalId &&
+      currentId === originalId &&
+      initialSponsorRef.current.uuid
+    ) {
+      setIsValidatingSponsor(false);
+
+      setForm((prev) => ({
+        ...prev,
+        sponsorId: originalId,
+        sponsorName:
+          initialSponsorRef.current.name ||
+          prev.sponsorName ||
+          "PATROCINADOR",
+        sponsorUuid:
+          initialSponsorRef.current.uuid,
+      }));
+
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // ID alterado manualmente
+    // ----------------------------------------------------------
+
+    // Enquanto o usuário está digitando, o patrocinador anterior
+    // deixa de ser válido.
+    setIsValidatingSponsor(false);
+
+    setForm((prev) => ({
+      ...prev,
+      sponsorName: "",
+      sponsorUuid: "",
+    }));
+
+    // ID muito curto.
+    if (currentId.length < 4) {
+      return;
+    }
+
     setIsValidatingSponsor(true);
+
+    let cancelled = false;
 
     const debounce = setTimeout(async () => {
       try {
+        console.log(
+          "🔎 Validando novo patrocinador:",
+          currentId
+        );
+
         const { data, error } = await supabase
           .from("profiles")
           .select("id, full_name, id_dr")
           .eq("id_dr", currentId)
           .maybeSingle();
 
+        if (cancelled) {
+          return;
+        }
+
+        // ------------------------------------------------------
+        // ERRO SUPABASE
+        // ------------------------------------------------------
+
         if (error) {
-          console.log("Erro ao buscar patrocinador:", error.message);
+          console.log(
+            "❌ Erro Supabase ao buscar patrocinador:",
+            error
+          );
 
           setForm((prev) => ({
             ...prev,
@@ -158,8 +247,17 @@ export default function RunnerRegisterScreen() {
 
           return;
         }
+
+        // ------------------------------------------------------
+        // NÃO ENCONTRADO
+        // ------------------------------------------------------
 
         if (!data) {
+          console.log(
+            "❌ Patrocinador não encontrado:",
+            currentId
+          );
+
           setForm((prev) => ({
             ...prev,
             sponsorName: "NÃO ENCONTRADO ❌",
@@ -169,15 +267,36 @@ export default function RunnerRegisterScreen() {
           return;
         }
 
-        // Patrocinador encontrado.
+        // ------------------------------------------------------
+        // ENCONTRADO
+        // ------------------------------------------------------
+
+        console.log(
+          "✅ Novo patrocinador encontrado:",
+          data
+        );
+
         setForm((prev) => ({
           ...prev,
-          sponsorId: data.id_dr || currentId,
-          sponsorName: data.full_name || "PATROCINADOR",
-          sponsorUuid: data.id,
+
+          sponsorId:
+            data.id_dr || currentId,
+
+          sponsorName:
+            data.full_name || "PATROCINADOR",
+
+          sponsorUuid:
+            data.id,
         }));
       } catch (error) {
-        console.log("Erro inesperado ao buscar patrocinador:", error);
+        if (cancelled) {
+          return;
+        }
+
+        console.log(
+          "❌ Erro inesperado ao buscar patrocinador:",
+          error
+        );
 
         setForm((prev) => ({
           ...prev,
@@ -185,21 +304,27 @@ export default function RunnerRegisterScreen() {
           sponsorUuid: "",
         }));
       } finally {
-        setIsValidatingSponsor(false);
+        if (!cancelled) {
+          setIsValidatingSponsor(false);
+        }
       }
     }, 700);
 
     return () => {
+      cancelled = true;
       clearTimeout(debounce);
     };
-  }, [form.sponsorId, routeSponsorId]);
+  }, [form.sponsorId]);
 
   // ============================================================
-  // 7. CONTINUAR PARA PAGAMENTO
+  // 7. CONTINUAR
   // ============================================================
 
   const handleContinue = () => {
-    // Validação do patrocinador
+    // ----------------------------------------------------------
+    // PATROCINADOR
+    // ----------------------------------------------------------
+
     if (!form.sponsorUuid) {
       Alert.alert(
         "PATROCINADOR INVÁLIDO",
@@ -209,7 +334,10 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
-    // Nome
+    // ----------------------------------------------------------
+    // NOME
+    // ----------------------------------------------------------
+
     if (!form.fullName.trim()) {
       Alert.alert(
         "DADOS INCOMPLETOS",
@@ -219,7 +347,10 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
+    // ----------------------------------------------------------
     // CPF
+    // ----------------------------------------------------------
+
     if (!form.documentId.trim()) {
       Alert.alert(
         "DADOS INCOMPLETOS",
@@ -229,7 +360,10 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
-    // E-mail
+    // ----------------------------------------------------------
+    // E-MAIL
+    // ----------------------------------------------------------
+
     if (!form.email.trim()) {
       Alert.alert(
         "DADOS INCOMPLETOS",
@@ -239,7 +373,10 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
-    // WhatsApp
+    // ----------------------------------------------------------
+    // WHATSAPP
+    // ----------------------------------------------------------
+
     if (!form.phone.trim()) {
       Alert.alert(
         "DADOS INCOMPLETOS",
@@ -249,7 +386,34 @@ export default function RunnerRegisterScreen() {
       return;
     }
 
-    // Tudo certo.
+    // ----------------------------------------------------------
+    // GARANTE QUE NÃO ESTÁ VALIDANDO
+    // ----------------------------------------------------------
+
+    if (isValidatingSponsor) {
+      Alert.alert(
+        "AGUARDE",
+        "Estamos validando o patrocinador."
+      );
+
+      return;
+    }
+
+    // ----------------------------------------------------------
+    // PAGAMENTO
+    // ----------------------------------------------------------
+
+    console.log(
+      "➡️ Indo para pagamento com:",
+      {
+        sponsorUuid: form.sponsorUuid,
+        sponsorId: form.sponsorId,
+        sponsorName: form.sponsorName,
+        fullName: form.fullName,
+        email: form.email,
+      }
+    );
+
     navigation.navigate("PaymentScreen", {
       ...form,
     });
@@ -261,14 +425,22 @@ export default function RunnerRegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={
+        Platform.OS === "ios"
+          ? "padding"
+          : "height"
+      }
       style={{
         flex: 1,
         backgroundColor: theme.bg,
       }}
     >
       <StatusBar
-        barStyle={isDark ? "light-content" : "dark-content"}
+        barStyle={
+          isDark
+            ? "light-content"
+            : "dark-content"
+        }
       />
 
       {/* ======================================================
@@ -300,7 +472,9 @@ export default function RunnerRegisterScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={
+          styles.scrollContent
+        }
         keyboardShouldPersistTaps="handled"
       >
         {/* ====================================================
@@ -334,7 +508,8 @@ export default function RunnerRegisterScreen() {
             </Text>
 
             <Text style={styles.sponsorName}>
-              {form.sponsorName || "BUSCANDO..."}
+              {form.sponsorName ||
+                "PATROCINADOR NÃO INFORMADO"}
             </Text>
 
             <Text style={styles.sponsorId}>
@@ -362,7 +537,10 @@ export default function RunnerRegisterScreen() {
           label="NOME COMPLETO *"
           value={form.fullName}
           onChange={(value) =>
-            updateForm("fullName", value)
+            updateForm(
+              "fullName",
+              value
+            )
           }
         />
 
@@ -371,7 +549,10 @@ export default function RunnerRegisterScreen() {
           value={form.documentId}
           keyboard="numeric"
           onChange={(value) =>
-            updateForm("documentId", value)
+            updateForm(
+              "documentId",
+              value
+            )
           }
         />
 
@@ -380,7 +561,10 @@ export default function RunnerRegisterScreen() {
           value={form.email}
           keyboard="email-address"
           onChange={(value) =>
-            updateForm("email", value)
+            updateForm(
+              "email",
+              value
+            )
           }
         />
 
@@ -389,33 +573,72 @@ export default function RunnerRegisterScreen() {
           value={form.phone}
           keyboard="phone-pad"
           onChange={(value) =>
-            updateForm("phone", value)
+            updateForm(
+              "phone",
+              value
+            )
           }
         />
 
         {/* ====================================================
-            ALTERAÇÃO DE PATROCINADOR
+            TROCAR PATROCINADOR
         ==================================================== */}
 
-        <TouchableOpacity
-          style={styles.changeSponsorInfo}
-          onPress={() => {}}
-        >
+        <View style={styles.changeSponsorInfo}>
           <Text style={styles.changeSponsorText}>
-            Deseja trocar o patrocinador? Altere o ID abaixo:
+            Deseja trocar o patrocinador?
+            Altere o ID abaixo:
           </Text>
-        </TouchableOpacity>
+        </View>
 
         <InputField
-          label=""
+          label="ID DO PATROCINADOR"
           value={form.sponsorId}
           onChange={(value) =>
             updateForm(
               "sponsorId",
-              value.toUpperCase()
+              value
+                .trim()
+                .toUpperCase()
             )
           }
         />
+
+        {/* ====================================================
+            STATUS DA VALIDAÇÃO
+        ==================================================== */}
+
+        {isValidatingSponsor && (
+          <View style={styles.validationStatus}>
+            <ActivityIndicator
+              size="small"
+              color={PALETTE.primary}
+            />
+
+            <Text style={styles.validationText}>
+              Validando patrocinador...
+            </Text>
+          </View>
+        )}
+
+        {!isValidatingSponsor &&
+          form.sponsorName ===
+            "NÃO ENCONTRADO ❌" && (
+            <Text style={styles.errorText}>
+              Patrocinador não encontrado.
+              Verifique o ID informado.
+            </Text>
+          )}
+
+        {!isValidatingSponsor &&
+          form.sponsorUuid &&
+          form.sponsorName &&
+          form.sponsorName !==
+            "NÃO ENCONTRADO ❌" && (
+            <Text style={styles.successText}>
+              ✓ Patrocinador validado
+            </Text>
+          )}
 
         {/* ====================================================
             BOTÃO
@@ -434,7 +657,8 @@ export default function RunnerRegisterScreen() {
             loading ||
             isValidatingSponsor ||
             !form.sponsorUuid ||
-            form.sponsorName.includes("❌")
+            form.sponsorName ===
+              "NÃO ENCONTRADO ❌"
           }
         />
 
@@ -583,5 +807,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#1a4a8a",
     fontSize: 15,
+  },
+
+  validationStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: -5,
+    marginBottom: 15,
+  },
+
+  validationText: {
+    color: PALETTE.primary,
+    fontSize: 12,
+    marginLeft: 8,
+  },
+
+  successText: {
+    color: "#2c94bc",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+
+  errorText: {
+    color: "#ff6b6b",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 15,
   },
 });
