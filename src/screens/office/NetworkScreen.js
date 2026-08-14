@@ -29,11 +29,16 @@ const NetworkNode = ({ member, isRoot = false }) => {
     if (!isOpen && children.length === 0) {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, status, profile_type, id_dr, avatar_url')
-          .eq('sponsor_id', member.id)
-          .order('full_name', { ascending: true });
+       const { data, error } = await supabase
+  .from('profiles')
+  .select('id, full_name, status, profile_type, id_dr, avatar_url')
+  .eq('sponsor_id', member.id)
+  .order('full_name', { ascending: true });
+
+console.log("REDE DO MEMBRO:", member.id);
+console.log("FILHOS ENCONTRADOS:", data);
+console.log("ERRO REDE:", error);
+
         if (error) throw error;
         setChildren(data || []);
       } catch (err) {
@@ -55,7 +60,12 @@ const NetworkNode = ({ member, isRoot = false }) => {
           activeOpacity={0.9}
           style={[
             styles.memberCard, 
-            { borderColor: member.status === 'active' ? PALETTE.success : PALETTE.error }
+          {
+ borderColor:
+   member.status?.toUpperCase() === 'ATIVO'
+     ? PALETTE.success
+     : PALETTE.error
+}
           ]}
         >
           {/* AVATAR COM FOTO OU ÍCONE */}
@@ -122,7 +132,11 @@ export default function NetworkScreen() {
     async function loadInitial() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from('profiles').select('id, full_name, status, profile_type, id_dr, avatar_url').eq('id', user.id).single();
+   const { data } = await supabase
+  .from('profiles')
+  .select('id, full_name, status, profile_type, id_dr, avatar_url, sponsor_id')
+  .eq('id', user.id)
+  .single();
         setRootMember(data);
       }
       setLoading(false);
