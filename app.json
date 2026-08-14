@@ -16,6 +16,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.diamondrunner.app",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
@@ -23,6 +24,7 @@
       }
     },
     "android": {
+      "package": "com.diamondrunner.app",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/logodiamond.png",
         "backgroundColor": "#000000"
@@ -30,6 +32,18 @@
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "diamondrunner"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
       ]
     },
     "web": {

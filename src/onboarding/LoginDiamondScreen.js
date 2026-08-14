@@ -81,11 +81,12 @@ export default function LoginDiamondScreen() {
   // PRIMEIRO ACESSO
   // ============================================================
 
-  async function handleFirstAccess() {
-    // Placeholder – implemente a navegação/fluxo de primeiro acesso aqui
-    navigation.navigate("FirstAccess");
-  }
-
+async function handleFirstAccess() {
+  navigation.navigate("FirstAccess", {
+    // se a pessoa já digitou ID/e-mail no login, leva junto
+    prefill: loginInput.trim() || "",
+  });
+}
   // ============================================================
   // LOGIN
   // ============================================================
