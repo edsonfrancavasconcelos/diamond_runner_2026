@@ -44,21 +44,27 @@ export default function DiamondStoreApps() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ status: 'pending', vouchers: 0, type: '' });
 
-  const fetchUserData = async () => {
+    const fetchUserData = async () => {
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('status, voucher_balance, profile_type')
-        .eq('id', authUser.id)
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("status, is_active")
+        .eq("id", authUser.id)
         .single();
-      
+
+      if (error) console.log("Erro Store:", error.message);
+
+      const st = String(profile?.status || "").toUpperCase();
+      const isActive =
+        st === "ATIVO" || st === "ACTIVE" || profile?.is_active === true;
+
       setUser({
-        status: profile?.status ? profile.status.toString().toLowerCase().trim() : 'pending',
-        vouchers: profile?.voucher_balance || 0,
-        type: profile?.profile_type?.toUpperCase() || 'CONSULTOR'
+        status: isActive ? "active" : "pending",
+        vouchers: 0, // até existir coluna / regra de voucher
+        type: "DISTRIBUIDOR",
       });
     } catch (e) {
       console.log("Erro Store:", e.message);

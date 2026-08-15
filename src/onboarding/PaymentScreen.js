@@ -68,40 +68,26 @@ export default function PaymentScreen() {
     amount,
   } = params;
 
-  // ==========================================================
-  // PLANO
-  // ==========================================================
-
-  const planInfo = useMemo(() => {
-    const t = type?.toLowerCase() || "";
+   const planInfo = useMemo(() => {
+    const t = String(type || "").toLowerCase();
+    const priceFromParams = Number(amount);
 
     if (t.includes("elite")) {
-      return {
-        name: "ELITE",
-        price: 1599.0,
-        vouchers: 30,
-      };
+      return { name: "ELITE", price: priceFromParams || 1599, vouchers: 30 };
     }
-
     if (t.includes("prime")) {
-      return {
-        name: "PRIME",
-        price: 799.0,
-        vouchers: 15,
-      };
+      return { name: "PRIME", price: priceFromParams || 799, vouchers: 15 };
     }
-
     if (t.includes("builder")) {
-      return {
-        name: "BUILDER",
-        price: 299.0,
-        vouchers: 7,
-      };
+      return { name: "BUILDER", price: priceFromParams || 299, vouchers: 7 };
+    }
+    if (t.includes("afiliado") || t.includes("adesao")) {
+      return { name: "AFILIADO", price: priceFromParams || 99, vouchers: 0 };
     }
 
     return {
       name: "DISTRIBUIDOR",
-      price: Number(amount) || 99.0,
+      price: priceFromParams || 99,
       vouchers: 0,
     };
   }, [type, amount]);

@@ -1,520 +1,167 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  RefreshControl,
+  View, Text, StyleSheet, TouchableOpacity, Image,
+  ActivityIndicator, Alert, ScrollView, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../services/supabase";
 import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
+import { supabase } from "../../services/supabase";
 
 const PALETTE = {
-  primary: "#2c94bc",
-  gold: "#FFD700",
-  darkBlue: "#0c3c74",
-  bgDark: "#061d36",
-  bgLight: "#f4f7f8",
-  white: "#FFFFFF",
-  lightGray: "#a4bccc",
-  textDark: "#333333",
-};
-
-const formatWhatsApp = (phone) => {
-  if (!phone) return "Não informado";
-  const cleaned = ("" + phone).replace(/\D/g, "");
-  const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
-  if (match) {
-    return "(" + match[1] + ") " + match[2] + "-" + match[3];
-  }
-  return phone;
+  primary: "#2c94bc", gold: "#FFD700", darkBlue: "#0c3c74",
+  bgDark: "#061d36", lightGray: "#a4bccc",
 };
 
 export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  const theme = {
-    bg: isDarkMode ? PALETTE.bgDark : PALETTE.bgLight,
-    card: isDarkMode ? PALETTE.darkBlue : PALETTE.white,
-    text: isDarkMode ? PALETTE.white : PALETTE.textDark,
-    subtext: isDarkMode ? PALETTE.lightGray : "#666",
-  };
-
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
-      // Só colunas que existem — sem whatsapp / payment_status / profile_active
       const { data, error } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, full_name, email, id_dr, document_id, status, is_active, sponsor_id, avatar_url")
         .eq("id", user.id)
         .single();
-
       if (error) {
-        console.log("Erro perfil:", error.message, error.code, error.details);
-        Alert.alert("Erro ao carregar perfil", error.message);
+        Alert.alert("Erro", error.message);
         return;
       }
-
-      if (data) {
-        if (data.sponsor_id) {
-          const { data: sponsorData } = await supabase
-            .from("profiles")
-            .select("id_dr")
-            .eq("id", data.sponsor_id)
-            .single();
-
-          if (sponsorData?.id_dr) {
-            data.sponsorCode = sponsorData.id_dr;
-          }
-        }
-
-        // e-mail do Auth se faltar no profile
-        if (!data.email && user.email) {
-          data.email = user.email;
-        }
-
-        setUserData(data);
-      }
-    } catch (error) {
-      console.log("Erro ao carregar perfil:", error.message);
+      if (data && !data.email) data.email = user.email;
+      setUserData(data);
+    } catch (e) {
+      console.log(e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }
+  }, []);
 
-  const editField = (field, label) => {
-    Alert.prompt(
-      `Alterar ${label}`,
-      `Digite o novo ${label}:`,
-      async (text) => {
-        if (!text) return;
-        setLoading(true);
-        const valueToSave =
-          field === "whatsapp" ? text.replace(/\D/g, "") : text;
-        const { error } = await supabase
-          .from("profiles")
-          .update({ [field]: valueToSave })
-          .eq("id", userData.id);
-        if (error) Alert.alert("Erro", error.message || "Falha ao atualizar.");
-        else fetchProfile();
-        setLoading(false);
-      },
-      "plain-text",
-      String(userData[field] || "")
-    );
-  };
-
-  const handleEditProfile = () => {
-    Alert.alert("Editar Perfil", "O que deseja alterar?", [
-      { text: "Nome", onPress: () => editField("full_name", "Nome Completo") },
-      { text: "Cancelar", style: "cancel" },
-    ]);
-  };
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
   const handleAvatarPress = () => {
-    Alert.alert("Foto de Perfil", "Escolha uma opção:", [
-      { text: "Escolher da Galeria", onPress: pickImage },
-      { text: "Remover Foto", onPress: removeImage, style: "destructive" },
+    Alert.alert("Foto", "Escolha:", [
+      { text: "Galeria", onPress: pickImage },
+      { text: "Remover", style: "destructive", onPress: removeImage },
       { text: "Cancelar", style: "cancel" },
     ]);
   };
 
   const pickImage = async () => {
-    const { status } =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return Alert.alert("Erro", "Sem permissão.");
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") return Alert.alert("Permissão", "Libere a galeria");
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-      base64: true,
+      mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.5, base64: true,
     });
-    if (!result.canceled && result.assets?.length > 0) {
-      uploadAvatar(result.assets[0]);
-    }
+    if (!result.canceled && result.assets?.[0]?.base64) await uploadAvatar(result.assets[0]);
   };
 
   const uploadAvatar = async (asset) => {
     try {
       setUploading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const fileName = `avatar_${Date.now()}.png`;
-      const filePath = `${user.id}/${fileName}`;
-      const { error: uploadError } = await supabase.storage
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const filePath = `${user.id}/avatar_${Date.now()}.png`;
+      const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(filePath, decode(asset.base64), {
-          contentType: "image/png",
-          upsert: true,
-        });
-      if (uploadError) throw uploadError;
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl })
-        .eq("id", user.id);
-      fetchProfile();
-    } catch (error) {
-      Alert.alert("Erro", error.message);
+        .upload(filePath, decode(asset.base64), { contentType: "image/png", upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const { error: updErr } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+      if (updErr) throw updErr;
+      await fetchProfile();
+      Alert.alert("Ok", "Foto atualizada");
+    } catch (e) {
+      Alert.alert("Erro", e.message || "Falha upload");
     } finally {
       setUploading(false);
     }
   };
 
   const removeImage = async () => {
-    await supabase
-      .from("profiles")
-      .update({ avatar_url: null })
-      .eq("id", userData.id);
-    fetchProfile();
-  };
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const handlePasswordReset = () => {
-    Alert.alert("Segurança", "Enviar e-mail para redefinir senha?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Enviar",
-        onPress: () => Alert.alert("Sucesso", "E-mail enviado!"),
-      },
-    ]);
+    if (!userData?.id) return;
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", userData.id);
+    await fetchProfile();
   };
 
   if (loading) {
     return (
-      <View style={[styles.loadingCenter, { backgroundColor: theme.bg }]}>
-        <ActivityIndicator size="large" color={PALETTE.gold} />
-      </View>
-    );
-  }
-    if (loading) {
-    return (
-      <View style={[styles.loadingCenter, { backgroundColor: theme.bg }]}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" color={PALETTE.gold} />
       </View>
     );
   }
 
-  // NOVO: evita TypeError quando o perfil não carregou
   if (!userData) {
     return (
-      <View style={[styles.loadingCenter, { backgroundColor: theme.bg }]}>
-        <Text style={{ color: "#fff", marginBottom: 16, textAlign: "center" }}>
-          Não foi possível carregar o perfil.
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            setLoading(true);
-            fetchProfile();
-          }}
-          style={{
-            backgroundColor: PALETTE.primary,
-            paddingHorizontal: 20,
-            paddingVertical: 12,
-            borderRadius: 10,
-          }}
-        >
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>TENTAR DE NOVO</Text>
+      <View style={styles.center}>
+        <Text style={{ color: "#fff" }}>Perfil não carregou</Text>
+        <TouchableOpacity style={styles.btn} onPress={() => { setLoading(true); fetchProfile(); }}>
+          <Text style={styles.btnText}>TENTAR DE NOVO</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  // Aceita ATIVO (banco) e active (legado)
   const isPaid =
-    userData?.status === "active" ||
-    String(userData?.status || "").toUpperCase() === "ATIVO" ||
-    userData?.is_active === true;
+    String(userData.status || "").toUpperCase() === "ATIVO" || userData.is_active === true;
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: theme.bg }]}
+      style={styles.container}
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={PALETTE.gold}
-        />
+        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchProfile(); }} tintColor={PALETTE.gold} />
       }
     >
-      <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
-        <TouchableOpacity
-          style={styles.themeIconButton}
-          onPress={() => setIsDarkMode(!isDarkMode)}
-        >
-          <Ionicons
-            name={isDarkMode ? "sunny" : "moon"}
-            size={26}
-            color={PALETTE.gold}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleAvatarPress}
-          style={[styles.avatarCircle, { borderColor: PALETTE.gold }]}
-        >
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleAvatarPress} style={styles.avatar} activeOpacity={0.7}>
           {uploading ? (
             <ActivityIndicator color={PALETTE.gold} />
-          ) : userData?.avatar_url ? (
-            <Image
-              source={{ uri: userData.avatar_url }}
-              style={styles.avatarImg}
-            />
+          ) : userData.avatar_url ? (
+            <Image source={{ uri: userData.avatar_url }} style={styles.avatarImg} />
           ) : (
-            <Ionicons name="person" size={50} color={PALETTE.gold} />
+            <Ionicons name="camera" size={40} color={PALETTE.gold} />
           )}
         </TouchableOpacity>
-
-        <Text style={[styles.userName, { color: theme.text }]}>
-          {userData?.full_name?.toUpperCase()}
-        </Text>
-        <Text style={styles.userID}>ID: {userData?.id_dr}</Text>
-
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: isPaid ? "#2ecc71" : "#e74c3c" },
-          ]}
-        >
-          <Ionicons
-            name={isPaid ? "checkmark-circle" : "time"}
-            size={14}
-            color="white"
-            style={{ marginRight: 5 }}
-          />
-          <Text style={styles.statusText}>
-            {isPaid ? "ASSINATURA ATIVA" : "AGUARDANDO PAGAMENTO"}
-          </Text>
+        <Text style={styles.hint}>TOQUE PARA ALTERAR A FOTO</Text>
+        <Text style={styles.name}>{(userData.full_name || "").toUpperCase()}</Text>
+        <Text style={styles.id}>ID: {userData.id_dr}</Text>
+        <View style={[styles.badge, { backgroundColor: isPaid ? "#2ecc71" : "#e74c3c" }]}>
+          <Text style={styles.badgeText}>{isPaid ? "ASSINATURA ATIVA" : "AGUARDANDO"}</Text>
         </View>
       </View>
-
-      <View style={styles.infoSection}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 20,
-          }}
-        >
-          <Text
-            style={[
-              styles.sectionTitle,
-              { color: theme.subtext, marginBottom: 0 },
-            ]}
-          >
-            DADOS DA CONTA
-          </Text>
-          <TouchableOpacity onPress={() => setShowSettings(!showSettings)}>
-            <Ionicons
-              name={
-                showSettings ? "close-circle-outline" : "settings-outline"
-              }
-              size={22}
-              color={showSettings ? PALETTE.gold : theme.subtext}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Ionicons name="mail-outline" size={24} color={PALETTE.primary} />
-          <View style={styles.infoTextGroup}>
-            <Text style={[styles.label, { color: theme.subtext }]}>E-MAIL</Text>
-            <Text style={[styles.value, { color: theme.text }]}>
-              {userData?.email || "---"}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.infoRow}>
-          <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
-          <View style={styles.infoTextGroup}>
-            <Text style={[styles.label, { color: theme.subtext }]}>
-              WHATSAPP
-            </Text>
-            <Text style={[styles.value, { color: theme.text }]}>
-              {formatWhatsApp(
-                userData?.whatsapp || userData?.phone || userData?.phone_number
-              )}
-            </Text>
-          </View>
-        </View>
-
-        {userData?.sponsor_id ? (
-          <View style={styles.infoRow}>
-            <Ionicons name="person" size={24} color={PALETTE.primary} />
-            <View style={styles.infoTextGroup}>
-              <Text style={[styles.label, { color: theme.subtext }]}>
-                PATROCINADOR
-              </Text>
-              <Text style={[styles.value, { color: theme.text }]}>
-                {userData.sponsorCode || userData.sponsor_id}
-              </Text>
-            </View>
-          </View>
-        ) : null}
-
-        <View style={styles.infoRow}>
-          <Ionicons
-            name="finger-print-outline"
-            size={24}
-            color={PALETTE.primary}
-          />
-          <View style={styles.infoTextGroup}>
-            <Text style={[styles.label, { color: theme.subtext }]}>
-              CPF CADASTRADO
-            </Text>
-            <Text style={[styles.value, { color: theme.text, opacity: 0.8 }]}>
-              {userData?.document_id || "---"}
-            </Text>
-          </View>
-          <View style={{ marginLeft: "auto", padding: 10 }}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={18}
-              color={theme.subtext}
-            />
-          </View>
-        </View>
-
-        {showSettings && (
-          <View
-            style={{
-              marginTop: 10,
-              padding: 15,
-              backgroundColor: "rgba(255,255,255,0.05)",
-              borderRadius: 12,
-            }}
-          >
-            <TouchableOpacity
-              style={styles.passwordRow}
-              onPress={handlePasswordReset}
-            >
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={PALETTE.gold}
-              />
-              <Text
-                style={[
-                  styles.actionLabel,
-                  { color: theme.text, marginLeft: 10 },
-                ]}
-              >
-                Trocar minha senha
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.passwordRow, { marginTop: 15 }]}
-              onPress={handleEditProfile}
-            >
-              <Ionicons
-                name="create-outline"
-                size={20}
-                color={PALETTE.primary}
-              />
-              <Text
-                style={[
-                  styles.actionLabel,
-                  { color: theme.text, marginLeft: 10 },
-                ]}
-              >
-                Editar nome do perfil
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+      <View style={styles.body}>
+        <Text style={styles.label}>E-MAIL</Text>
+        <Text style={styles.value}>{userData.email || "---"}</Text>
+        <Text style={styles.label}>CPF</Text>
+        <Text style={styles.value}>{userData.document_id || "---"}</Text>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  loadingCenter: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerCard: { padding: 30, alignItems: "center" },
-  themeIconButton: {
-    position: "absolute",
-    top: 15,
-    right: 20,
-    padding: 10,
-  },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 15,
-    overflow: "hidden",
+  container: { flex: 1, backgroundColor: PALETTE.bgDark },
+  center: { flex: 1, backgroundColor: PALETTE.bgDark, justifyContent: "center", alignItems: "center" },
+  header: { alignItems: "center", padding: 28 },
+  avatar: {
+    width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: PALETTE.gold,
+    backgroundColor: PALETTE.darkBlue, justifyContent: "center", alignItems: "center", overflow: "hidden",
   },
   avatarImg: { width: "100%", height: "100%" },
-  userName: { fontSize: 18, fontWeight: "bold" },
-  userID: {
-    color: PALETTE.gold,
-    fontSize: 14,
-    fontWeight: "bold",
-    marginTop: 5,
-  },
-  statusBadge: {
-    marginTop: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statusText: { color: "white", fontSize: 11, fontWeight: "bold" },
-  infoSection: { padding: 20 },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: "bold",
-    marginBottom: 20,
-    letterSpacing: 1,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 25,
-  },
-  infoTextGroup: { marginLeft: 15, flex: 1 },
-  label: { fontSize: 11 },
-  value: { fontSize: 16, fontWeight: "bold" },
-  passwordRow: { flexDirection: "row", alignItems: "center" },
-  actionLabel: { fontSize: 14, fontWeight: "bold" },
+  hint: { color: PALETTE.gold, marginTop: 12, fontSize: 11, fontWeight: "bold" },
+  name: { color: "#fff", fontSize: 18, fontWeight: "bold", marginTop: 14 },
+  id: { color: PALETTE.gold, marginTop: 6, fontWeight: "bold" },
+  badge: { marginTop: 12, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  badgeText: { color: "#fff", fontWeight: "bold", fontSize: 11 },
+  body: { padding: 24 },
+  label: { color: PALETTE.lightGray, fontSize: 11, marginTop: 16 },
+  value: { color: "#fff", fontSize: 16, fontWeight: "bold", marginTop: 4 },
+  btn: { marginTop: 12, backgroundColor: PALETTE.primary, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 10 },
+  btnText: { color: "#fff", fontWeight: "bold" },
 });

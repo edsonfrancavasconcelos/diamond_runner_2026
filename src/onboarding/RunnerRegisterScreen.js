@@ -42,6 +42,10 @@ export default function RunnerRegisterScreen() {
     sponsorUuid: routeSponsorUuid = "",
     sponsorId: routeSponsorId = "",
     sponsorName: routeSponsorName = "",
+    amount: routeAmount,
+    type: routeType,
+    packageId: routePackageId,
+    points: routePoints,
   } = route.params || {};
 
   // ============================================================
@@ -442,61 +446,52 @@ export default function RunnerRegisterScreen() {
   // ============================================================
   // 3. CONTINUAR PARA PAGAMENTO
   // ============================================================
-
   const handleContinue = () => {
     if (!form.sponsorUuid) {
       Alert.alert(
         "PATROCINADOR INVÁLIDO",
         "Informe um ID de patrocinador válido antes de continuar."
       );
-
       return;
     }
 
     if (!form.fullName.trim()) {
-      Alert.alert(
-        "DADOS INCOMPLETOS",
-        "Informe seu nome completo."
-      );
-
+      Alert.alert("DADOS INCOMPLETOS", "Informe seu nome completo.");
       return;
     }
 
     if (!form.documentId.trim()) {
-      Alert.alert(
-        "DADOS INCOMPLETOS",
-        "Informe seu CPF."
-      );
-
+      Alert.alert("DADOS INCOMPLETOS", "Informe seu CPF.");
       return;
     }
 
     if (!form.email.trim()) {
-      Alert.alert(
-        "DADOS INCOMPLETOS",
-        "Informe seu e-mail."
-      );
-
+      Alert.alert("DADOS INCOMPLETOS", "Informe seu e-mail.");
       return;
     }
 
     if (!form.phone.trim()) {
-      Alert.alert(
-        "DADOS INCOMPLETOS",
-        "Informe seu WhatsApp."
-      );
-
+      Alert.alert("DADOS INCOMPLETOS", "Informe seu WhatsApp.");
       return;
     }
 
-    console.log(
-      "➡️ Indo para pagamento com:",
-      form
-    );
-
-    navigation.navigate("PaymentScreen", {
+    const paymentParams = {
       ...form,
-    });
+      amount: routeAmount,
+      type: routeType,
+      packageId: routePackageId,
+      points: routePoints,
+    };
+
+    console.log("➡️ Indo para pagamento com:", paymentParams);
+
+   navigation.navigate("PaymentScreen", {
+  ...form,
+  amount: routeAmount,
+  type: routeType,
+  packageId: routePackageId,
+  points: routePoints,
+});
   };
 
   // ============================================================

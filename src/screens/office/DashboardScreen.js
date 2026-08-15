@@ -80,17 +80,23 @@ export default function DashboardScreen() {
     }
 
     // ATUALIZA O ESTADO COM SEGURANÇA (Prevenindo o erro de null)
-    setUserData({
-      fullName: (profile?.full_name || user?.user_metadata?.full_name || "NOVO MEMBRO").toUpperCase(),
-      idDr: profile?.id_dr || "GERANDO ID...",
-      balance: profile?.balance || 0,
+      setUserData({
+      fullName: (
+        profile?.full_name ||
+        user?.user_metadata?.full_name ||
+        "NOVO MEMBRO"
+      ).toUpperCase(),
+      idDr: profile?.id_dr || "---",
+      balance: 0,
       networkCount: networkCount,
-      status: profile?.status || "active",
-      rankName: (profile?.profile_type || "DISTRIBUIDOR").toUpperCase(),
+      status: profile?.status || "ATIVO",
+      rankName: "DISTRIBUIDOR",
+      profileType: "distributor",
       avatarUrl: profile?.avatar_url || null,
-      points: profile?.points_total || 0,
+      // Plano: 10 pts por direto (volume inicial). Pacote Stripe soma depois.
+      points: networkCount * 10,
       email: profile?.email || user?.email || "",
-      documentId: profile?.document_id || ""
+      documentId: profile?.document_id || "",
     });
 
   } catch (e) {
@@ -166,7 +172,11 @@ export default function DashboardScreen() {
           </View>
           <View style={styles.cardFooter}>
              <Text style={styles.idText}>ID: {userData.idDr}</Text>
-             <View style={[styles.badge, { backgroundColor: userData.status === 'active' ? PALETTE.success : '#FF9800' }]}>
+             <View style={[styles.badge, { backgroundColor:
+  String(userData.status || "").toUpperCase() === "ATIVO" ||
+  userData.status === "active"
+    ? PALETTE.success
+    : "#FF9800" }]}>
                 <Text style={styles.badgeText}>ATIVO</Text>
              </View>
           </View>

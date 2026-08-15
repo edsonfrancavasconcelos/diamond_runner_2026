@@ -35,7 +35,11 @@ import ProfileScreen from "./ProfileScreen"; // 👈 Certifique-se que esta tela
 import ProgressScreen from "./ProgressScreen";
 import ProWayScreen from "./ProWayScreen";
 import WithdrawScreen from "./WithdrawScreen";
-import DiamondStoreApps from "./DiamondStoreAppsScreen"; 
+import DiamondStoreApps from "./DiamondStoreAppsScreen";
+import SettingsScreen from "./SettingsScreen";
+import TermsScreen from "./TermsScreen";
+import PrivacyScreen from "./PrivacyScreen";
+import AboutScreen from "./AboutScreen";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -142,7 +146,46 @@ export default function OfficeDrawer() {
       <Drawer.Screen name="Progress" component={ProgressScreen} options={{ title: texts.progress, drawerIcon: () => <Ionicons name="trending-up-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="ProWay" component={ProWayScreen} options={{ title: texts.proway, drawerIcon: () => <Ionicons name="school-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="News" component={NewsScreen} options={{ title: texts.news, drawerIcon: () => <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold}/> }} />
-      
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: "CONFIGURAÇÕES",
+          drawerIcon: () => (
+            <Ionicons name="settings-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Terms"
+        component={TermsScreen}
+        options={{
+          title: "TERMOS DE USO",
+          drawerIcon: () => (
+            <Ionicons name="document-text-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={{
+          title: "PRIVACIDADE",
+          drawerIcon: () => (
+            <Ionicons name="lock-closed-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          title: "SOBRE / EMPRESA",
+          drawerIcon: () => (
+            <Ionicons name="business-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
       <Drawer.Screen 
         name="Logout" 
         component={View} 
