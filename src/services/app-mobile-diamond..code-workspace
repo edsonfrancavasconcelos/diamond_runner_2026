@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "../..",
+    },
+    {
+      "path": "../../../diamond-backend",
+    },
+  ],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "app-mobile-diamond",
+  },
+}
