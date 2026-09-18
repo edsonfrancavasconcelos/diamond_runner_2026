@@ -25,7 +25,7 @@ export default function RunnerRegisterScreen() {
   const { theme, isDark } = useTheme();
   
   // 1. RECEBE OS DADOS DA TELA DE VALIDAÇÃO
-  const { sponsorUuid, sponsorId, sponsorName } = route.params || {};
+  const { sponsorUuid, sponsorId, sponsorName, planName, packageId, amount, points, type } = route.params || {};
 
   const [loading, setLoading] = useState(false);
   const [isValidatingSponsor, setIsValidatingSponsor] = useState(false);
@@ -114,7 +114,7 @@ export default function RunnerRegisterScreen() {
 
         <Button 
           title="IR PARA PAGAMENTO" 
-          onPress={() => navigation.navigate("PaymentScreen", { ...form })} 
+          onPress={() => navigation.navigate("PaymentScreen", { ...form, planName, packageId, amount, points, type })} 
           disabled={!form.sponsorUuid || form.sponsorName.includes("❌")}
         />
       </ScrollView>

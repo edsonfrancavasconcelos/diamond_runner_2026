@@ -1,11 +1,8 @@
 // Local: src/onboarding/PaymentScreen.js
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import React, { useState, useMemo } from "react";
-import { ActivityIndicator, Alert, StatusBar, StyleSheet, Text, TouchableOpacity, View, Modal, Image, ScrollView } from "react-native";
-import * as Clipboard from "expo-clipboard";
-import axios from "axios";
-import { useTheme } from "../i18n/context/ThemeContext";
+import { ActivityIndicator, Alert, Linking, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { supabase } from "../services/supabase";
 
 const PALETTE = {
@@ -15,135 +12,61 @@ const PALETTE = {
   success: "#4CAF50"
 };
 
-const ASAAS_API_KEY = process.env.EXPO_PUBLIC_ASAAS_API_KEY;
-const ASAAS_URL = 'https://sandbox.asaas.com';
-
 export default function PaymentScreen() {
-  const navigation = useNavigation();
   const route = useRoute();
-  const { theme } = useTheme();
   
   const [loading, setLoading] = useState(false);
-  const [showPix, setShowPix] = useState(false);
-  const [pixCode, setPixCode] = useState("");
-  const [qrCodeBase64, setQrCodeBase64] = useState("");
 
   const params = route.params || {};
-  const { type, fullName, email, documentId, whatsapp, sponsorUuid, amount } = params;
+  const { type, planName, fullName, email, documentId, amount } = params;
 
   const planInfo = useMemo(() => {
-    const t = type?.toLowerCase() || "";
-    if (t.includes("elite")) return { name: "ELITE", price: 1599.0, vouchers: 30 };
-    if (t.includes("prime")) return { name: "PRIME", price: 799.0, vouchers: 15 };
-    if (t.includes("builder")) return { name: "BUILDER", price: 299.0, vouchers: 7 };
-    return { name: "DISTRIBUIDOR", price: amount || 99.0, vouchers: 0 };
-  }, [type, amount]);
+    const t = `${planName || type || ""}`.toLowerCase();
+    const price = t.includes("elite") ? 1599.0 : t.includes("prime") ? 799.0 : t.includes("builder") || t.includes("distributor") || t.includes("distribuidor") ? 299.0 : t.includes("affiliate") || t.includes("afiliado") ? 99.0 : Number(amount) || 99.0;
+    const name = t.includes("elite") ? "ELITE" : t.includes("prime") ? "PRIME" : t.includes("builder") || t.includes("distributor") || t.includes("distribuidor") ? "BUILDER" : t.includes("affiliate") || t.includes("afiliado") ? "AFILIADO" : "DISTRIBUIDOR";
+    return { name, price, voucherCredit: Number((price * 0.3 + 10).toFixed(2)) };
+  }, [type, planName, amount]);
 
-  // FUNÇÃO 1: GERAR PIX REAL (ASAAS)
-  async function handleGeneratePix() {
+  const paymentLinks = {
+    AFILIADO: process.env.EXPO_PUBLIC_STRIPE_LINK_AFILIADO || "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
+    DISTRIBUIDOR: process.env.EXPO_PUBLIC_STRIPE_LINK_BUILDER || "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    BUILDER: process.env.EXPO_PUBLIC_STRIPE_LINK_BUILDER || "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    PRIME: process.env.EXPO_PUBLIC_STRIPE_LINK_PRIME || "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
+    ELITE: process.env.EXPO_PUBLIC_STRIPE_LINK_ELITE || "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
+  };
+
+  async function handleStripePayment() {
     if (loading) return;
+    const link = paymentLinks[planInfo.name]?.trim();
+    if (!link) {
+      Alert.alert("Pagamento indisponível", "O Payment Link Stripe deste plano ainda não foi configurado.");
+      return;
+    }
+
+    const cleanEmail = email?.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      Alert.alert("E-mail obrigatório", "Informe um e-mail válido antes de abrir o pagamento.");
+      return;
+    }
+
     setLoading(true);
-
     try {
-      const cleanEmail = email?.trim().toLowerCase();
-      const cleanCPF = documentId?.replace(/\D/g, '');
-
-      // 1. Criar/Verificar Cliente no Asaas
-      const customerRes = await axios.post(`${ASAAS_URL}/customers`, {
-        name: fullName, email: cleanEmail, cpfCnpj: cleanCPF
-      }, { headers: { access_token: ASAAS_API_KEY } });
-
-      // 2. Criar Cobrança
-      const paymentRes = await axios.post(`${ASAAS_URL}/payments`, {
-        customer: customerRes.data.id,
-        billingType: "PIX",
-        value: planInfo.price,
-        dueDate: new Date().toISOString().split('T')[0],
-        description: `Diamond Runner - ${planInfo.name}`
-      }, { headers: { access_token: ASAAS_API_KEY } });
-
-      // 3. Pegar QR Code
-      const qrRes = await axios.get(`${ASAAS_URL}/payments/${paymentRes.data.id}/pixQrCode`, {
-        headers: { access_token: ASAAS_API_KEY }
+      const tempPassword = `DR${Math.random().toString(36).slice(-10)}!`;
+      const { error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: tempPassword,
+        options: { data: { full_name: fullName, document_id: documentId?.replace(/\D/g, ''), plan_name: planInfo.name, status: 'pending' } },
       });
+      if (error && !error.message.toLowerCase().includes("already registered")) throw error;
 
-      setPixCode(qrRes.data.payload);
-      setQrCodeBase64(qrRes.data.encodedImage);
-      setShowPix(true);
+      const separator = link.includes("?") ? "&" : "?";
+      await Linking.openURL(`${link}${separator}prefilled_email=${encodeURIComponent(cleanEmail)}`);
     } catch (error) {
-      Alert.alert("Erro Asaas", error.response?.data?.errors?.[0]?.description || "Falha ao gerar PIX");
+      Alert.alert("Falha no pagamento", error.message || "Não foi possível abrir o Stripe.");
     } finally {
       setLoading(false);
     }
   }
-
-
-// Local: src/onboarding/PaymentScreen.js
-// Ajuste para redirecionar para FirstAccessScreen após ativação
-
-async function handleForcedActivation() {
-  if (loading) return;
-  setLoading(true);
-
-  try {
-    const cleanEmail = email?.trim().toLowerCase();
-    const cleanCPF = documentId?.replace(/\D/g, '');
-    
-    console.log("Iniciando Ativação e Redirecionando para Primeiro Acesso:", cleanEmail);
-
-    // 1. TENTA O SIGNUP (AUTH) - Cria a conta no banco
-    // Usamos uma senha aleatória que será resetada no FirstAccess
-    const tempPassword = "DR" + Math.random().toString(36).slice(-8) + "!";
-    
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: cleanEmail,
-      password: tempPassword, 
-      options: {
-        data: {
-          full_name: fullName,
-          whatsapp: whatsapp,
-          document_id: cleanCPF,
-          sponsor_id: sponsorUuid,
-          profile_type: planInfo.name.toLowerCase(),
-          status: 'active' // O Trigger vai ler isso aqui
-        }
-      }
-    });
-
-    // Se o erro for 'User already registered', ele já existe, então só levamos para o FirstAccess
-    if (authError && !authError.message.includes("already registered")) {
-        throw authError;
-    }
-
-    // 2. FORÇA O UPDATE NO PERFIL (Garantia extra se o Trigger demorar)
-    // Isso garante que o status esteja 'active' antes dele tentar logar no FirstAccess
-    await supabase
-      .from("profiles")
-      .update({
-        status: 'active',
-        payment_status: 'CONFIRMED'
-      })
-      .eq('email', cleanEmail);
-
-    // 3. REDIRECIONAMENTO CORRETO
-    // IMPORTANTE: Passamos o e-mail para a próxima tela para ele não ter que digitar de novo
-    Alert.alert("PAGAMENTO CONFIRMADO", "Sua conta foi ativada! Vamos configurar sua senha de acesso agora.", [
-      { 
-        text: "DEFINIR MINHA SENHA", 
-        onPress: () => navigation.replace("FirstAccess", { 
-            email: cleanEmail,
-            isNewUser: true 
-        }) 
-      }
-    ]);
-
-  } catch (error) {
-    console.error("Erro no Fluxo de Ativação:", error);
-    Alert.alert("FALHA NA ATIVAÇÃO", error.message);
-  } finally {
-    setLoading(false);
-  }
-}
 
 
   return (
@@ -158,32 +81,10 @@ async function handleForcedActivation() {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.payButton} onPress={handleGeneratePix} disabled={loading}>
-          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>GERAR PIX (ASAAS)</Text>}
+        <TouchableOpacity style={styles.payButton} onPress={handleStripePayment} disabled={loading}>
+          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>PAGAR COM STRIPE</Text>}
         </TouchableOpacity>
-
-        <View style={styles.sandboxDivider}>
-          <Text style={styles.sandboxLabel}>AMBIENTE DE TESTE</Text>
-          <TouchableOpacity style={[styles.payButton, {backgroundColor: PALETTE.success}]} onPress={handleForcedActivation} disabled={loading}>
-            <Text style={styles.btnText}>JÁ PAGUEI / ATIVAR MANUAL</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-
-      <Modal visible={showPix} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-             <Text style={styles.modalTitle}>PAGUE COM PIX</Text>
-             {qrCodeBase64 && <Image source={{ uri: `data:image/png;base64,${qrCodeBase64}` }} style={styles.qrImg} />}
-             <TouchableOpacity style={styles.copyBtn} onPress={() => Clipboard.setStringAsync(pixCode)}>
-                <Text style={styles.btnText}>COPIAR CÓDIGO PIX</Text>
-             </TouchableOpacity>
-             <TouchableOpacity style={{marginTop: 20}} onPress={() => setShowPix(false)}>
-                <Text style={{color: '#666'}}>FECHAR</Text>
-             </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }

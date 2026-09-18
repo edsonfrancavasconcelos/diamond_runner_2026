@@ -31,7 +31,7 @@ const NetworkNode = ({ member, isRoot = false }) => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, full_name, status, profile_type, id_dr, avatar_url')
+          .select('id, full_name, status, plan_name, id_dr, avatar_url')
           .eq('sponsor_id', member.id)
           .order('full_name', { ascending: true });
         if (error) throw error;
@@ -122,7 +122,7 @@ export default function NetworkScreen() {
     async function loadInitial() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from('profiles').select('id, full_name, status, profile_type, id_dr, avatar_url').eq('id', user.id).single();
+        const { data } = await supabase.from('profiles').select('id, full_name, status, plan_name, id_dr, avatar_url').eq('id', user.id).single();
         setRootMember(data);
       }
       setLoading(false);
@@ -131,15 +131,19 @@ export default function NetworkScreen() {
   }, []);
 
   const pinchGesture = Gesture.Pinch()
-    .onUpdate((e) => { scale.value = savedScale.value * e.scale; })
-    .onEnd(() => { savedScale.value = scale.value; });
+    .onUpdate((e) => {
+      scale.value = Math.min(3, Math.max(0.5, savedScale.value * e.scale));
+    })
+    .onFinalize(() => { savedScale.value = scale.value; });
 
   const panGesture = Gesture.Pan()
+    .minPointers(1)
+    .maxPointers(1)
     .onUpdate((e) => {
       translateX.value = savedTranslateX.value + e.translationX;
       translateY.value = savedTranslateY.value + e.translationY;
     })
-    .onEnd(() => {
+    .onFinalize(() => {
       savedTranslateX.value = translateX.value;
       savedTranslateY.value = translateY.value;
     });

@@ -131,6 +131,29 @@ export default function MarketingPlanScreen() {
           </View>
         </Section>      
       
+                <Section title="Crédito de Vouchers" icon="wallet-outline" color={COLORS.gold}>
+                  <View style={styles.highlightCard}>
+                    <Text style={styles.typeTitle}>REGRA ÚNICA PARA TODOS OS PLANOS</Text>
+                    <Text style={styles.infoText}>
+                      O crédito de vouchers corresponde a 30% do valor do plano escolhido + R$ 10,00.
+                    </Text>
+                    <View style={styles.comboTable}>
+                      {[
+                        ['Afiliado', 99, 39.70],
+                        ['Builder', 299, 99.70],
+                        ['Prime', 799, 249.70],
+                        ['Elite', 1599, 489.70],
+                      ].map(([name, price, credit]) => (
+                        <View key={name} style={styles.comboRow}>
+                          <Text style={styles.comboText}>{name} - {cur} {formatCurrency(price)}</Text>
+                          <Text style={[styles.comboText, { color: COLORS.gold, fontWeight: 'bold' }]}>
+                            {cur} {formatCurrency(credit)}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                </Section>
 
    <Section title={texts.directReferral || "Indicação Direta"} icon="people-outline">
   <View style={styles.highlightCard}>

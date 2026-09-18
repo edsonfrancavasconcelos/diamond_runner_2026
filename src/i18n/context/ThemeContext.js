@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -41,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
     loadTheme();
   }, [systemScheme]);
 
-  const toggleTheme = async () => {
+  const toggleTheme = useCallback(async () => {
     const next = !isDark;
     setIsDark(next);
     try {
@@ -49,10 +49,10 @@ export const ThemeProvider = ({ children }) => {
     } catch (e) {
       console.error("Erro ao salvar tema", e);
     }
-  };
+  }, [isDark]);
 
 
-  const theme = {
+  const theme = useMemo(() => ({
     isDark,
     primary: COLORS.blue1,
     secondary: COLORS.blue2,
@@ -62,10 +62,12 @@ export const ThemeProvider = ({ children }) => {
     border: isDark ? COLORS.blue4 : COLORS.blue5,
     button: isDark ? COLORS.blue1 : COLORS.blue3,
     input: isDark ? 'rgba(188, 220, 244, 0.1)' : '#FFFFFF',
-  };
+  }), [isDark]);
+
+  const contextValue = useMemo(() => ({ isDark, theme, toggleTheme, ready }), [isDark, theme, toggleTheme, ready]);
 
   return (
-    <ThemeContext.Provider value={{ isDark, theme, toggleTheme, ready }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

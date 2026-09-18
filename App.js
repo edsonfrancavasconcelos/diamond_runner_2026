@@ -126,13 +126,33 @@ function AppContent() {
 
         <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
           <Stack.Screen name="FirstAccess" component={FirstAccessScreen} />
-          <Stack.Screen name="PackagesScreen" component={PackagesScreen} />
+          <Stack.Screen
+            name="PackagesScreen"
+            component={PackagesScreen}
+            options={{
+              headerShown: true,
+              headerTitle: "",
+              headerBackTitle: "",
+              headerTintColor: "#FFD700",
+              headerStyle: { backgroundColor: "#0c3c74" },
+            }}
+          />
           <Stack.Screen name="FindSponsor" component={FindSponsorScreen} />
           <Stack.Screen
             name="RunnerRegister"
             component={RunnerRegisterScreen}
           />
-          <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+          <Stack.Screen
+            name="PaymentScreen"
+            component={PaymentScreen}
+            options={{
+              headerShown: true,
+              headerTitle: "",
+              headerBackTitle: "",
+              headerTintColor: "#FFD700",
+              headerStyle: { backgroundColor: "#0c3c74" },
+            }}
+          />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>

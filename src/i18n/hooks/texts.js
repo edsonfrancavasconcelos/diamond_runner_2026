@@ -470,8 +470,6 @@ export const marketingTexts = {
     calculatedOnSmallerLeg: "Calculado sobre o volume da perna menor. Pagamento semanal.",
     entryPackages: "Pacotes de Entrada",
     registrationTypes: "Tipos de Cadastro",
-    clientTitle: "+ CLIENTE (Grátis)",
-    clientInfo: "Compra Apps a",
     noCommission: "Sem comissão",
     affiliateTitle: "+ AFILIADO",
     uniqueFee: "Taxa Única",
@@ -524,8 +522,6 @@ export const marketingTexts = {
     calculatedOnSmallerLeg: "Calculated on smaller leg volume. Weekly payment.",
     entryPackages: "Entry Packages",
     registrationTypes: "Registration Types",
-    clientTitle: "+ CUSTOMER (Free)",
-    clientInfo: "Buy Apps at",
     noCommission: "No commission",
     affiliateTitle: "+ AFFILIATE",
     uniqueFee: "One-time Fee",
@@ -577,8 +573,6 @@ export const marketingTexts = {
     calculatedOnSmallerLeg: "Calculado sobre el volumen de la pierna menor. Pago semanal.",
     entryPackages: "Paquetes de Entrada",
     registrationTypes: "Tipos de Registro",
-    clientTitle: "+ CLIENTE (Gratis)",
-    clientInfo: "Compra Apps a",
     noCommission: "Sin comisión",
     affiliateTitle: "+ AFILIADO",
     uniqueFee: "Tasa Única",
@@ -623,7 +617,6 @@ export const paymentTexts = {
     // Textos de UI
     tagline: "ATIVAÇÃO EXECUTIVA",
     title: "PAGAMENTO DE ADESÃO",
-    planClient: "PLANO CLIENTE", // Adicionado
     planExecutive: "PLANO EXECUTIVO", // Adicionado
     payNow: "PAGAR AGORA", // Adicionado
     price: "299",
@@ -648,7 +641,6 @@ export const paymentTexts = {
     // Textos de UI
     tagline: "EXECUTIVE ACTIVATION",
     title: "MEMBERSHIP PAYMENT",
-    planClient: "CLIENT PLAN", 
     planExecutive: "EXECUTIVE PLAN", 
     payNow: "PAY NOW",
     price: "299",
@@ -672,7 +664,6 @@ export const paymentTexts = {
   ES: {
     tagline: "ACTIVACIÓN EJECUTIVA",
     title: "PAGO DE ADHESIÓN",
-    planClient: "PLAN CLIENTE", 
     planExecutive: "PLAN EJECUTIVO", 
     payNow: "PAGAR AHORA",
     price: "299",

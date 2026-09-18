@@ -17,6 +17,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  InteractionManager,
 } from "react-native";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
@@ -76,7 +77,10 @@ function CustomDrawerContent(props) {
     }
   }
 
-  useEffect(() => { if (isFocused) fetchProfileData(); }, [isFocused]);
+  useEffect(() => {
+    const task = isFocused ? InteractionManager.runAfterInteractions(fetchProfileData) : null;
+    return () => task?.cancel();
+  }, [isFocused]);
 
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: PALETTE.darkBlue }}>
@@ -105,6 +109,17 @@ function CustomDrawerContent(props) {
 export default function OfficeDrawer() {
   const { country } = useContext(CountryContext);
   const texts = useMemo(() => officeTexts[country?.toUpperCase()] || officeTexts["BR"], [country]);
+  const [canUseModules, setCanUseModules] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase.from('profiles').select('status, is_active').eq('id', user.id).single();
+      if (mounted) setCanUseModules(Boolean(data?.is_active && ['active', 'ativo'].includes(String(data.status).toLowerCase())));
+    });
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <Drawer.Navigator
@@ -132,16 +147,18 @@ export default function OfficeDrawer() {
         }} 
       />
 
-      <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Earnings" component={EarningsScreen} options={{ title: texts.earnings, drawerIcon: () => <Ionicons name="wallet-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Withdraw" component={WithdrawScreen} options={{ title: texts.withdraw, drawerIcon: () => <Ionicons name="cash-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="Packages" component={PackagesScreen} options={{ title: texts.packages, drawerIcon: () => <Ionicons name="diamond-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="MarketingPlan" component={MarketingPlanScreen} options={{ title: "PLANO DE MARKETING", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="GPS" component={GPSScreen} options={{ title: texts.gps, drawerIcon: () => <Ionicons name="map-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Progress" component={ProgressScreen} options={{ title: texts.progress, drawerIcon: () => <Ionicons name="trending-up-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="ProWay" component={ProWayScreen} options={{ title: texts.proway, drawerIcon: () => <Ionicons name="school-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="News" component={NewsScreen} options={{ title: texts.news, drawerIcon: () => <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold}/> }} />
+      {canUseModules && <>
+        <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="Earnings" component={EarningsScreen} options={{ title: texts.earnings, drawerIcon: () => <Ionicons name="wallet-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="Withdraw" component={WithdrawScreen} options={{ title: texts.withdraw, drawerIcon: () => <Ionicons name="cash-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="MarketingPlan" component={MarketingPlanScreen} options={{ title: "PLANO DE MARKETING", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="GPS" component={GPSScreen} options={{ title: texts.gps, drawerIcon: () => <Ionicons name="map-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="Progress" component={ProgressScreen} options={{ title: texts.progress, drawerIcon: () => <Ionicons name="trending-up-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="ProWay" component={ProWayScreen} options={{ title: texts.proway, drawerIcon: () => <Ionicons name="school-outline" size={20} color={PALETTE.gold}/> }} />
+        <Drawer.Screen name="News" component={NewsScreen} options={{ title: texts.news, drawerIcon: () => <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold}/> }} />
+      </>}
       
       <Drawer.Screen 
         name="Logout" 

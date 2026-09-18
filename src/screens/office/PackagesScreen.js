@@ -34,12 +34,13 @@ export default function PackagesScreen() {
   const m = marketingTexts[country] || marketingTexts.BR;
   const cur = m.currency || "R$";
 
-  const handlePayment = (id, price, pts, type) => {
+  const handlePayment = (id, price, pts, type, planName) => {
     navigation.navigate("FindSponsor", {
       packageId: id,
       amount: price,
       points: pts,
       type: type,
+      planName: planName,
     });
   };
 
@@ -64,7 +65,7 @@ export default function PackagesScreen() {
           <Text style={styles.cardPrice}>{cur} 99,00</Text>
           <TouchableOpacity 
             style={[styles.actionBtn, { backgroundColor: 'rgba(255,255,255,0.1)' }]}
-            onPress={() => handlePayment(0, 99, 0, "adesao")}
+            onPress={() => handlePayment(0, 99, 0, "adesao", "AFILIADO")}
           >
             <Text style={styles.btnText}>ATIVAR LICENÇA</Text>
           </TouchableOpacity>
@@ -77,7 +78,7 @@ export default function PackagesScreen() {
           
           <TouchableOpacity 
             style={[styles.actionBtn, { backgroundColor: COLORS.primary, marginBottom: 10 }]}
-            onPress={() => handlePayment(1, 299, 299, "adesao")}
+            onPress={() => handlePayment(1, 299, 299, "adesao", "BUILDER")}
           >
             <Text style={styles.btnText}>ATIVAR ADESÃO BUILDER</Text>
           </TouchableOpacity>
@@ -85,13 +86,13 @@ export default function PackagesScreen() {
           <View style={styles.upgradeRow}>
             <TouchableOpacity 
               style={[styles.upBtn, { backgroundColor: COLORS.upgrade }]}
-              onPress={() => handlePayment(4, 799, 500, "upgrade")}
+              onPress={() => handlePayment(4, 799, 500, "upgrade", "PRIME")}
             >
               <Text style={styles.upBtnText}>UP PRIME (799)</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.upBtn, { backgroundColor: COLORS.gold }]}
-              onPress={() => handlePayment(3, 1599, 1300, "upgrade")}
+              onPress={() => handlePayment(3, 1599, 1300, "upgrade", "ELITE")}
             >
               <Text style={[styles.upBtnText, { color: '#000' }]}>UP ELITE (1.599)</Text>
             </TouchableOpacity>
@@ -106,14 +107,14 @@ export default function PackagesScreen() {
           
           <TouchableOpacity 
             style={[styles.actionBtn, { backgroundColor: COLORS.prime, marginBottom: 10 }]}
-            onPress={() => handlePayment(4, 799, 799, "adesao")}
+            onPress={() => handlePayment(4, 799, 799, "adesao", "PRIME")}
           >
             <Text style={styles.btnText}>ATIVAR ADESÃO PRIME</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.actionBtn, { backgroundColor: COLORS.gold }]}
-            onPress={() => handlePayment(3, 1599, 800, "upgrade")}
+            onPress={() => handlePayment(3, 1599, 800, "upgrade", "ELITE")}
           >
             <Text style={[styles.btnText, { color: '#000' }]}>UPGRADE PARA ELITE (1.599)</Text>
           </TouchableOpacity>
@@ -127,7 +128,7 @@ export default function PackagesScreen() {
           
           <TouchableOpacity 
             style={[styles.actionBtn, { backgroundColor: COLORS.white }]}
-            onPress={() => handlePayment(3, 1599, 1599, "adesao")}
+            onPress={() => handlePayment(3, 1599, 1599, "adesao", "ELITE")}
           >
             <Text style={[styles.btnText, { color: COLORS.primary }]}>ATIVAR ADESÃO ELITE</Text>
           </TouchableOpacity>

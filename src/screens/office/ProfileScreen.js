@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   RefreshControl,
+  InteractionManager,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../services/supabase";
@@ -58,10 +59,11 @@ export default function ProfileScreen() {
       if (user) {
         const { data, error } = await supabase
           .from("profiles")
-          .select("*, email, whatsapp, sponsor_id, payment_status, profile_active") 
+          .select("*")
           .eq("id", user.id)
           .single();
         if (data) {
+          data.whatsapp = data.whatsapp || user.user_metadata?.whatsapp || user.phone || "";
           // buscar código legível do patrocinador (id_dr) se existir
           if (data.sponsor_id) {
             const { data: sponsorData } = await supabase
@@ -92,7 +94,9 @@ export default function ProfileScreen() {
         if (!text) return;
         setLoading(true);
         const valueToSave = field === "whatsapp" ? text.replace(/\D/g, "") : text;
-        const { error } = await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id);
+        const { error } = field === "whatsapp"
+          ? (await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })).error
+          : (await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id)).error;
         if (error) Alert.alert("Erro", "Falha ao atualizar.");
         else fetchProfile();
         setLoading(false);
@@ -164,7 +168,10 @@ export default function ProfileScreen() {
     fetchProfile();
   }, []);
 
-  useEffect(() => { fetchProfile(); }, []);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(fetchProfile);
+    return () => task.cancel();
+  }, []);
 
   const handlePasswordReset = () => {
     Alert.alert("Segurança", "Enviar e-mail para redefinir senha?", [
@@ -181,7 +188,7 @@ export default function ProfileScreen() {
     );
   }
 
-  const isPaid = userData?.status === 'active';
+  const isPaid = ['active', 'ativo'].includes(userData?.status?.toLowerCase());
 
   return (
     <ScrollView 

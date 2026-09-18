@@ -32,7 +32,8 @@ const SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 export default function DashboardScreen() {
   const navigation = useNavigation();
   const { isDark, toggleTheme } = useTheme();
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const [scrollY] = useState(() => new Animated.Value(0));
+  const retryTimeout = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,7 +42,7 @@ export default function DashboardScreen() {
     idDr: "---",
     balance: 0,
     networkCount: 0,
-    status: "active",
+    status: "pending",
     rankName: "CONSULTOR",
     profileType: "distributor",
     avatarUrl: null,
@@ -50,22 +51,22 @@ export default function DashboardScreen() {
     documentId: "",
   });
 
-  const fetchDashboardData = useCallback(async (retryCount = 0) => {
+  const fetchDashboardData = useCallback(async function loadDashboardData(retryCount = 0) {
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return;
 
     // BUSCA O PERFIL
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
-      .select("*")
+      .select("full_name, id_dr, status, plan_name, avatar_url, points_total, email, document_id")
       .eq("id", user.id)
       .maybeSingle(); // maybeSingle não quebra se for null
 
     // SE O PERFIL AINDA NÃO EXISTE (Atraso do banco/webhook)
     if (!profile && retryCount < 3) {
       console.log("Perfil não encontrado, tentando novamente...");
-      setTimeout(() => fetchDashboardData(retryCount + 1), 2000);
+      retryTimeout.current = setTimeout(() => loadDashboardData(retryCount + 1), 2000);
       return;
     }
 
@@ -85,8 +86,8 @@ export default function DashboardScreen() {
       idDr: profile?.id_dr || "GERANDO ID...",
       balance: profile?.balance || 0,
       networkCount: networkCount,
-      status: profile?.status || "active",
-      rankName: (profile?.profile_type || "DISTRIBUIDOR").toUpperCase(),
+      status: profile?.status || "pending",
+      rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
       avatarUrl: profile?.avatar_url || null,
       points: profile?.points_total || 0,
       email: profile?.email || user?.email || "",
@@ -99,11 +100,17 @@ export default function DashboardScreen() {
     setLoading(false);
     setRefreshing(false);
   }
-}, []);
+  }, []);
 
 
   useEffect(() => {
     fetchDashboardData();
+    return () => {
+      if (retryTimeout.current) {
+        clearTimeout(retryTimeout.current);
+        retryTimeout.current = null;
+      }
+    };
   }, [fetchDashboardData]);
 
   // ANIMAÇÕES

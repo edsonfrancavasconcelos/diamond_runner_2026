@@ -45,9 +45,9 @@ export const handlePickAndUploadAvatar = async (userId, onUploadSuccess) => {
 
     if (uploadError) throw uploadError;
 
-    // 5. Atualizar o nome do arquivo na tabela 'users' (padrão do projeto)
+    // 5. Atualizar o perfil vinculado ao usuário autenticado
     const { error: dbError } = await supabase
-      .from('users')
+      .from('profiles')
       .update({ avatar_url: fileName })
       .eq('id', userId);
 

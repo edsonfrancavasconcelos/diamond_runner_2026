@@ -2,7 +2,7 @@
 // Arquivo: src/i18n/context/CountryContext.js
 // Descrição: Gerenciamento global do país/idioma com persistência local (AsyncStorage)
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const CountryContext = createContext({
@@ -33,7 +33,7 @@ export function CountryProvider({ children }) {
   }, []);
 
 // Função para mudar o país e salvar permanentemente
-const selectCountry = async (countryCode) => {
+const selectCountry = useCallback(async (countryCode) => {
   try {
     const codeFixed = countryCode.toUpperCase(); // Garante 'BR', 'EN' ou 'ES'
     setCountry(codeFixed);
@@ -41,11 +41,13 @@ const selectCountry = async (countryCode) => {
   } catch (e) {
     console.error('Erro ao salvar país no AsyncStorage:', e);
   }
-};
+}, []);
+
+  const contextValue = useMemo(() => ({ country, loading, selectCountry }), [country, loading, selectCountry]);
 
 
   return (
-    <CountryContext.Provider value={{ country, loading, selectCountry }}>
+    <CountryContext.Provider value={contextValue}>
       {children}
     </CountryContext.Provider>
   );

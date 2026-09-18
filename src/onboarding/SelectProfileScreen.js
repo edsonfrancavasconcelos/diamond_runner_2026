@@ -47,7 +47,7 @@ export default function SelectProfileScreen() {
     }
   };
 
-  const handleNavigation = (basePriceBRL, role, type, screenName) => {
+  const handleNavigation = (basePriceBRL, role, type, screenName, planName) => {
     const finalAmount = basePriceBRL * currentRate;
 
     navigation.navigate(screenName, {
@@ -57,6 +57,7 @@ export default function SelectProfileScreen() {
       currencySymbol: cur, 
       country: country,
       sponsorId: "SYSTEM", 
+      planName,
     });
   };
 
@@ -81,23 +82,10 @@ export default function SelectProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         
-        {/* CLIENTE */}
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => handleNavigation(39.00, types.cliente, "client_app_purchase", "RunnerRegister")}
-        >
-          <View style={styles.headerRow}>
-            <Text style={[styles.planName, { color: COLORS.white }]}>{types.cliente || "CLIENTE"}</Text>
-            <Ionicons name="cart-outline" size={26} color={COLORS.white} />
-          </View>
-          <Text style={styles.priceTag}>{formatCurrency(39)}</Text>
-          <Text style={styles.bulletText}>• {types.clienteDesc || ""}</Text>
-        </TouchableOpacity>
-
         {/* AFILIADO */}
         <TouchableOpacity
           style={styles.card}
-          onPress={() => handleNavigation(99.00, types.afiliado, "affiliate_yearly", "FindSponsor")}
+          onPress={() => handleNavigation(99.00, types.afiliado, "affiliate_yearly", "FindSponsor", "AFILIADO")}
         >
           <View style={styles.headerRow}>
             <Text style={[styles.planName, { color: COLORS.primary }]}>{types.afiliado || "AFILIADO"}</Text>
@@ -110,7 +98,7 @@ export default function SelectProfileScreen() {
         {/* DISTRIBUIDOR */}
         <TouchableOpacity
           style={[styles.card, { borderColor: COLORS.gold, borderWidth: 1.5 }]}
-          onPress={() => handleNavigation(299.00, types.distribuidor, "distributor_pack", "FindSponsor")}
+          onPress={() => handleNavigation(299.00, types.distribuidor, "distributor_pack", "FindSponsor", "BUILDER")}
         >
           <View style={styles.headerRow}>
             <Text style={[styles.planName, { color: COLORS.gold }]}>{types.distribuidor || "DISTRIBUIDOR"}</Text>

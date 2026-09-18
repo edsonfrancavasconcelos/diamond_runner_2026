@@ -3,10 +3,8 @@
     "name": "Diamond Runner",
     "slug": "diamond-runner",
     "version": "1.0.0",
-    "jsEngine": "hermes",
-    "newArchEnabled": true,
     "orientation": "portrait",
-    "icon": "./src/assets/images/diamondlogo.jpeg",
+    "icon": "./src/assets/images/logodiamond.png",
     "scheme": "diamondrunner",
     "userInterfaceStyle": "automatic",
     "extra": {
@@ -47,10 +45,14 @@
       ],
       "expo-font",
       "expo-video",
-      "expo-audio"
+      "expo-audio",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-asset"
     ],
     "experiments": {
-      "reactCompiler": true
+      "reactCompiler": false
     }
   }
 }
