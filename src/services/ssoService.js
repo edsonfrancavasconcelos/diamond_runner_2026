@@ -1,9 +1,13 @@
-import api from './api';
+import { supabase } from './supabase';
 
 export const createSSOToken = async (appSlug) => {
-  const response = await api.post('/api/create-sso', {
-    app: appSlug
+  const { data, error } = await supabase.functions.invoke('create-sso', {
+    body: { app: appSlug },
   });
 
-  return response.data.token;
+  if (error) {
+    throw error;
+  }
+
+  return data.token;
 };

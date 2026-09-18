@@ -12,7 +12,7 @@ npx expo prebuild
 eas build --platform android
 ```
 
-2) Backend: provide endpoint `POST /payments/create` that returns a `clientSecret`. (Already added in `diamond-backend/src/controllers/PaymentController.ts`.)
+2) Backend: provide a Supabase Edge Function that returns a `clientSecret` (the standalone `diamond-backend` Express server was removed; all server-side/privileged logic now lives in `supabase/functions/*`, e.g. `supabase/functions/stripe-webhook`). If this native-SDK PaymentIntent flow is implemented, add a new function such as `supabase/functions/stripe-create-payment-intent`.
 
 3) Client: initialize Stripe with the publishable key and call the backend to get `clientSecret`, then confirm the payment.
 

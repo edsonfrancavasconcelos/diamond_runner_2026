@@ -1,99 +1,114 @@
-// Local: supabase/functions/asaas-pix-gerador/index.ts
-// Status: BACKEND CORRIGIDO - Edson Vasconcelos 2026
+// Edge Function: asaas-webhook
+// Substitui diamond-backend/src/controllers/AsaasWebhookController.ts
+// Recebe eventos PAYMENT_RECEIVED/PAYMENT_CONFIRMED do Asaas, ativa o usuário e paga comissão do patrocinador.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Headers de CORS para o App React Native conseguir acessar
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+function ok() {
+  return new Response("OK", { status: 200 });
+}
 
 Deno.serve(async (req) => {
-  // 1. Responde ao preflight do navegador/mobile
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
   try {
-    const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY');
-    const ASAAS_URL = 'https://sandbox.asaas.com'; // Adicionado /api/v3
-
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
-    // Recebe o ID do perfil e o valor da adesão do App
-    const { profileId, amount } = await req.json();
+    const { event, payment } = await req.json();
 
-    // 2. Busca os dados do usuário no seu banco
-    const { data: user, error: userError } = await supabase
-      .from('profiles')
-      .select('full_name, document_id, email, phone_number')
-      .eq('id', profileId)
-      .single();
+    if (event === "PAYMENT_RECEIVED" || event === "PAYMENT_CONFIRMED") {
+      const paymentId = payment?.id;
+      const userId = payment?.externalReference;
+      const amount = Number(payment?.value || 0);
 
-    if (userError || !user) throw new Error('Perfil não encontrado no Diamond Runner');
+      if (!userId) return ok();
 
-    // 3. Registra/Busca Cliente no Asaas (Limpa CPF antes)
-    const cleanCPF = user.document_id?.replace(/\D/g, '');
-    
-    const customerResp = await fetch(`${ASAAS_URL}/v3/customers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'access_token': ASAAS_API_KEY! },
-      body: JSON.stringify({
-        name: user.full_name,
-        cpfCnpj: cleanCPF,
-        email: user.email,
-        mobilePhone: user.phone_number
-      })
-    });
-    const customerData = await customerResp.json();
+      const { data: userProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-    // 4. Gera a cobrança PIX
-    const paymentResp = await fetch(`${ASAAS_URL}/v3/payments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'access_token': ASAAS_API_KEY! },
-      body: JSON.stringify({
-        customer: customerData.id,
-        billingType: 'PIX',
-        value: amount,
-        dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-        externalReference: profileId,
-        description: `Adesão Diamond Runner 2026`
-      })
-    });
-    const paymentData = await paymentResp.json();
+      if (profileError || !userProfile) {
+        console.error("❌ Asaas Webhook: Usuário não encontrado", userId);
+        return ok();
+      }
 
-    // 5. Pega o QR Code e o Copia e Cola
-    const pixResp = await fetch(`${ASAAS_URL}/v3/payments/${paymentData.id}/pixQrCode`, {
-      method: 'GET',
-      headers: { 'access_token': ASAAS_API_KEY! }
-    });
-    const pixData = await pixResp.json();
+      if (userProfile.status === "active") {
+        console.log(`⚠️ Usuário ${userId} já está ativo. Ignorando.`);
+        return ok();
+      }
 
-    // 6. Salva o registro para controle (Garanta que a tabela payments_asaas exista)
-    await supabase.from('profiles').update({
-      payment_id: paymentData.id,
-      payment_status: 'PENDING'
-    }).eq('id', profileId);
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          status: "active",
+          payment_status: "CONFIRMED",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
 
-    return new Response(JSON.stringify({ 
-      pix_code: pixData.payload, 
-      encodedImage: pixData.encodedImage, // QR Code em imagem
-      invoice_url: paymentData.invoiceUrl 
-    }), { 
-      headers: { ...corsHeaders, "Content-Type": "application/json" }, 
-      status: 200 
-    });
+      if (updateError) {
+        console.error("❌ Asaas Webhook: Erro ao ativar usuário", updateError);
+        return ok();
+      }
 
+      console.log(`✅ Pagamento Asaas confirmado: ${paymentId}. Usuário ${userId} ativado.`);
+
+      const sponsorId = userProfile.sponsor_id;
+      if (sponsorId) {
+        let commissionRate = 0;
+        if (amount >= 1599) commissionRate = 0.27;
+        else if (amount >= 799) commissionRate = 0.20;
+        else if (amount >= 299) commissionRate = 0.12;
+        else if (amount >= 99) commissionRate = 0.10;
+
+        if (commissionRate > 0) {
+          const commissionAmount = amount * commissionRate;
+
+          const { data: sponsorProfile } = await supabase
+            .from("profiles")
+            .select("balance, direct_bonus")
+            .eq("id", sponsorId)
+            .single();
+
+          if (sponsorProfile) {
+            const newBalance = Number(sponsorProfile.balance || 0) + commissionAmount;
+            const newDirectBonus = Number(sponsorProfile.direct_bonus || 0) + commissionAmount;
+
+            const { error: sponsorUpdateError } = await supabase
+              .from("profiles")
+              .update({ balance: newBalance, direct_bonus: newDirectBonus })
+              .eq("id", sponsorId);
+
+            if (!sponsorUpdateError) {
+              await supabase.from("earnings").insert({
+                user_id: sponsorId,
+                amount: commissionAmount,
+                description: `Bônus de Indicação Direta - Adesão R$ ${amount.toFixed(2)}`,
+                created_at: new Date().toISOString(),
+              });
+
+              console.log(
+                `💰 Comissão de R$ ${commissionAmount.toFixed(2)} paga para o patrocinador ${sponsorId}`,
+              );
+            } else {
+              console.error(
+                "❌ Asaas Webhook: Erro ao atualizar saldo do patrocinador",
+                sponsorUpdateError,
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return ok();
   } catch (error) {
-    console.error("Erro na Function:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), { 
-      headers: { ...corsHeaders, "Content-Type": "application/json" }, 
-      status: 400 
-    });
+    console.error("❌ Erro no Webhook Asaas:", error);
+    return ok();
   }
 });
