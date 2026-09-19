@@ -52,12 +52,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   }
 
-  const email = session.customer_details?.email || session.customer_email ||
-    session.metadata?.email;
-  if (!email) {
-    return new Response(JSON.stringify({ received: true }), { status: 200 });
-  }
-
   const planName = session.metadata?.plan_name || "ASSOCIADO";
   const amountTotal = session.amount_total ?? 0;
   const paidAt = new Date().toISOString();
@@ -67,6 +61,52 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
+
+  // Fluxo novo: checkout criado via create-checkout (tem user_id/plan_id no metadata).
+  // Atualiza payments/subscriptions e ativa o profile por id, sem tocar no fluxo antigo abaixo.
+  const userId = session.metadata?.user_id;
+  const planId = session.metadata?.plan_id;
+  if (userId) {
+    await supabase
+      .from("payments")
+      .update({
+        status: "paid",
+        stripe_payment_id: session.payment_intent ? String(session.payment_intent) : session.id,
+      })
+      .eq("stripe_session_id", session.id);
+
+    if (planId) {
+      await supabase.from("subscriptions").upsert({
+        user_id: userId,
+        plano_id: planId,
+        stripe_customer_id: typeof session.customer === "string" ? session.customer : null,
+        status: "active",
+        data_inicio: paidAt,
+      }, { onConflict: "user_id,plano_id" });
+    }
+
+    await supabase
+      .from("profiles")
+      .update({
+        status: "ATIVO",
+        is_active: true,
+        plan_name: planName,
+        updated_at: paidAt,
+      })
+      .eq("id", userId);
+
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Fluxo antigo: Stripe Payment Links estáticos (sem metadata.user_id), casa por e-mail.
+  const email = session.customer_details?.email || session.customer_email ||
+    session.metadata?.email;
+  if (!email) {
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")

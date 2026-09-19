@@ -4,6 +4,7 @@ import { useRoute } from "@react-navigation/native";
 import React, { useState, useMemo } from "react";
 import { ActivityIndicator, Alert, Linking, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import { supabase } from "../services/supabase";
+import { createCheckoutSession } from "../services/checkoutService";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -16,6 +17,7 @@ export default function PaymentScreen() {
   const route = useRoute();
   
   const [loading, setLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const params = route.params || {};
   const { type, planName, fullName, email, documentId, amount } = params;
@@ -68,6 +70,20 @@ export default function PaymentScreen() {
     }
   }
 
+  // Fluxo novo (opcional): Stripe Checkout Session dinâmica via Supabase Edge Function.
+  async function handleSecureCheckout() {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    try {
+      const url = await createCheckoutSession(planInfo.name);
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert("Pagamento indisponível", error.message || "Não foi possível iniciar o checkout seguro.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  }
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -84,6 +100,14 @@ export default function PaymentScreen() {
         <TouchableOpacity style={styles.payButton} onPress={handleStripePayment} disabled={loading}>
           {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>PAGAR COM STRIPE</Text>}
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.payButton, styles.secureCheckoutButton]}
+          onPress={handleSecureCheckout}
+          disabled={checkoutLoading}
+        >
+          {checkoutLoading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>PAGAR (CHECKOUT SEGURO)</Text>}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -96,6 +120,7 @@ const styles = StyleSheet.create({
   planName: { color: PALETTE.primary, fontSize: 16, fontWeight: 'bold' },
   priceText: { color: PALETTE.gold, fontSize: 40, fontWeight: '900', marginTop: 10 },
   payButton: { backgroundColor: PALETTE.primary, padding: 20, borderRadius: 15, alignItems: 'center', width: '100%' },
+  secureCheckoutButton: { backgroundColor: PALETTE.dark, borderWidth: 1, borderColor: PALETTE.primary, marginTop: 15 },
   btnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
   sandboxDivider: { marginTop: 40, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 20, width: '100%' },
   sandboxLabel: { color: PALETTE.gold, fontSize: 10, textAlign: 'center', marginBottom: 15, letterSpacing: 2 },
