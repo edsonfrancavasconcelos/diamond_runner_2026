@@ -62,7 +62,13 @@ export default function PaymentScreen() {
       if (error && !error.message.toLowerCase().includes("already registered")) throw error;
 
       const separator = link.includes("?") ? "&" : "?";
-      await Linking.openURL(`${link}${separator}prefilled_email=${encodeURIComponent(cleanEmail)}`);
+     const checkoutUrl = `${link}${separator}prefilled_email=${encodeURIComponent(cleanEmail)}`;
+
+if (typeof window !== "undefined" && window.open) {
+  window.open(checkoutUrl, "_blank");
+} else {
+  await Linking.openURL(checkoutUrl);
+}
     } catch (error) {
       Alert.alert("Falha no pagamento", error.message || "Não foi possível abrir o Stripe.");
     } finally {
