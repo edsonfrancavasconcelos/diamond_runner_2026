@@ -36,9 +36,13 @@
       "package": "com.vascodev.diamondrunner"
     },
     "web": {
-      "output": "single",
-      "favicon": "./src/assets/images/logodiamond.png",
-      "bundler": "metro"
+  "output": "single",
+  "favicon": "./src/assets/images/logodiamond.png",
+  "bundler": "metro",
+  "name": "Diamond Runner",
+  "shortName": "Diamond Runner",
+  "description": "Diamond Runner App",
+  "themeColor": "#000000"
     },
     "plugins": [
       [
