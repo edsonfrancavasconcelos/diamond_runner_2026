@@ -221,11 +221,15 @@ export default function RunnerRegisterScreen() {
         {registered && (
           <>
             <Text style={styles.pendingMessage}>
-              Conta criada como PENDENTE. Pague para liberar o ID DR e o acesso ao escritório.
+              Sua conta foi criada. Sem pagamento ela fica PENDENTE e sem ID DR.
             </Text>
             <Button
-              title="IR PARA PAGAMENTO SEGURO"
+              title="IR PARA PAGAMENTO"
               onPress={openStripe}
+            />
+            <Button
+              title="CONFIRMAR CONTA E PAGAR DEPOIS"
+              onPress={() => navigation.navigate("Welcome")}
             />
           </>
         )}
