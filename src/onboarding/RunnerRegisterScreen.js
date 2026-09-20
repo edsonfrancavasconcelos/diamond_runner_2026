@@ -228,7 +228,7 @@ export default function RunnerRegisterScreen() {
             />
             <Button
               title="CONFIRMAR CONTA E PAGAR DEPOIS"
-              onPress={() => navigation.navigate("Welcome")}
+              onPress={() => setRegistered(true)}
             />
           </>
         )}
