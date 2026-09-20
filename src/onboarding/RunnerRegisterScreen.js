@@ -393,7 +393,12 @@ export default function RunnerRegisterScreen() {
         />
         <Button
           title="CONFIRMAR CONTA E PAGAR DEPOIS"
-          onPress={() => navigation.navigate("Welcome")}
+          onPress={() =>
+            navigation.navigate("LoginDiamond", {
+              email: form.email.trim().toLowerCase(),
+              pending: true,
+            })
+          }
         />
       </ScrollView>
     </KeyboardAvoidingView>
