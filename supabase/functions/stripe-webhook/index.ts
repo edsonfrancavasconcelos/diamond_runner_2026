@@ -6,6 +6,29 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@17?target=deno";
 
+async function ensureIdDr(supabase: ReturnType<typeof createClient>, userId: string) {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id_dr")
+    .eq("id", userId)
+    .single();
+  if (profileError) throw profileError;
+  if (profile?.id_dr) return profile.id_dr;
+
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const candidate = `DR${Math.floor(1000 + Math.random() * 9000)}`;
+    const { data: existing, error: existingError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id_dr", candidate)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (!existing) return candidate;
+  }
+
+  throw new Error("Não foi possível gerar um ID DR disponível");
+}
+
 Deno.serve(async (req) => {
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
@@ -67,6 +90,7 @@ Deno.serve(async (req) => {
   const userId = session.metadata?.user_id;
   const planId = session.metadata?.plan_id;
   if (userId) {
+    const idDr = await ensureIdDr(supabase, userId);
     await supabase
       .from("payments")
       .update({
@@ -90,6 +114,7 @@ Deno.serve(async (req) => {
       .update({
         status: "ATIVO",
         is_active: true,
+        id_dr: idDr,
         plan_name: planName,
         updated_at: paidAt,
       })
@@ -110,7 +135,7 @@ Deno.serve(async (req) => {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, id_dr")
     .eq("email", email.toLowerCase())
     .maybeSingle();
 
@@ -123,11 +148,13 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   }
 
+  const idDr = await ensureIdDr(supabase, profile.id);
   const { error } = await supabase
     .from("profiles")
     .update({
       status: "ATIVO",
       is_active: true,
+      id_dr: idDr,
       plan_name: planName,
       updated_at: new Date().toISOString(),
     })
