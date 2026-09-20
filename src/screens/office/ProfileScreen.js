@@ -61,7 +61,7 @@ export default function ProfileScreen() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
@@ -93,14 +93,19 @@ export default function ProfileScreen() {
   const saveField = async (field, text) => {
     if (!text?.trim()) return;
     setLoading(true);
-    const valueToSave = field === "whatsapp" ? text.replace(/\D/g, "") : text.trim();
-    const result = field === "whatsapp"
-      ? await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })
-      : await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id);
-    const { error } = result;
-    if (error) Alert.alert("Erro", "Falha ao atualizar.");
-    else fetchProfile();
-    setLoading(false);
+    try {
+      const valueToSave = field === "whatsapp" ? text.replace(/\D/g, "") : text.trim();
+      if (!valueToSave) return;
+      const result = field === "whatsapp"
+        ? await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })
+        : await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id);
+      if (result.error) throw result.error;
+      await fetchProfile();
+    } catch (error) {
+      Alert.alert("Erro", error.message || "Falha ao atualizar.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const editField = (field, label) => {
@@ -153,16 +158,21 @@ export default function ProfileScreen() {
     try {
       setUploading(true);
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sessão expirada. Entre novamente.");
       const fileName = `avatar_${Date.now()}.png`;
       const filePath = `${user.id}/${fileName}`;
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, decode(asset.base64), {
+      const fileData = asset.base64
+        ? decode(asset.base64)
+        : await fetch(asset.uri).then((response) => response.arrayBuffer());
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, fileData, {
         contentType: 'image/png',
         upsert: true,
       });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
-      fetchProfile();
+      const { error: profileError } = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+      if (profileError) throw profileError;
+      await fetchProfile();
     } catch (error) {
       Alert.alert("Erro", error.message);
     } finally {
@@ -171,8 +181,16 @@ export default function ProfileScreen() {
   };
   
   const removeImage = async () => {
-    await supabase.from("profiles").update({ avatar_url: null }).eq("id", userData.id);
-    fetchProfile();
+    try {
+      setUploading(true);
+      const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", userData.id);
+      if (error) throw error;
+      await fetchProfile();
+    } catch (error) {
+      Alert.alert("Erro", error.message || "Não foi possível remover a foto.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onRefresh = useCallback(() => {
@@ -188,8 +206,23 @@ export default function ProfileScreen() {
   const handlePasswordReset = () => {
     Alert.alert("Segurança", "Enviar e-mail para redefinir senha?", [
       { text: "Cancelar", style: "cancel" },
-      { text: "Enviar", onPress: () => Alert.alert("Sucesso", "E-mail enviado!") }
+      { text: "Enviar", onPress: sendPasswordReset }
     ]);
+  };
+
+  const sendPasswordReset = async () => {
+    if (!userData?.email) {
+      Alert.alert("Erro", "Não foi possível identificar o e-mail da conta.");
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(userData.email, {
+      redirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : undefined,
+    });
+    if (error) {
+      Alert.alert("Erro", error.message || "Não foi possível enviar o e-mail.");
+      return;
+    }
+    Alert.alert("Sucesso", "E-mail para redefinir a senha enviado.");
   };
 
   if (loading) {

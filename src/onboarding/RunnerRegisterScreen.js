@@ -29,6 +29,7 @@ export default function RunnerRegisterScreen() {
 
   const [loading, setLoading] = useState(false);
   const [isValidatingSponsor, setIsValidatingSponsor] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   // 2. O ESTADO JÁ NASCE COM OS DADOS DO PATROCINADOR
   const [form, setForm] = useState({
@@ -43,6 +44,78 @@ export default function RunnerRegisterScreen() {
   });
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+
+  const createPendingAccount = async () => {
+    if (loading) return;
+    if (!form.fullName.trim() || !form.documentId.trim() || !form.email.trim() || !form.phone.trim()) {
+      Alert.alert("Dados incompletos", "Preencha nome, CPF, e-mail e WhatsApp.");
+      return;
+    }
+    if (!form.sponsorUuid || form.sponsorName.includes("❌")) {
+      Alert.alert("Patrocinador inválido", "Selecione um patrocinador válido antes de continuar.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const cleanEmail = form.email.trim().toLowerCase();
+      const cleanDocument = form.documentId.replace(/\D/g, "");
+      const cleanPhone = form.phone.replace(/\D/g, "");
+      const temporaryPassword = `DR${Math.random().toString(36).slice(-12)}!`;
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: temporaryPassword,
+        options: {
+          data: {
+            full_name: form.fullName.trim(),
+            document_id: cleanDocument,
+            whatsapp: cleanPhone,
+            sponsor_id: form.sponsorUuid,
+            plan_name: planName || type || "",
+            status: "PENDING",
+            is_active: false,
+          },
+        },
+      });
+      if (signUpError) throw signUpError;
+
+      const userId = data.user?.id;
+      if (!userId) throw new Error("Não foi possível criar a conta.");
+
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: userId,
+        full_name: form.fullName.trim(),
+        document_id: cleanDocument,
+        email: cleanEmail,
+        whatsapp: cleanPhone,
+        sponsor_id: form.sponsorUuid,
+        status: "PENDING",
+        is_active: false,
+        id_dr: null,
+      }, { onConflict: "id" });
+      if (profileError) throw profileError;
+
+      await supabase.auth.signOut({ scope: "local" });
+      setRegistered(true);
+      Alert.alert("Cadastro criado", "Sua conta está PENDENTE. Faça o pagamento para ativá-la e receber o ID DR.");
+    } catch (error) {
+      Alert.alert("Não foi possível cadastrar", error.message || "Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goToPayment = () => {
+    navigation.navigate("PaymentScreen", {
+      ...form,
+      email: form.email.trim().toLowerCase(),
+      planName,
+      packageId,
+      amount,
+      points,
+      type,
+    });
+  };
 
   // 3. BUSCA SÓ DISPARA SE O USUÁRIO REALMENTE MUDAR O ID MANUALMENTE
   useEffect(() => {
@@ -70,7 +143,7 @@ export default function RunnerRegisterScreen() {
 
     const debounce = setTimeout(searchSponsor, 1000);
     return () => clearTimeout(debounce);
-  }, [form.sponsorId]);
+  }, [form.sponsorId, sponsorId]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, backgroundColor: theme.bg }}>
@@ -112,11 +185,18 @@ export default function RunnerRegisterScreen() {
           onChange={(v) => updateForm("sponsorId", v.toUpperCase())}
         />
 
-        <Button 
-          title="IR PARA PAGAMENTO" 
-          onPress={() => navigation.navigate("PaymentScreen", { ...form, planName, packageId, amount, points, type })} 
-          disabled={!form.sponsorUuid || form.sponsorName.includes("❌")}
-        />
+        {!registered ? (
+          <Button
+            title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
+            onPress={createPendingAccount}
+            disabled={loading || !form.sponsorUuid || form.sponsorName.includes("❌")}
+          />
+        ) : (
+          <Button
+            title="IR PARA PAGAMENTO"
+            onPress={goToPayment}
+          />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
