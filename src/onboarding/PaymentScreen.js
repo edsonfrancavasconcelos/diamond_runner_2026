@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import React, { useState, useMemo } from "react";
 import { ActivityIndicator, Alert, Linking, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
-import { supabase } from "../services/supabase";
 import { createCheckoutSession } from "../services/checkoutService";
 
 const PALETTE = {
@@ -16,11 +15,10 @@ const PALETTE = {
 export default function PaymentScreen() {
   const route = useRoute();
   
-  const [loading, setLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const params = route.params || {};
-  const { type, planName, fullName, email, documentId, amount } = params;
+  const { type, planName, email, amount } = params;
 
   const planInfo = useMemo(() => {
     const t = `${planName || type || ""}`.toLowerCase();
@@ -30,49 +28,26 @@ export default function PaymentScreen() {
   }, [type, planName, amount]);
 
   const paymentLinks = {
-    AFILIADO: process.env.EXPO_PUBLIC_STRIPE_LINK_AFILIADO || "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
-    DISTRIBUIDOR: process.env.EXPO_PUBLIC_STRIPE_LINK_BUILDER || "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-    BUILDER: process.env.EXPO_PUBLIC_STRIPE_LINK_BUILDER || "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-    PRIME: process.env.EXPO_PUBLIC_STRIPE_LINK_PRIME || "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
-    ELITE: process.env.EXPO_PUBLIC_STRIPE_LINK_ELITE || "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
+    AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
+    DISTRIBUIDOR: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    BUILDER: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    PRIME: "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
+    ELITE: "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
   };
 
-  async function handleStripePayment() {
-    if (loading) return;
-    const link = paymentLinks[planInfo.name]?.trim();
+  function openStripe() {
+    const link = paymentLinks[planInfo.name];
+    const cleanEmail = email?.trim().toLowerCase() || "";
     if (!link) {
-      Alert.alert("Pagamento indisponível", "O Payment Link Stripe deste plano ainda não foi configurado.");
+      Alert.alert("Pagamento indisponível", "Link Stripe deste plano não configurado.");
       return;
     }
-
-    const cleanEmail = email?.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes("@")) {
-      Alert.alert("E-mail obrigatório", "Informe um e-mail válido antes de abrir o pagamento.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const tempPassword = `DR${Math.random().toString(36).slice(-10)}!`;
-      const { error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: tempPassword,
-        options: { data: { full_name: fullName, document_id: documentId?.replace(/\D/g, ''), plan_name: planInfo.name, status: 'pending' } },
-      });
-      if (error && !error.message.toLowerCase().includes("already registered")) throw error;
-
-      const separator = link.includes("?") ? "&" : "?";
-     const checkoutUrl = `${link}${separator}prefilled_email=${encodeURIComponent(cleanEmail)}`;
-
-if (typeof window !== "undefined" && window.open) {
-  window.open(checkoutUrl, "_blank");
-} else {
-  await Linking.openURL(checkoutUrl);
-}
-    } catch (error) {
-      Alert.alert("Falha no pagamento", error.message || "Não foi possível abrir o Stripe.");
-    } finally {
-      setLoading(false);
+    const sep = link.includes("?") ? "&" : "?";
+    const url = `${link}${sep}prefilled_email=${encodeURIComponent(cleanEmail)}`;
+    if (typeof window !== "undefined" && window.open) {
+      window.open(url, "_blank");
+    } else {
+      Linking.openURL(url);
     }
   }
 
@@ -103,8 +78,8 @@ if (typeof window !== "undefined" && window.open) {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.payButton} onPress={handleStripePayment} disabled={loading}>
-          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnText}>PAGAR COM STRIPE</Text>}
+        <TouchableOpacity style={styles.payButton} onPress={openStripe}>
+          <Text style={styles.btnText}>PAGAR COM STRIPE</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
