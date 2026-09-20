@@ -185,7 +185,7 @@ export default function OfficeDrawer() {
         }} 
       />
 
-      <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />
+      {canUseModules && <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />}
       <Drawer.Screen name="Packages" component={PackagesScreen} options={{ title: texts.packages, drawerIcon: () => <Ionicons name="diamond-outline" size={20} color={PALETTE.gold}/> }} />
       {canUseModules && <>
         <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />

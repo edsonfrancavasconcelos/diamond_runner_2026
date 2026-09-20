@@ -41,14 +41,24 @@ export default function RunnerRegisterScreen() {
     documentId: "",
     birth: "",
     phone: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const createPendingAccount = async () => {
     if (loading) return;
-    if (!form.fullName.trim() || !form.documentId.trim() || !form.email.trim() || !form.phone.trim()) {
-      Alert.alert("Dados incompletos", "Preencha nome, CPF, e-mail e WhatsApp.");
+    if (!form.fullName.trim() || !form.documentId.trim() || !form.email.trim() || !form.phone.trim() || !form.password || !form.confirmPassword) {
+      Alert.alert("Dados incompletos", "Preencha nome, CPF, e-mail, WhatsApp, senha e confirmação de senha.");
+      return;
+    }
+    if (form.password.length < 6) {
+      Alert.alert("Senha inválida", "A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      Alert.alert("Senha inválida", "As senhas não conferem.");
       return;
     }
     if (!form.sponsorUuid || form.sponsorName.includes("❌")) {
@@ -61,10 +71,9 @@ export default function RunnerRegisterScreen() {
       const cleanEmail = form.email.trim().toLowerCase();
       const cleanDocument = form.documentId.replace(/\D/g, "");
       const cleanPhone = form.phone.replace(/\D/g, "");
-      const temporaryPassword = `DR${Math.random().toString(36).slice(-12)}!`;
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: cleanEmail,
-        password: temporaryPassword,
+        password: form.password,
         options: {
           data: {
             full_name: form.fullName.trim(),
@@ -190,6 +199,8 @@ export default function RunnerRegisterScreen() {
         <InputField label="CPF *" value={form.documentId} keyboard="numeric" onChange={(v) => updateForm("documentId", v)} />
         <InputField label="E-MAIL *" value={form.email} keyboard="email-address" onChange={(v) => updateForm("email", v)} />
         <InputField label="WHATSAPP *" value={form.phone} keyboard="phone-pad" onChange={(v) => updateForm("phone", v)} />
+        <InputField label="SENHA *" value={form.password} secure onChange={(v) => updateForm("password", v)} />
+        <InputField label="CONFIRMAR SENHA *" value={form.confirmPassword} secure onChange={(v) => updateForm("confirmPassword", v)} />
 
         {/* CAMPO DE ALTERAÇÃO (CASO PRECISE MUDAR O ID) */}
         <TouchableOpacity style={{marginTop: 10}} onPress={() => {/* focar input se quiser */}}>
@@ -223,7 +234,7 @@ export default function RunnerRegisterScreen() {
   );
 }
 
-const InputField = ({ label, value, onChange, keyboard = "default" }) => (
+const InputField = ({ label, value, onChange, keyboard = "default", secure = false }) => (
   <View style={{ marginBottom: 15 }}>
     {label !== "" && <Text style={{ color: '#a4bccc', fontSize: 12, marginBottom: 5 }}>{label}</Text>}
     <TextInput
@@ -231,6 +242,7 @@ const InputField = ({ label, value, onChange, keyboard = "default" }) => (
       value={value}
       onChangeText={onChange}
       keyboardType={keyboard}
+      secureTextEntry={secure}
     />
   </View>
 );
