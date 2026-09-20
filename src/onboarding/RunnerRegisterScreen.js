@@ -153,13 +153,12 @@ export default function RunnerRegisterScreen() {
       const userId = data.user?.id;
       if (!userId) throw new Error("Não foi possível criar a conta.");
 
-      const { error: profileError } = await supabase.from("profiles").upsert(
+          const { error: profileError } = await supabase.from("profiles").upsert(
         {
           id: userId,
           full_name: form.fullName.trim(),
           document_id: cleanDocument,
           email: cleanEmail,
-          whatsapp: cleanPhone,
           sponsor_id: uuid,
           status: "PENDING",
           is_active: false,
