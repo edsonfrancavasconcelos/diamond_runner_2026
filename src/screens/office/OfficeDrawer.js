@@ -137,18 +137,46 @@ function CustomDrawerContent(props) {
 
 export default function OfficeDrawer() {
   const { country } = useContext(CountryContext);
-  const texts = useMemo(() => officeTexts[country?.toUpperCase()] || officeTexts["BR"], [country]);
+  const texts = useMemo(
+    () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
+    [country]
+  );
   const [canUseModules, setCanUseModules] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase.from('profiles').select('status, is_active').eq('id', user.id).single();
-      if (mounted) setCanUseModules(Boolean(data?.is_active && ['active', 'ativo'].includes(String(data.status).toLowerCase())));
-    });
-    return () => { mounted = false; };
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("status, is_active, id_dr")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      const status = String(data?.status || "").toUpperCase();
+      const active =
+        data?.is_active === true &&
+        !!data?.id_dr &&
+        (status === "" || status === "ATIVO" || status === "ACTIVE");
+
+      setCanUseModules(active);
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  const hideIfPending = canUseModules
+    ? undefined
+    : { display: "none" };
 
   return (
     <Drawer.Navigator
@@ -159,11 +187,21 @@ export default function OfficeDrawer() {
         headerTitleStyle: { fontWeight: "900", fontSize: 12, letterSpacing: 2 },
         headerLeft: ({ tintColor }) => (
           <TouchableOpacity
-            onPress={() => route.name === "Dashboard" ? navigation.openDrawer() : navigation.navigate("Dashboard")}
+            onPress={() =>
+              route.name === "Dashboard"
+                ? navigation.openDrawer()
+                : navigation.navigate("Dashboard")
+            }
             style={styles.headerBackButton}
-            accessibilityLabel={route.name === "Dashboard" ? "Abrir menu" : "Voltar"}
+            accessibilityLabel={
+              route.name === "Dashboard" ? "Abrir menu" : "Voltar"
+            }
           >
-            <Ionicons name={route.name === "Dashboard" ? "menu" : "arrow-back"} size={26} color={tintColor || "#FFF"} />
+            <Ionicons
+              name={route.name === "Dashboard" ? "menu" : "arrow-back"}
+              size={26}
+              color={tintColor || "#FFF"}
+            />
           </TouchableOpacity>
         ),
         drawerActiveTintColor: "#FFF",
@@ -173,35 +211,216 @@ export default function OfficeDrawer() {
         unmountOnBlur: true,
       })}
     >
-      <Drawer.Screen name="Dashboard" component={DashboardScreen} options={{ title: texts.dashboard, drawerIcon: () => <Ionicons name="grid-outline" size={20} color={PALETTE.gold}/> }} />
-      
-      {/* 🚀 ROTA DE PERFIL ÚNICA E ESCONDIDA */}
-      <Drawer.Screen 
-        name="MyProfile" 
-        component={ProfileScreen} 
-        options={{ 
-            drawerItemStyle: { display: 'none' },
-            title: texts.viewProfile || "MEU PERFIL"
-        }} 
+      <Drawer.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          title: texts.dashboard,
+          drawerIcon: () => (
+            <Ionicons name="grid-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
       />
 
-      {canUseModules && <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />}
-      <Drawer.Screen name="Packages" component={PackagesScreen} options={{ title: texts.packages, drawerIcon: () => <Ionicons name="diamond-outline" size={20} color={PALETTE.gold}/> }} />
-      {canUseModules && <>
-        <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="Earnings" component={EarningsScreen} options={{ title: texts.earnings, drawerIcon: () => <Ionicons name="wallet-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="Withdraw" component={WithdrawScreen} options={{ title: texts.withdraw, drawerIcon: () => <Ionicons name="cash-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="MarketingPlan" component={MarketingPlanScreen} options={{ title: "PLANO DE MARKETING", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="GPS" component={GPSScreen} options={{ title: texts.gps, drawerIcon: () => <Ionicons name="map-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="Progress" component={ProgressScreen} options={{ title: texts.progress, drawerIcon: () => <Ionicons name="trending-up-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="ProWay" component={ProWayScreen} options={{ title: texts.proway, drawerIcon: () => <Ionicons name="school-outline" size={20} color={PALETTE.gold}/> }} />
-        <Drawer.Screen name="News" component={NewsScreen} options={{ title: texts.news, drawerIcon: () => <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold}/> }} />
-      </>}
+      <Drawer.Screen
+        name="MyProfile"
+        component={ProfileScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          title: texts.viewProfile || "MEU PERFIL",
+        }}
+      />
 
-      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ title: "CONFIGURAÇÕES", drawerIcon: () => <Ionicons name="settings-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Terms" component={TermsScreen} options={{ title: "TERMOS DE USO", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Privacy" component={PrivacyScreen} options={{ title: "PRIVACIDADE", drawerIcon: () => <Ionicons name="shield-checkmark-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="About" component={AboutScreen} options={{ title: "SOBRE / EMPRESA", drawerIcon: () => <Ionicons name="information-circle-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen
+        name="Packages"
+        component={PackagesScreen}
+        options={{
+          title: texts.packages,
+          drawerIcon: () => (
+            <Ionicons name="diamond-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Network"
+        component={NetworkScreen}
+        options={{
+          title: texts.network,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="people-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="DiamondStore"
+        component={DiamondStoreApps}
+        options={{
+          title: "DIAMOND STORE",
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="cart-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Earnings"
+        component={EarningsScreen}
+        options={{
+          title: texts.earnings,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="wallet-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Withdraw"
+        component={WithdrawScreen}
+        options={{
+          title: texts.withdraw,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="cash-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="MarketingPlan"
+        component={MarketingPlanScreen}
+        options={{
+          title: "PLANO DE MARKETING",
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons
+              name="document-text-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="GPS"
+        component={GPSScreen}
+        options={{
+          title: texts.gps,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="map-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Progress"
+        component={ProgressScreen}
+        options={{
+          title: texts.progress,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons
+              name="trending-up-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="ProWay"
+        component={ProWayScreen}
+        options={{
+          title: texts.proway,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons name="school-outline" size={20} color={PALETTE.gold} />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="News"
+        component={NewsScreen}
+        options={{
+          title: texts.news,
+          drawerItemStyle: hideIfPending,
+          drawerIcon: () => (
+            <Ionicons
+              name="newspaper-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: "CONFIGURAÇÕES",
+          drawerIcon: () => (
+            <Ionicons
+              name="settings-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Terms"
+        component={TermsScreen}
+        options={{
+          title: "TERMOS DE USO",
+          drawerIcon: () => (
+            <Ionicons
+              name="document-text-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={{
+          title: "PRIVACIDADE",
+          drawerIcon: () => (
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          title: "SOBRE / EMPRESA",
+          drawerIcon: () => (
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color={PALETTE.gold}
+            />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 }

@@ -54,11 +54,10 @@ function AppContent() {
         .maybeSingle();
 
       const status = String(data?.status || "").toUpperCase();
-      const active =
-        data?.is_active === true &&
-        (status === "" || status === "ATIVO" || status === "ACTIVE");
+      const blocked =
+        status === "EXCLUIDO" || status === "BLOQUEADO";
 
-      setSession(active ? nextSession : null);
+      setSession(blocked ? null : nextSession);
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
