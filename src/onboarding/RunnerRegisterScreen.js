@@ -181,14 +181,35 @@ export default function RunnerRegisterScreen() {
         sponsorName: name,
       });
     } catch (error) {
-      warn(
-        "Não foi possível cadastrar",
-        error.message || "Tente novamente."
-      );
+      const msg = String(error?.message || "").toLowerCase();
+
+      if (
+        msg.includes("rate limit") ||
+        msg.includes("already registered") ||
+        msg.includes("user already")
+      ) {
+        navigation.navigate("PaymentScreen", {
+          email: form.email.trim().toLowerCase(),
+          fullName: form.fullName.trim(),
+          documentId: form.documentId.replace(/\D/g, ""),
+          phone: form.phone.replace(/\D/g, ""),
+          type: planName || type || "",
+          planName: planName || type || "",
+          sponsorUuid: form.sponsorUuid,
+          sponsorId: form.sponsorId,
+          sponsorName: form.sponsorName,
+        });
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        window.alert(error.message || "Não foi possível cadastrar");
+      } else {
+        Alert.alert("Não foi possível cadastrar", error.message || "Tente novamente.");
+      }
     } finally {
       setLoading(false);
-    }
-  };
+    }}
 
   const paymentLinks = {
     AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
