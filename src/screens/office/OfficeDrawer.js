@@ -12,7 +12,6 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -106,6 +105,32 @@ function CustomDrawerContent(props) {
       </TouchableOpacity>
 
       <DrawerItemList {...props} />
+      <TouchableOpacity
+        style={{
+          marginTop: 20,
+          marginHorizontal: 16,
+          marginBottom: 30,
+          padding: 14,
+          borderWidth: 1,
+          borderColor: "#FFD700",
+          borderRadius: 10,
+          alignItems: "center",
+        }}
+        onPress={async () => {
+          const ok =
+            typeof window !== "undefined"
+              ? window.confirm("Deseja realmente sair?")
+              : true;
+
+          if (!ok) return;
+
+          await supabase.auth.signOut();
+        }}
+      >
+        <Text style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}>
+          SAIR
+        </Text>
+      </TouchableOpacity>
     </DrawerContentScrollView>
   );
 }
@@ -128,16 +153,25 @@ export default function OfficeDrawer() {
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{
+      screenOptions={({ navigation, route }) => ({
         headerStyle: { backgroundColor: PALETTE.darkBlue },
         headerTintColor: "#FFF",
         headerTitleStyle: { fontWeight: "900", fontSize: 12, letterSpacing: 2 },
+        headerLeft: ({ tintColor }) => (
+          <TouchableOpacity
+            onPress={() => route.name === "Dashboard" ? navigation.openDrawer() : navigation.navigate("Dashboard")}
+            style={styles.headerBackButton}
+            accessibilityLabel={route.name === "Dashboard" ? "Abrir menu" : "Voltar"}
+          >
+            <Ionicons name={route.name === "Dashboard" ? "menu" : "arrow-back"} size={26} color={tintColor || "#FFF"} />
+          </TouchableOpacity>
+        ),
         drawerActiveTintColor: "#FFF",
         drawerActiveBackgroundColor: PALETTE.primary,
         drawerInactiveTintColor: PALETTE.lightGray,
         drawerLabelStyle: { fontSize: 11, fontWeight: "bold" },
-        unmountOnBlur: true, // 👈 Limpa a tela ao sair dela, matando menus fantasmas
-      }}
+        unmountOnBlur: true,
+      })}
     >
       <Drawer.Screen name="Dashboard" component={DashboardScreen} options={{ title: texts.dashboard, drawerIcon: () => <Ionicons name="grid-outline" size={20} color={PALETTE.gold}/> }} />
       
@@ -153,10 +187,6 @@ export default function OfficeDrawer() {
 
       <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="Packages" component={PackagesScreen} options={{ title: texts.packages, drawerIcon: () => <Ionicons name="diamond-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ title: "CONFIGURAÇÕES", drawerIcon: () => <Ionicons name="settings-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Terms" component={TermsScreen} options={{ title: "TERMOS DE USO", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="Privacy" component={PrivacyScreen} options={{ title: "PRIVACIDADE", drawerIcon: () => <Ionicons name="shield-checkmark-outline" size={20} color={PALETTE.gold}/> }} />
-      <Drawer.Screen name="About" component={AboutScreen} options={{ title: "SOBRE / EMPRESA", drawerIcon: () => <Ionicons name="information-circle-outline" size={20} color={PALETTE.gold}/> }} />
       {canUseModules && <>
         <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />
         <Drawer.Screen name="Earnings" component={EarningsScreen} options={{ title: texts.earnings, drawerIcon: () => <Ionicons name="wallet-outline" size={20} color={PALETTE.gold}/> }} />
@@ -167,36 +197,11 @@ export default function OfficeDrawer() {
         <Drawer.Screen name="ProWay" component={ProWayScreen} options={{ title: texts.proway, drawerIcon: () => <Ionicons name="school-outline" size={20} color={PALETTE.gold}/> }} />
         <Drawer.Screen name="News" component={NewsScreen} options={{ title: texts.news, drawerIcon: () => <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold}/> }} />
       </>}
-      
-      <Drawer.Screen 
-        name="Logout" 
-        component={View} 
-        listeners={({ navigation }) => ({
-          drawerItemPress: (event) => {
-            event.preventDefault();
-            Alert.alert(
-              texts.logout || "Sair", 
-              texts.confirmLogout || "Deseja realmente sair?",
-              [
-                { text: "Não", onPress: () => navigation.navigate("Dashboard") },
-                {
-                  text: "Sim",
-                  onPress: async () => {
-                    const { error } = await supabase.auth.signOut();
-                    if (error) {
-                      Alert.alert("Erro", "Não foi possível sair. Tente novamente.");
-                    }
-                  },
-                },
-              ]
-            );
-          },
-        })}
-        options={{ 
-          title: texts.logout || "SAIR", 
-          drawerIcon: () => <Ionicons name="log-out-outline" size={20} color={PALETTE.gold}/> 
-        }} 
-      />
+
+      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ title: "CONFIGURAÇÕES", drawerIcon: () => <Ionicons name="settings-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="Terms" component={TermsScreen} options={{ title: "TERMOS DE USO", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="Privacy" component={PrivacyScreen} options={{ title: "PRIVACIDADE", drawerIcon: () => <Ionicons name="shield-checkmark-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="About" component={AboutScreen} options={{ title: "SOBRE / EMPRESA", drawerIcon: () => <Ionicons name="information-circle-outline" size={20} color={PALETTE.gold}/> }} />
     </Drawer.Navigator>
   );
 }
@@ -214,4 +219,7 @@ const styles = StyleSheet.create({
   avatarImg: { width: '100%', height: '100%' },
   userName: { color: "#FFF", fontWeight: "bold", fontSize: 14, textAlign: 'center' },
   userRole: { fontSize: 11, fontWeight: "bold", marginTop: 2, textAlign: 'center' },
+  drawerDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.12)", marginVertical: 10, marginHorizontal: 16 },
+  drawerLabel: { fontSize: 11, fontWeight: "bold" },
+  headerBackButton: { paddingHorizontal: 16, paddingVertical: 10 },
 });
