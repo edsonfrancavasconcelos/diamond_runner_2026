@@ -104,9 +104,8 @@ export default function RunnerRegisterScreen() {
       }, { onConflict: "id" });
       if (profileError) throw profileError;
 
-      await supabase.auth.signOut({ scope: "local" });
       setRegistered(true);
-      Alert.alert("Cadastro criado", "Sua conta está PENDENTE. Faça o pagamento para ativá-la e receber o ID DR.");
+      await supabase.auth.signOut({ scope: "local" });
     } catch (error) {
       Alert.alert("Não foi possível cadastrar", error.message || "Tente novamente.");
     } finally {
@@ -212,16 +211,16 @@ export default function RunnerRegisterScreen() {
           onChange={(v) => updateForm("sponsorId", v.toUpperCase())}
         />
 
-        <Button
-          title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
-          onPress={createPendingAccount}
-          disabled={loading || registered || !form.sponsorUuid || form.sponsorName.includes("❌")}
-        />
-
-        {registered && (
+        {!registered ? (
+          <Button
+            title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
+            onPress={createPendingAccount}
+            disabled={loading || !form.sponsorUuid || form.sponsorName.includes("❌")}
+          />
+        ) : (
           <>
             <Text style={styles.pendingMessage}>
-              Sua conta foi criada. Sem pagamento ela fica PENDENTE e sem ID DR.
+              Conta criada. Sem pagamento fica PENDENTE e sem ID DR.
             </Text>
             <Button
               title="IR PARA PAGAMENTO"
