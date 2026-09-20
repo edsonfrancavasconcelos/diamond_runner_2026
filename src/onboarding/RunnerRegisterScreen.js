@@ -180,21 +180,23 @@ export default function RunnerRegisterScreen() {
         sponsorId: dr,
         sponsorName: name,
       });
-    } catch (error) {
+        } catch (error) {
       const msg = String(error?.message || "").toLowerCase();
 
-      if (
-        msg.includes("rate limit") ||
-        msg.includes("already registered") ||
-        msg.includes("user already")
-      ) {
-        navigation.navigate("PaymentScreen", {
+      if (msg.includes("rate limit")) {
+        warn(
+          "Aguarde um pouco",
+          "O Supabase bloqueou cadastro por excesso de e-mail. Espere uns minutos ou use outro e-mail."
+        );
+        return;
+      }
+
+      if (msg.includes("already registered") || msg.includes("user already")) {
+        navigation.navigate("PackagesScreen", {
           email: form.email.trim().toLowerCase(),
           fullName: form.fullName.trim(),
           documentId: form.documentId.replace(/\D/g, ""),
           phone: form.phone.replace(/\D/g, ""),
-          type: planName || type || "",
-          planName: planName || type || "",
           sponsorUuid: form.sponsorUuid,
           sponsorId: form.sponsorId,
           sponsorName: form.sponsorName,
@@ -202,14 +204,11 @@ export default function RunnerRegisterScreen() {
         return;
       }
 
-      if (typeof window !== "undefined") {
-        window.alert(error.message || "Não foi possível cadastrar");
-      } else {
-        Alert.alert("Não foi possível cadastrar", error.message || "Tente novamente.");
-      }
+      warn("Não foi possível cadastrar", error.message || "Tente novamente.");
     } finally {
       setLoading(false);
-    }}
+    }
+  };
 
   const paymentLinks = {
     AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
@@ -378,7 +377,20 @@ export default function RunnerRegisterScreen() {
           A conta nasce PENDENTE e sem ID DR. Pague agora ou pague depois.
         </Text>
 
-        <Button title="IR PARA PAGAMENTO" onPress={openStripe} />
+             <Button
+          title="IR PARA PAGAMENTO"
+          onPress={() =>
+            navigation.navigate("PackagesScreen", {
+              email: form.email,
+              fullName: form.fullName,
+              documentId: form.documentId,
+              phone: form.phone,
+              sponsorUuid: form.sponsorUuid,
+              sponsorId: form.sponsorId,
+              sponsorName: form.sponsorName,
+            })
+          }
+        />
         <Button
           title="CONFIRMAR CONTA E PAGAR DEPOIS"
           onPress={() => navigation.navigate("Welcome")}
