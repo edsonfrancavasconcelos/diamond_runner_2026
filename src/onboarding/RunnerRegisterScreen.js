@@ -102,10 +102,19 @@ export default function RunnerRegisterScreen() {
         is_active: false,
         id_dr: null,
       }, { onConflict: "id" });
-      if (profileError) throw profileError;
+          if (profileError) throw profileError;
 
-      setRegistered(true);
-      await supabase.auth.signOut({ scope: "local" });
+      navigation.navigate("PaymentScreen", {
+        email: cleanEmail,
+        fullName: form.fullName.trim(),
+        documentId: cleanDocument,
+        phone: cleanPhone,
+        type: planName || type || "",
+        planName: planName || type || "",
+        sponsorUuid: form.sponsorUuid,
+        sponsorId: form.sponsorId,
+        sponsorName: form.sponsorName,
+      });
     } catch (error) {
       Alert.alert("Não foi possível cadastrar", error.message || "Tente novamente.");
     } finally {
