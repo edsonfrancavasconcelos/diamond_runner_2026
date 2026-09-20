@@ -175,7 +175,7 @@ export default function RunnerRegisterScreen() {
 
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}><Ionicons name="arrow-back" size={28} color={PALETTE.primary} /></TouchableOpacity>
-        <Text style={[styles.topTitle, { color: theme.text }]}>FINALIZAR CADASTRO</Text>
+        <Text style={[styles.topTitle, { color: theme.text }]}>FINALIZAR CADASTRO 2</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
