@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 import {
-  KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet,
+  KeyboardAvoidingView, Linking, Platform, ScrollView, StatusBar, StyleSheet,
   Text, TextInput, TouchableOpacity, View, Alert, ActivityIndicator
 } from "react-native";
 
@@ -25,7 +25,7 @@ export default function RunnerRegisterScreen() {
   const { theme, isDark } = useTheme();
   
   // 1. RECEBE OS DADOS DA TELA DE VALIDAÇÃO
-  const { sponsorUuid, sponsorId, sponsorName, planName, packageId, amount, points, type } = route.params || {};
+  const { sponsorUuid, sponsorId, sponsorName, planName, type } = route.params || {};
 
   const [loading, setLoading] = useState(false);
   const [isValidatingSponsor, setIsValidatingSponsor] = useState(false);
@@ -105,16 +105,32 @@ export default function RunnerRegisterScreen() {
     }
   };
 
-  const goToPayment = () => {
-    navigation.navigate("PaymentScreen", {
-      ...form,
-      email: form.email.trim().toLowerCase(),
-      planName,
-      packageId,
-      amount,
-      points,
-      type,
-    });
+  const paymentLinks = {
+    AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
+    DISTRIBUIDOR: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    BUILDER: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
+    PRIME: "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
+    ELITE: "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
+  };
+
+  const openStripe = () => {
+    const plan = `${planName || type || ""}`.toLowerCase();
+    const planKey = plan.includes("elite")
+      ? "ELITE"
+      : plan.includes("prime")
+        ? "PRIME"
+        : plan.includes("builder") || plan.includes("distributor") || plan.includes("distribuidor")
+          ? "BUILDER"
+          : "AFILIADO";
+    const link = paymentLinks[planKey];
+    const cleanEmail = form.email.trim().toLowerCase();
+    const separator = link.includes("?") ? "&" : "?";
+    const url = `${link}${separator}prefilled_email=${encodeURIComponent(cleanEmail)}`;
+    if (typeof window !== "undefined" && window.open) {
+      window.open(url, "_blank");
+    } else {
+      Linking.openURL(url);
+    }
   };
 
   // 3. BUSCA SÓ DISPARA SE O USUÁRIO REALMENTE MUDAR O ID MANUALMENTE
@@ -185,17 +201,22 @@ export default function RunnerRegisterScreen() {
           onChange={(v) => updateForm("sponsorId", v.toUpperCase())}
         />
 
-        {!registered ? (
-          <Button
-            title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
-            onPress={createPendingAccount}
-            disabled={loading || !form.sponsorUuid || form.sponsorName.includes("❌")}
-          />
-        ) : (
-          <Button
-            title="IR PARA PAGAMENTO"
-            onPress={goToPayment}
-          />
+        <Button
+          title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
+          onPress={createPendingAccount}
+          disabled={loading || registered || !form.sponsorUuid || form.sponsorName.includes("❌")}
+        />
+
+        {registered && (
+          <>
+            <Text style={styles.pendingMessage}>
+              Conta criada como PENDENTE. Pague para liberar o ID DR e o acesso ao escritório.
+            </Text>
+            <Button
+              title="IR PARA PAGAMENTO SEGURO"
+              onPress={openStripe}
+            />
+          </>
         )}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -219,5 +240,6 @@ const styles = StyleSheet.create({
   topTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 15 },
   scrollContent: { padding: 25 },
   sponsorHeader: { flexDirection: 'row', alignItems: 'center', padding: 20, borderRadius: 15, marginBottom: 25, borderWidth: 1, borderColor: PALETTE.gold },
-  sectionTitle: { color: PALETTE.gold, fontSize: 13, fontWeight: 'bold', marginBottom: 15, marginTop: 10 }
+  sectionTitle: { color: PALETTE.gold, fontSize: 13, fontWeight: 'bold', marginBottom: 15, marginTop: 10 },
+  pendingMessage: { color: PALETTE.gold, fontSize: 13, lineHeight: 20, textAlign: 'center', marginTop: 16, marginBottom: 12 }
 });
