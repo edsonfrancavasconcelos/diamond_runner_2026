@@ -37,6 +37,10 @@ import ProgressScreen from "./ProgressScreen";
 import ProWayScreen from "./ProWayScreen";
 import WithdrawScreen from "./WithdrawScreen";
 import DiamondStoreApps from "./DiamondStoreAppsScreen"; 
+import SettingsScreen from "./SettingsScreen";
+import TermsScreen from "./TermsScreen";
+import PrivacyScreen from "./PrivacyScreen";
+import AboutScreen from "./AboutScreen";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -149,6 +153,10 @@ export default function OfficeDrawer() {
 
       <Drawer.Screen name="DiamondStore" component={DiamondStoreApps} options={{ title: "DIAMOND STORE", drawerIcon: () => <Ionicons name="cart-outline" size={20} color={PALETTE.gold}/> }} />
       <Drawer.Screen name="Packages" component={PackagesScreen} options={{ title: texts.packages, drawerIcon: () => <Ionicons name="diamond-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} options={{ title: "CONFIGURAÇÕES", drawerIcon: () => <Ionicons name="settings-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="Terms" component={TermsScreen} options={{ title: "TERMOS DE USO", drawerIcon: () => <Ionicons name="document-text-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="Privacy" component={PrivacyScreen} options={{ title: "PRIVACIDADE", drawerIcon: () => <Ionicons name="shield-checkmark-outline" size={20} color={PALETTE.gold}/> }} />
+      <Drawer.Screen name="About" component={AboutScreen} options={{ title: "SOBRE / EMPRESA", drawerIcon: () => <Ionicons name="information-circle-outline" size={20} color={PALETTE.gold}/> }} />
       {canUseModules && <>
         <Drawer.Screen name="Network" component={NetworkScreen} options={{ title: texts.network, drawerIcon: () => <Ionicons name="people-outline" size={20} color={PALETTE.gold}/> }} />
         <Drawer.Screen name="Earnings" component={EarningsScreen} options={{ title: texts.earnings, drawerIcon: () => <Ionicons name="wallet-outline" size={20} color={PALETTE.gold}/> }} />
@@ -164,16 +172,25 @@ export default function OfficeDrawer() {
         name="Logout" 
         component={View} 
         listeners={({ navigation }) => ({
-          focus: () => {
+          drawerItemPress: (event) => {
+            event.preventDefault();
             Alert.alert(
               texts.logout || "Sair", 
-              texts.logoutConfirm || "Deseja realmente sair?",
+              texts.confirmLogout || "Deseja realmente sair?",
               [
                 { text: "Não", onPress: () => navigation.navigate("Dashboard") },
-                { text: "Sim", onPress: async () => await supabase.auth.signOut() }
+                {
+                  text: "Sim",
+                  onPress: async () => {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) {
+                      Alert.alert("Erro", "Não foi possível sair. Tente novamente.");
+                    }
+                  },
+                },
               ]
             );
-          }
+          },
         })}
         options={{ 
           title: texts.logout || "SAIR", 

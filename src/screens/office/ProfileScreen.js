@@ -10,6 +10,9 @@ import {
   ScrollView,
   RefreshControl,
   InteractionManager,
+  Modal,
+  TextInput,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../services/supabase";
@@ -45,6 +48,7 @@ export default function ProfileScreen() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [editingField, setEditingField] = useState(null);
 
   const theme = {
     bg: isDarkMode ? PALETTE.bgDark : PALETTE.bgLight,
@@ -86,23 +90,31 @@ export default function ProfileScreen() {
     }
   }
 
+  const saveField = async (field, text) => {
+    if (!text?.trim()) return;
+    setLoading(true);
+    const valueToSave = field === "whatsapp" ? text.replace(/\D/g, "") : text.trim();
+    const result = field === "whatsapp"
+      ? await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })
+      : await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id);
+    const { error } = result;
+    if (error) Alert.alert("Erro", "Falha ao atualizar.");
+    else fetchProfile();
+    setLoading(false);
+  };
+
   const editField = (field, label) => {
+    const currentValue = String(userData[field] || "");
+    if (Platform.OS !== "ios") {
+      setEditingField({ field, label, value: currentValue });
+      return;
+    }
     Alert.prompt(
       `Alterar ${label}`,
       `Digite o novo ${label}:`,
-      async (text) => {
-        if (!text) return;
-        setLoading(true);
-        const valueToSave = field === "whatsapp" ? text.replace(/\D/g, "") : text;
-        const { error } = field === "whatsapp"
-          ? (await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })).error
-          : (await supabase.from("profiles").update({ [field]: valueToSave }).eq("id", userData.id)).error;
-        if (error) Alert.alert("Erro", "Falha ao atualizar.");
-        else fetchProfile();
-        setLoading(false);
-      },
+      (text) => saveField(field, text),
       "plain-text",
-      String(userData[field] || "")
+      currentValue
     );
   };
 
@@ -191,10 +203,39 @@ export default function ProfileScreen() {
   const isPaid = ['active', 'ativo'].includes(userData?.status?.toLowerCase());
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: theme.bg }]}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PALETTE.gold} />}
-    >
+    <>
+      <Modal visible={Boolean(editingField)} transparent animationType="fade" onRequestClose={() => setEditingField(null)}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.editModal, { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Alterar {editingField?.label}</Text>
+            <TextInput
+              autoFocus
+              value={editingField?.value || ""}
+              onChangeText={(value) => setEditingField((current) => ({ ...current, value }))}
+              keyboardType={editingField?.field === "whatsapp" ? "phone-pad" : "default"}
+              style={[styles.editInput, { color: theme.text, borderColor: PALETTE.primary }]}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setEditingField(null)}>
+                <Text style={[styles.modalAction, { color: theme.subtext }]}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const { field, value } = editingField;
+                  setEditingField(null);
+                  saveField(field, value);
+                }}
+              >
+                <Text style={[styles.modalAction, { color: PALETTE.gold }]}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.bg }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={PALETTE.gold} />}
+      >
       <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
         <TouchableOpacity style={styles.themeIconButton} onPress={() => setIsDarkMode(!isDarkMode)}>
           <Ionicons name={isDarkMode ? "sunny" : "moon"} size={26} color={PALETTE.gold} />
@@ -285,7 +326,8 @@ export default function ProfileScreen() {
           </View>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 
@@ -307,5 +349,11 @@ const styles = StyleSheet.create({
   label: { fontSize: 11 },
   value: { fontSize: 16, fontWeight: "bold" },
   passwordRow: { flexDirection: 'row', alignItems: 'center' },
-  actionLabel: { fontSize: 14, fontWeight: 'bold' }
+  actionLabel: { fontSize: 14, fontWeight: 'bold' },
+  modalBackdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.65)' },
+  editModal: { padding: 22, borderRadius: 12 },
+  modalTitle: { fontSize: 17, fontWeight: 'bold', marginBottom: 16 },
+  editInput: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 24, marginTop: 20 },
+  modalAction: { fontSize: 14, fontWeight: 'bold' }
 });
