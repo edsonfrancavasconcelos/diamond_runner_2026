@@ -41,14 +41,34 @@ function AppContent() {
   const [session, setSession] = useState(undefined);
 
   useEffect(() => {
+    const check = async (nextSession) => {
+      if (!nextSession?.user?.id) {
+        setSession(null);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_active, status")
+        .eq("id", nextSession.user.id)
+        .maybeSingle();
+
+      const status = String(data?.status || "").toUpperCase();
+      const active =
+        data?.is_active === true &&
+        (status === "" || status === "ATIVO" || status === "ACTIVE");
+
+      setSession(active ? nextSession : null);
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      check(session);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, _session) => {
-      setSession(_session);
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      check(nextSession);
     });
 
     return () => subscription?.unsubscribe();
