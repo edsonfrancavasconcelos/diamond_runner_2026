@@ -7,7 +7,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { registerRootComponent } from "expo";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StatusBar, View } from "react-native";
+import { ActivityIndicator, StatusBar, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -39,7 +39,15 @@ const Stack = createNativeStackNavigator();
 function AppContent() {
   const themeContext = useTheme();
   const [session, setSession] = useState(undefined);
+  const [showSplash, setShowSplash] = useState(true);
 
+  // Splash 5 segundos
+  useEffect(() => {
+    const t = setTimeout(() => setShowSplash(false), 5000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Sessão: PENDING e ATIVO entram; só EXCLUIDO/BLOQUEADO ficam de fora
   useEffect(() => {
     const check = async (nextSession) => {
       if (!nextSession?.user?.id) {
@@ -73,6 +81,44 @@ function AppContent() {
     return () => subscription?.unsubscribe();
   }, []);
 
+  // Splash
+  if (showSplash) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#0c3c74",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#FFD700",
+            fontSize: 22,
+            fontWeight: "900",
+            letterSpacing: 3,
+            marginBottom: 20,
+          }}
+        >
+          DIAMOND RUNNER
+        </Text>
+        <ActivityIndicator size="large" color="#2c94bc" />
+        <Text
+          style={{
+            color: "#a4bccc",
+            marginTop: 16,
+            fontSize: 12,
+            letterSpacing: 1,
+          }}
+        >
+          CARREGANDO...
+        </Text>
+      </View>
+    );
+  }
+
+  // Loading de sessão / tema
   if (!themeContext || !themeContext.theme || session === undefined) {
     return (
       <View
