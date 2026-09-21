@@ -7,7 +7,7 @@ import {
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { registerRootComponent } from "expo";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, Image, StatusBar, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -92,6 +92,11 @@ function AppContent() {
           alignItems: "center",
         }}
       >
+        <Image
+          source={require("./src/assets/images/logodiamond.png")}
+          style={{ width: 140, height: 140, marginBottom: 20 }}
+          resizeMode="contain"
+        />
         <Text
           style={{
             color: "#FFD700",
