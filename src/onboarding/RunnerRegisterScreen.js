@@ -408,17 +408,20 @@ export default function RunnerRegisterScreen() {
           A conta nasce PENDENTE e sem ID DR. Pague agora ou pague depois.
         </Text>
 
-        {registered && (
-          <Button
-            title="PAGAR DEPOIS / IR PARA LOGIN"
-            onPress={() =>
-              navigation.navigate("LoginDiamond", {
-                email: form.email.trim().toLowerCase(),
-                pending: true,
-              })
-            }
-          />
-        )}
+     {registered && (
+  <Button
+    title="PAGAR DEPOIS / IR PARA LOGIN"
+    onPress={() =>
+      navigation.navigate("LoginDiamond", {
+        email: form.email.trim().toLowerCase(),
+        pending: true,
+        fullName: form.fullName.trim(),
+        status: "PENDING",
+        is_active: false,
+      })
+    }
+  />
+)}
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -2,7 +2,7 @@
 // Correção: Login Híbrido + Lógica Inteligente de Primeiro Acesso
 
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useContext, useState } from "react";
 import {
   Alert,
@@ -30,6 +30,7 @@ const PALETTE = {
 };
 
 export default function LoginDiamondScreen() {
+  const route = useRoute();
   const navigation = useNavigation();
   const countryCtx = useContext(CountryContext);
   const themeCtx = useTheme();
@@ -46,7 +47,9 @@ export default function LoginDiamondScreen() {
 
   const texts = loginTexts[country] || loginTexts.BR || {};
 
-  const [loginInput, setLoginInput] = useState("");
+ const [loginInput, setLoginInput] = useState(
+  route.params?.email || ""
+);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
