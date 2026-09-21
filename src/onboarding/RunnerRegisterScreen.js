@@ -151,8 +151,12 @@ export default function RunnerRegisterScreen() {
       });
       if (signUpError) throw signUpError;
 
-      const userId = data.user?.id;
-      if (!userId) throw new Error("Não foi possível criar a conta.");
+  const userId = data.user?.id;
+
+if (!userId)
+ throw new Error("Não foi possível criar a conta.");
+
+await supabase.auth.signOut();;
 
           const { error: profileError } = await supabase.from("profiles").upsert(
         {
