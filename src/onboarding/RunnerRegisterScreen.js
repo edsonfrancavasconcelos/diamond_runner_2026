@@ -44,6 +44,7 @@ export default function RunnerRegisterScreen() {
 
   const [loading, setLoading] = useState(false);
   const [isValidatingSponsor, setIsValidatingSponsor] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   const [form, setForm] = useState({
     sponsorId: sponsorId || "",
@@ -168,17 +169,7 @@ export default function RunnerRegisterScreen() {
       );
       if (profileError) throw profileError;
 
-      navigation.navigate("PaymentScreen", {
-        email: cleanEmail,
-        fullName: form.fullName.trim(),
-        documentId: cleanDocument,
-        phone: cleanPhone,
-        type: planName || type || "",
-        planName: planName || type || "",
-        sponsorUuid: uuid,
-        sponsorId: dr,
-        sponsorName: name,
-      });
+      setRegistered(true);
         } catch (error) {
       const msg = String(error?.message || "").toLowerCase();
 
@@ -366,39 +357,68 @@ export default function RunnerRegisterScreen() {
           onChange={(v) => updateForm("sponsorId", v.toUpperCase())}
         />
 
-        <Button
-          title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
-          onPress={createPendingAccount}
-          disabled={loading}
-        />
+        {!registered ? (
+          <Button
+            title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
+            onPress={createPendingAccount}
+            disabled={loading}
+          />
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() =>
+              navigation.navigate("PackagesScreen", {
+                email: form.email.trim().toLowerCase(),
+                fullName: form.fullName.trim(),
+                documentId: form.documentId.replace(/\D/g, ""),
+                phone: form.phone.replace(/\D/g, ""),
+                sponsorUuid: form.sponsorUuid,
+                sponsorId: form.sponsorId,
+                sponsorName: form.sponsorName,
+              })
+            }
+            style={{
+              marginTop: 20,
+              backgroundColor: "#0c3c74",
+              borderWidth: 1,
+              borderColor: "#FFD700",
+              borderRadius: 14,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                color: "#FFD700",
+                fontWeight: "900",
+                fontSize: 14,
+                marginBottom: 8,
+                letterSpacing: 1,
+              }}
+            >
+              CONTA CRIADA COM SUCESSO
+            </Text>
+            <Text style={{ color: "#fff", fontSize: 13, lineHeight: 20 }}>
+              Sua conta está inativa. Ative pagando um dos planos. Toque aqui
+              para escolher o plano.
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <Text style={styles.pendingMessage}>
           A conta nasce PENDENTE e sem ID DR. Pague agora ou pague depois.
         </Text>
 
-             <Button
-          title="IR PARA PAGAMENTO"
-          onPress={() =>
-            navigation.navigate("PackagesScreen", {
-              email: form.email,
-              fullName: form.fullName,
-              documentId: form.documentId,
-              phone: form.phone,
-              sponsorUuid: form.sponsorUuid,
-              sponsorId: form.sponsorId,
-              sponsorName: form.sponsorName,
-            })
-          }
-        />
-        <Button
-          title="CONFIRMAR CONTA E PAGAR DEPOIS"
-          onPress={() =>
-            navigation.navigate("LoginDiamond", {
-              email: form.email.trim().toLowerCase(),
-              pending: true,
-            })
-          }
-        />
+        {registered && (
+          <Button
+            title="PAGAR DEPOIS / IR PARA LOGIN"
+            onPress={() =>
+              navigation.navigate("LoginDiamond", {
+                email: form.email.trim().toLowerCase(),
+                pending: true,
+              })
+            }
+          />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
