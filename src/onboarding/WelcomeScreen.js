@@ -152,7 +152,7 @@ export default function WelcomeScreen() {
             variant="outline"
             onPress={() =>
               country
-                ? navigation.navigate("ChooseSponsor")
+                ? navigation.navigate("RunnerRegister")
                 : setShowModal(true)
             }
             style={{
