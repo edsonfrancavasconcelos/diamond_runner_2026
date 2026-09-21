@@ -46,39 +46,43 @@ export default function PackagesScreen() {
     sponsorName,
   } = params;
 
-  const hasAccount = Boolean(email && String(email).includes("@"));
+const hasAccount = Boolean(email && String(email).includes("@"));
 
-  const handlePayment = (id, price, pts, type, planName) => {
-    console.log("PACKAGES params", route.params, "hasAccount", hasAccount);
-    if (typeof window !== "undefined") {
-      window.alert(`hasAccount=${hasAccount} email=${email || "vazio"}`);
-    }
-    if (hasAccount) {
-      navigation.navigate("PaymentScreen", {
-        email,
-        fullName,
-        documentId,
-        phone,
-        sponsorUuid,
-        sponsorId,
-        sponsorName,
-        packageId: id,
-        amount: price,
-        points: pts,
-        type: planName,
-        planName: planName,
-      });
-      return;
-    }
+const handlePayment = (id, price, pts, type, planName) => {
+  console.log("PACKAGES params", route.params, "hasAccount", hasAccount);
 
-    navigation.navigate("FindSponsor", {
+  if (typeof window !== "undefined") {
+    window.alert(`email=${email || "vazio"}`);
+  }
+
+  // Usuário que acabou de criar conta
+  if (email) {
+    navigation.navigate("PaymentScreen", {
+      email,
+      fullName,
+      documentId,
+      phone,
+      sponsorUuid,
+      sponsorId,
+      sponsorName,
       packageId: id,
       amount: price,
       points: pts,
-      type: type,
-      planName: planName,
+      type,
+      planName,
     });
-  };
+    return;
+  }
+
+  // Só cai aqui se realmente não tiver cadastro
+  navigation.navigate("FindSponsor", {
+    packageId: id,
+    amount: price,
+    points: pts,
+    type,
+    planName,
+  });
+};
 
   return (
     <SafeAreaView style={styles.container}>
