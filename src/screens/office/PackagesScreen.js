@@ -13,7 +13,7 @@ import {
   Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
 import { marketingTexts } from "../../i18n/hooks/texts";
@@ -30,11 +30,47 @@ const COLORS = {
 
 export default function PackagesScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const { country } = useContext(CountryContext);
   const m = marketingTexts[country] || marketingTexts.BR;
   const cur = m.currency || "R$";
 
+  const params = route.params || {};
+  const {
+    email,
+    fullName,
+    documentId,
+    phone,
+    sponsorUuid,
+    sponsorId,
+    sponsorName,
+  } = params;
+
+  const hasAccount = Boolean(email && String(email).includes("@"));
+
   const handlePayment = (id, price, pts, type, planName) => {
+    console.log("PACKAGES params", route.params, "hasAccount", hasAccount);
+    if (typeof window !== "undefined") {
+      window.alert(`hasAccount=${hasAccount} email=${email || "vazio"}`);
+    }
+    if (hasAccount) {
+      navigation.navigate("PaymentScreen", {
+        email,
+        fullName,
+        documentId,
+        phone,
+        sponsorUuid,
+        sponsorId,
+        sponsorName,
+        packageId: id,
+        amount: price,
+        points: pts,
+        type: planName,
+        planName: planName,
+      });
+      return;
+    }
+
     navigation.navigate("FindSponsor", {
       packageId: id,
       amount: price,
