@@ -93,7 +93,7 @@ function AppContent() {
         }}
       >
         <Image
-          source={require("./src/assets/images/logodiamond.png")}
+         source={require("./src/assets/images/logodiamond-light.png")}
           style={{ width: 140, height: 140, marginBottom: 20 }}
           resizeMode="contain"
         />
