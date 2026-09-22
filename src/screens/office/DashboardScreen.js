@@ -1,5 +1,5 @@
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
-import DiamondLogoLight from "../../assets/images/logodiamond-light.jpeg";
+import DiamondLogoLight from "../../assets/images/logodiamond-light.png";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   ActivityIndicator,
