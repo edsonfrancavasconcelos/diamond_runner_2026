@@ -98,7 +98,7 @@ role
         networkCount = count || 0;
       }
 
-  const statusRaw = String(profile?.status || "")
+const statusRaw = String(profile?.status || "")
   .trim()
   .toUpperCase();
 
@@ -113,23 +113,37 @@ const isPending = !isAdmin && (
   statusRaw !== "ATIVO"
 );
 
-      setUserData({
-        fullName: (
-          profile?.full_name ||
-          user?.user_metadata?.full_name ||
-          "NOVO MEMBRO"
-        ).toUpperCase(),
-        idDr: profile?.id_dr || null,
+  setUserData({
+  fullName: (
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    "NOVO MEMBRO"
+  ).toUpperCase(),
+
+  idDr: profile?.id_dr || null,
+
   balance: Number(profile?.balance || 0),
-        networkCount,
-        status: isPending ? "PENDING" : "ATIVO",
-        isPending,
-        rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
-        avatarUrl: profile?.avatar_url || null,
-        points: profile?.points_total || 0,
-        email: profile?.email || user?.email || "",
-        documentId: profile?.document_id || "",
-      });
+
+  networkCount,
+
+  status: isPending ? "PENDING" : "ATIVO",
+
+  isPending,
+
+  isAdmin,
+
+  rankName: (
+    profile?.plan_name || "DISTRIBUIDOR"
+  ).toUpperCase(),
+
+  avatarUrl: profile?.avatar_url || null,
+
+  points: profile?.points_total || 0,
+
+  email: profile?.email || user?.email || "",
+
+  documentId: profile?.document_id || "",
+});;
     } catch (e) {
       console.log("Erro ao carregar Dashboard:", e.message);
     } finally {
