@@ -4,14 +4,19 @@
     "slug": "diamond-runner",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/images/logodiamond.png",
+
+    "icon": "./src/assets/images/logodiamond-light.jpeg",
+
     "scheme": "diamondrunner",
+
     "userInterfaceStyle": "automatic",
+
     "extra": {
       "eas": {
         "projectId": "e83319af-140d-451e-b52d-6d6c40539407"
       }
     },
+
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -22,10 +27,11 @@
       },
       "bundleIdentifier": "com.vascodev.diamondrunner"
     },
+
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/logodiamond.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./src/assets/images/logodiamond-light.jpeg",
+        "backgroundColor": "#0c3c74"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -35,23 +41,25 @@
       ],
       "package": "com.vascodev.diamondrunner"
     },
+
     "web": {
-  "output": "single",
-  "favicon": "./src/assets/images/logodiamond.png",
-  "bundler": "metro",
-  "name": "Diamond Runner",
-  "shortName": "Diamond Runner",
-  "description": "Diamond Runner App",
-  "themeColor": "#0c3c74"
+      "output": "single",
+      "favicon": "./src/assets/images/logodiamond-light.jpeg",
+      "bundler": "metro",
+      "name": "Diamond Runner",
+      "shortName": "Diamond Runner",
+      "description": "Diamond Runner App",
+      "themeColor": "#0c3c74"
     },
+
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/logodiamond.png",
+          "image": "./src/assets/images/logodiamond-light.jpeg",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#0c3c74"
         }
       ],
       "expo-font",
@@ -62,6 +70,7 @@
       "expo-web-browser",
       "expo-asset"
     ],
+
     "experiments": {
       "reactCompiler": false
     }
