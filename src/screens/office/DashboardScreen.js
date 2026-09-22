@@ -38,19 +38,20 @@ export default function DashboardScreen() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [userData, setUserData] = useState({
-    fullName: "CARREGANDO...",
-    idDr: null,
-    balance: 0,
-    networkCount: 0,
-    status: "PENDING",
-    isPending: true,
-    rankName: "CONSULTOR",
-    avatarUrl: null,
-    points: 0,
-    email: "",
-    documentId: "",
-  });
+const [userData, setUserData] = useState({
+  fullName: "CARREGANDO...",
+  idDr: null,
+  balance: 0,
+  networkCount: 0,
+  status: "PENDING",
+  isPending: true,
+  isAdmin: false,
+  rankName: "CONSULTOR",
+  avatarUrl: null,
+  points: 0,
+  email: "",
+  documentId: "",
+});
 
   const fetchDashboardData = useCallback(async function loadDashboardData(
     retryCount = 0
@@ -97,11 +98,20 @@ role
         networkCount = count || 0;
       }
 
-      const statusRaw = String(profile?.status || "PENDING").toUpperCase();
-      const isPending =
-        !profile?.id_dr ||
-        profile?.is_active !== true ||
-        statusRaw === "PENDING";
+  const statusRaw = String(profile?.status || "")
+  .trim()
+  .toUpperCase();
+
+const isAdmin =
+  profile?.role === "admin" ||
+  profile?.id_dr === "DR8602" ||
+  profile?.id_dr === "DR8603";
+
+const isPending = !isAdmin && (
+  !profile?.id_dr ||
+  profile?.is_active !== true ||
+  statusRaw !== "ATIVO"
+);
 
       setUserData({
         fullName: (
