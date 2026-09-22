@@ -66,6 +66,57 @@ Deno.serve(async (req) => {
     });
   }
 
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+
+  if (event.type === "checkout.session.async_payment_failed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    await supabase.from("payments").update({ status: "failed" })
+      .eq("stripe_session_id", session.id);
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  if (event.type === "payment_intent.payment_failed") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    await supabase.from("payments").update({ status: "failed" })
+      .eq("stripe_payment_id", paymentIntent.id);
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId = typeof charge.payment_intent === "string"
+      ? charge.payment_intent
+      : null;
+
+    if (paymentIntentId) {
+      const { data: payment } = await supabase.from("payments")
+        .select("user_id")
+        .eq("stripe_payment_id", paymentIntentId)
+        .maybeSingle();
+
+      await supabase.from("payments").update({ status: "refunded" })
+        .eq("stripe_payment_id", paymentIntentId);
+
+      if (payment?.user_id) {
+        await supabase.from("subscriptions")
+          .update({ status: "refunded", data_fim: new Date().toISOString() })
+          .eq("user_id", payment.user_id)
+          .eq("status", "active");
+        await supabase.from("profiles").update({
+          status: "PENDING",
+          is_active: false,
+          updated_at: new Date().toISOString(),
+        }).eq("id", payment.user_id);
+      }
+    }
+
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  }
+
   if (event.type !== "checkout.session.completed") {
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   }
@@ -79,17 +130,20 @@ Deno.serve(async (req) => {
   const amountTotal = session.amount_total ?? 0;
   const paidAt = new Date().toISOString();
 
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  );
-
   // Fluxo novo: checkout criado via create-checkout (tem user_id/plan_id no metadata).
   // Atualiza payments/subscriptions e ativa o profile por id, sem tocar no fluxo antigo abaixo.
   const userId = session.metadata?.user_id;
   const planId = session.metadata?.plan_id;
   if (userId) {
+    const { data: existingPayment } = await supabase.from("payments")
+      .select("status")
+      .eq("stripe_session_id", session.id)
+      .maybeSingle();
+
+    if (existingPayment?.status === "paid") {
+      return new Response(JSON.stringify({ received: true }), { status: 200 });
+    }
+
     const idDr = await ensureIdDr(supabase, userId);
     await supabase
       .from("payments")

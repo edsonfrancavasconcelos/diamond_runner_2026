@@ -11,6 +11,12 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
+  return new Response(JSON.stringify({ error: "Pagamento PIX desativado. Use Stripe Checkout." }), {
+    status: 410,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
+  /*
   // 1. Responde ao preflight do navegador/mobile
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -96,4 +102,5 @@ Deno.serve(async (req) => {
       status: 400 
     });
   }
+  */
 });

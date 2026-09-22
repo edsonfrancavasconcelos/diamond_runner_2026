@@ -10,6 +10,12 @@ function ok() {
 }
 
 Deno.serve(async (req) => {
+  return new Response(JSON.stringify({ error: "Webhook Asaas desativado. Use Stripe." }), {
+    status: 410,
+    headers: { "Content-Type": "application/json" },
+  });
+
+  /*
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -111,4 +117,5 @@ Deno.serve(async (req) => {
     console.error("❌ Erro no Webhook Asaas:", error);
     return ok();
   }
+  */
 });

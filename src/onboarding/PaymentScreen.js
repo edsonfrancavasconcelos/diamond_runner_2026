@@ -11,6 +11,7 @@ import {
   View,
   ScrollView,
 } from "react-native";
+import { createCheckoutSession } from "../services/checkoutService";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -19,21 +20,14 @@ const PALETTE = {
   success: "#4CAF50",
 };
 
-const paymentLinks = {
-  AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
-  DISTRIBUIDOR: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-  BUILDER: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-  PRIME: "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
-  ELITE: "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
-};
-
 export default function PaymentScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const params = route.params || {};
   const { type, planName, email, amount } = params;
+  const [checkoutStarted, setCheckoutStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const planInfo = useMemo(() => {
     const t = `${planName || type || ""}`.toLowerCase();
@@ -62,44 +56,27 @@ export default function PaymentScreen() {
     return { name, price };
   }, [type, planName, amount]);
 
-  function openStripe() {
-    const link = paymentLinks[planInfo.name];
-    const cleanEmail = email?.trim().toLowerCase() || "";
-    if (!link) {
-      if (typeof window !== "undefined") {
-        window.alert("Link Stripe deste plano não configurado.");
-      }
-      return;
-    }
-    const sep = link.includes("?") ? "&" : "?";
-    const url = `${link}${sep}prefilled_email=${encodeURIComponent(cleanEmail)}`;
-    if (typeof window !== "undefined" && window.open) {
-      window.open(url, "_blank");
-    } else {
-      Linking.openURL(url);
-    }
-  }
+  async function openStripe() {
+    setLoading(true);
+    try {
+      const { url } = await createCheckoutSession(
+        planInfo.name,
+        email?.trim().toLowerCase(),
+      );
+      if (!url) throw new Error("Checkout Stripe indisponível.");
 
-  if (showSuccess) {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <View style={styles.successCard}>
-          <Ionicons name="checkmark-circle" size={64} color={PALETTE.success} />
-          <Text style={styles.successTitle}>PARABÉNS!</Text>
-          <Text style={styles.successText}>
-            Pagamento enviado. Quando o Stripe confirmar, sua conta fica ATIVA
-            com ID DR. Se já pagou, entre no escritório.
-          </Text>
-          <TouchableOpacity
-            style={styles.payButton}
-            onPress={() => navigation.navigate("LoginDiamond", { email })}
-          >
-            <Text style={styles.btnText}>IR PARA O LOGIN / ESCRITÓRIO</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+      setCheckoutStarted(true);
+      if (typeof window !== "undefined" && window.open) {
+        window.open(url, "_blank");
+      } else {
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      const message = error?.message || "Não foi possível iniciar o pagamento.";
+      if (typeof window !== "undefined") window.alert(message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -118,14 +95,15 @@ export default function PaymentScreen() {
 
       <View style={styles.actions}>
         <TouchableOpacity style={styles.payButton} onPress={openStripe}>
-          <Text style={styles.btnText}>PAGAR COM STRIPE</Text>
+          <Text style={styles.btnText}>{loading ? "ABRINDO STRIPE..." : "PAGAR COM STRIPE"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.payButton, styles.secondaryButton]}
-          onPress={() => setShowSuccess(true)}
+          disabled={!checkoutStarted}
+          onPress={() => navigation.navigate("LoginDiamond", { email })}
         >
-          <Text style={styles.btnText}>JÁ PAGUEI / CONTINUAR</Text>
+          <Text style={styles.btnText}>JÁ PAGUEI / IR PARA LOGIN</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

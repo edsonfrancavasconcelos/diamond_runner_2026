@@ -33,23 +33,46 @@ Deno.serve(async (req) => {
       return json({ error: "Configuração ausente no servidor" }, 500);
     }
 
-    // Autenticação: exige o token de sessão do usuário logado no Supabase Auth.
+    const { planId, planName, email } = await req.json();
+
+    // O cadastro pode estar deslogado enquanto aguarda o pagamento. Nesse caso,
+    // só permitimos checkout para um perfil PENDING e usamos o e-mail salvo no banco.
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return json({ error: "Token não enviado" }, 401);
-    }
-    const accessToken = authHeader.replace("Bearer ", "");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
-    if (userError || !user) {
-      return json({ error: "Usuário inválido" }, 401);
+    let userId: string | null = null;
+    let customerEmail: string | null = null;
+
+    if (authHeader) {
+      const accessToken = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: userError } = await supabase.auth.getUser(accessToken);
+      if (!userError && user) {
+        userId = user.id;
+        customerEmail = user.email ?? null;
+      }
     }
 
-    const { planId, planName } = await req.json();
+    if (!userId && email) {
+      const { data: pendingProfile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, email, status")
+        .eq("email", String(email).trim().toLowerCase())
+        .maybeSingle();
+
+      if (profileError || !pendingProfile || String(pendingProfile.status).toUpperCase() !== "PENDING") {
+        return json({ error: "Cadastro pendente não encontrado" }, 401);
+      }
+      userId = pendingProfile.id;
+      customerEmail = pendingProfile.email;
+    }
+
+    if (!userId || !customerEmail) {
+      return json({ error: "Usuário não identificado" }, 401);
+    }
+
     if (!planId && !planName) {
       return json({ error: "Informe planId ou planName" }, 400);
     }
@@ -75,11 +98,11 @@ Deno.serve(async (req) => {
       mode: "payment",
       payment_method_types: ["card"],
       line_items: [{ price: plan.stripe_price_id, quantity: 1 }],
-      customer_email: user.email,
+      customer_email: customerEmail,
       success_url: `${APP_URL}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${APP_URL}/?checkout=cancel`,
       metadata: {
-        user_id: user.id,
+        user_id: userId,
         plan_id: plan.id,
         plan_name: plan.nome,
       },
@@ -87,14 +110,14 @@ Deno.serve(async (req) => {
 
     // Registra o pagamento como "pending"; o stripe-webhook confirma e ativa quando o Stripe notificar.
     await supabase.from("payments").insert({
-      user_id: user.id,
+      user_id: userId,
       plano_id: plan.id,
       stripe_session_id: session.id,
       status: "pending",
       valor: plan.preco,
     });
 
-    return json({ url: session.url });
+    return json({ url: session.url, sessionId: session.id });
   } catch (error) {
     console.error("Erro no create-checkout:", error);
     return json({ error: "Erro ao criar checkout" }, 500);
