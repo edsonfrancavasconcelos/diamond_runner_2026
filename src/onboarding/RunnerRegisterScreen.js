@@ -156,11 +156,11 @@ export default function RunnerRegisterScreen() {
 if (!userId)
  throw new Error("Não foi possível criar a conta.");
 
-await supabase.auth.signOut();;
+await supabase.auth.signOut({ scope: "local" });
 
-          const { error: profileError } = await supabase.from("profiles").upsert(
-        {
-          id: userId,
+               const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
           full_name: form.fullName.trim(),
           document_id: cleanDocument,
           email: cleanEmail,
@@ -168,11 +168,12 @@ await supabase.auth.signOut();;
           status: "PENDING",
           is_active: false,
           id_dr: null,
-        },
-        { onConflict: "id" }
-      );
+        })
+        .eq("id", userId);
+
       if (profileError) throw profileError;
 
+      await supabase.auth.signOut({ scope: "local" });
       setRegistered(true);
         } catch (error) {
       const msg = String(error?.message || "").toLowerCase();

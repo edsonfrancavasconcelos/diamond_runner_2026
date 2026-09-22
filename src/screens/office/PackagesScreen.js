@@ -1,6 +1,6 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026
 // Status: HEADER SIMPLIFICADO (Sem Menu) + UPGRADES CRUZADOS
-
+import { supabase } from "../../services/supabase";
 import React, { useContext } from "react";
 import {
   SafeAreaView,
@@ -35,9 +35,9 @@ export default function PackagesScreen() {
   const m = marketingTexts[country] || marketingTexts.BR;
   const cur = m.currency || "R$";
 
-  const params = route.params || {};
+    const params = route.params || {};
   const {
-    email,
+    email: paramEmail,
     fullName,
     documentId,
     phone,
@@ -46,43 +46,49 @@ export default function PackagesScreen() {
     sponsorName,
   } = params;
 
-const hasAccount = Boolean(email && String(email).includes("@"));
+  const [sessionEmail, setSessionEmail] = React.useState("");
 
-const handlePayment = (id, price, pts, type, planName) => {
-  console.log("PACKAGES params", route.params, "hasAccount", hasAccount);
+  React.useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (alive && user?.email) setSessionEmail(user.email);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-  if (typeof window !== "undefined") {
-    window.alert(`email=${email || "vazio"}`);
-  }
+  const email = paramEmail || sessionEmail || "";
+  const hasAccount = Boolean(email && String(email).includes("@"));
 
-  // Usuário que acabou de criar conta
-  if (email) {
-    navigation.navigate("PaymentScreen", {
-      email,
-      fullName,
-      documentId,
-      phone,
-      sponsorUuid,
-      sponsorId,
-      sponsorName,
+  const handlePayment = (id, price, pts, type, planName) => {
+    if (hasAccount) {
+      navigation.navigate("PaymentScreen", {
+        email,
+        fullName,
+        documentId,
+        phone,
+        sponsorUuid,
+        sponsorId,
+        sponsorName,
+        packageId: id,
+        amount: price,
+        points: pts,
+        type: type || planName,
+        planName: planName || type,
+      });
+      return;
+    }
+
+    navigation.navigate("FindSponsor", {
       packageId: id,
       amount: price,
       points: pts,
       type,
       planName,
     });
-    return;
   }
 
-  // Só cai aqui se realmente não tiver cadastro
-  navigation.navigate("FindSponsor", {
-    packageId: id,
-    amount: price,
-    points: pts,
-    type,
-    planName,
-  });
-};
 
   return (
     <SafeAreaView style={styles.container}>
