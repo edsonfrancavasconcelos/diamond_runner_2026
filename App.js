@@ -131,7 +131,7 @@ function AppContent() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0c3c74",
+        backgroundColor: "#14508f",
         }}
       >
         <ActivityIndicator size="large" color="#2c94bc" />

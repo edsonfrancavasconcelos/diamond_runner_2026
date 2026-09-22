@@ -19,7 +19,7 @@ import { supabase } from "../../services/supabase";
 
 const PALETTE = {
   primary: "#2c94bc",
-  dark: "#0c3c74",
+ dark: "#14508f",
   gold: "#FFD700",
   white: "#FFFFFF",
   gray: "#a4bccc",

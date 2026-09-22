@@ -31,7 +31,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/logodiamond-light.png",
-        "backgroundColor": "#0c3c74"
+      "background_color": "#14508f",
+"theme_color": "#14508f"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
