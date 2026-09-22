@@ -23,6 +23,7 @@ const PALETTE = {
   white: "#FFFFFF",
   gray: "#a4bccc",
   success: "#4CAF50",
+  pending: "#FF9800",
 };
 
 const HEADER_MAX_HEIGHT = 220;
@@ -39,69 +40,83 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState({
     fullName: "CARREGANDO...",
-    idDr: "---",
+    idDr: null,
     balance: 0,
     networkCount: 0,
-    status: "pending",
+    status: "PENDING",
+    isPending: true,
     rankName: "CONSULTOR",
-    profileType: "distributor",
     avatarUrl: null,
     points: 0,
     email: "",
     documentId: "",
   });
 
-  const fetchDashboardData = useCallback(async function loadDashboardData(retryCount = 0) {
-  try {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return;
+  const fetchDashboardData = useCallback(async function loadDashboardData(
+    retryCount = 0
+  ) {
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) return;
 
-    // BUSCA O PERFIL
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, id_dr, status, plan_name, avatar_url, points_total, email, document_id")
-      .eq("id", user.id)
-      .maybeSingle(); // maybeSingle não quebra se for null
-
-    // SE O PERFIL AINDA NÃO EXISTE (Atraso do banco/webhook)
-    if (!profile && retryCount < 3) {
-      console.log("Perfil não encontrado, tentando novamente...");
-      retryTimeout.current = setTimeout(() => loadDashboardData(retryCount + 1), 2000);
-      return;
-    }
-
-    // CONTAGEM DE REDE (Só faz se o profile existir)
-    let networkCount = 0;
-    if (profile) {
-      const { count } = await supabase
+      const { data: profile } = await supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("sponsor_id", user.id);
-      networkCount = count || 0;
+        .select(
+          "full_name, id_dr, status, is_active, plan_name, avatar_url, points_total, email, document_id"
+        )
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!profile && retryCount < 3) {
+        retryTimeout.current = setTimeout(
+          () => loadDashboardData(retryCount + 1),
+          2000
+        );
+        return;
+      }
+
+      let networkCount = 0;
+      if (profile) {
+        const { count } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("sponsor_id", user.id);
+        networkCount = count || 0;
+      }
+
+      const statusRaw = String(profile?.status || "PENDING").toUpperCase();
+      const isPending =
+        !profile?.id_dr ||
+        profile?.is_active !== true ||
+        statusRaw === "PENDING";
+
+      setUserData({
+        fullName: (
+          profile?.full_name ||
+          user?.user_metadata?.full_name ||
+          "NOVO MEMBRO"
+        ).toUpperCase(),
+        idDr: profile?.id_dr || null,
+        balance: 0,
+        networkCount,
+        status: isPending ? "PENDING" : "ATIVO",
+        isPending,
+        rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
+        avatarUrl: profile?.avatar_url || null,
+        points: profile?.points_total || 0,
+        email: profile?.email || user?.email || "",
+        documentId: profile?.document_id || "",
+      });
+    } catch (e) {
+      console.log("Erro ao carregar Dashboard:", e.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-
-    // ATUALIZA O ESTADO COM SEGURANÇA (Prevenindo o erro de null)
-    setUserData({
-      fullName: (profile?.full_name || user?.user_metadata?.full_name || "NOVO MEMBRO").toUpperCase(),
-      idDr: profile?.id_dr || "GERANDO ID...",
-      balance: profile?.balance || 0,
-      networkCount: networkCount,
-      status: profile?.status || "pending",
-      rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
-      avatarUrl: profile?.avatar_url || null,
-      points: profile?.points_total || 0,
-      email: profile?.email || user?.email || "",
-      documentId: profile?.document_id || ""
-    });
-
-  } catch (e) {
-    console.log("Erro ao carregar Dashboard:", e.message);
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
   }, []);
-
 
   useEffect(() => {
     fetchDashboardData();
@@ -113,82 +128,190 @@ export default function DashboardScreen() {
     };
   }, [fetchDashboardData]);
 
-  // ANIMAÇÕES
   const headerHeight = scrollY.interpolate({
     inputRange: [0, SCROLL_DISTANCE],
     outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   const imageSize = scrollY.interpolate({
     inputRange: [0, SCROLL_DISTANCE],
     outputRange: [80, 40],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.center, { backgroundColor: isDark ? "#061d36" : "#f4f7f8" }]}>
+      <View
+        style={[
+          styles.container,
+          styles.center,
+          { backgroundColor: isDark ? "#061d36" : "#f4f7f8" },
+        ]}
+      >
         <ActivityIndicator size="large" color={PALETTE.gold} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#061d36" : "#f4f7f8" }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDark ? "#061d36" : "#f4f7f8" },
+      ]}
+    >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <Animated.View style={[styles.header, { height: headerHeight, backgroundColor: isDark ? PALETTE.dark : PALETTE.white }]}>
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            height: headerHeight,
+            backgroundColor: isDark ? PALETTE.dark : PALETTE.white,
+          },
+        ]}
+      >
         <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme}>
-          <Ionicons name={isDark ? "sunny" : "moon"} size={24} color={PALETTE.gold} />
+          <Ionicons
+            name={isDark ? "sunny" : "moon"}
+            size={24}
+            color={PALETTE.gold}
+          />
         </TouchableOpacity>
 
-        <Animated.View style={[styles.avatarWrapper, { width: imageSize, height: imageSize, borderRadius: 40 }]}>
+        <Animated.View
+          style={[
+            styles.avatarWrapper,
+            { width: imageSize, height: imageSize, borderRadius: 40 },
+          ]}
+        >
           {userData.avatarUrl ? (
-            <Image source={{ uri: userData.avatarUrl }} style={styles.avatarImg} />
+            <Image
+              source={{ uri: userData.avatarUrl }}
+              style={styles.avatarImg}
+            />
           ) : (
             <View style={styles.avatarPlaceholder}>
-               <Text style={styles.avatarLetter}>{userData.fullName.charAt(0)}</Text>
+              <Text style={styles.avatarLetter}>
+                {userData.fullName.charAt(0)}
+              </Text>
             </View>
           )}
         </Animated.View>
         <Text style={styles.rankTitle}>{userData.rankName}</Text>
-        <Text style={[styles.userName, { color: isDark ? "#FFF" : "#333" }]}>{userData.fullName}</Text>
+        <Text style={[styles.userName, { color: isDark ? "#FFF" : "#333" }]}>
+          {userData.fullName}
+        </Text>
       </Animated.View>
 
       <Animated.ScrollView
-        contentContainerStyle={{ paddingTop: HEADER_MAX_HEIGHT + 20, paddingBottom: 40 }}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        contentContainerStyle={{
+          paddingTop: HEADER_MAX_HEIGHT + 20,
+          paddingBottom: 40,
+        }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDashboardData(); }} tintColor={PALETTE.gold} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              fetchDashboardData();
+            }}
+            tintColor={PALETTE.gold}
+          />
         }
       >
-        <View style={[styles.balanceCard, { backgroundColor: isDark ? PALETTE.dark : "#FFF" }]}>
+        <View
+          style={[
+            styles.balanceCard,
+            { backgroundColor: isDark ? PALETTE.dark : "#FFF" },
+          ]}
+        >
           <View style={styles.cardHeader}>
-             <View>
-                <Text style={styles.balanceLabel}>SALDO DISPONÍVEL</Text>
-                <Text style={[styles.currency, { color: isDark ? "#FFF" : "#333" }]}>R$ <Text style={styles.amount}>{Number(userData.balance).toFixed(2)}</Text></Text>
-             </View>
-             <Image source={DiamondLogo} style={styles.logoMini} />
+            <View>
+              <Text style={styles.balanceLabel}>SALDO DISPONÍVEL</Text>
+              <Text
+                style={[styles.currency, { color: isDark ? "#FFF" : "#333" }]}
+              >
+                R${" "}
+                <Text style={styles.amount}>
+                  {Number(userData.balance).toFixed(2)}
+                </Text>
+              </Text>
+            </View>
+            <Image source={DiamondLogo} style={styles.logoMini} />
           </View>
+
           <View style={styles.cardFooter}>
-             <Text style={styles.idText}>ID: {userData.idDr}</Text>
-             <View style={[styles.badge, { backgroundColor: userData.status === 'active' ? PALETTE.success : '#FF9800' }]}>
-                <Text style={styles.badgeText}>ATIVO</Text>
-             </View>
+            <Text style={styles.idText}>
+              ID:{" "}
+              {userData.idDr ? userData.idDr : "AGUARDANDO ATIVAÇÃO"}
+            </Text>
+            <View
+              style={[
+                styles.badge,
+                {
+                  backgroundColor: userData.isPending
+                    ? PALETTE.pending
+                    : PALETTE.success,
+                },
+              ]}
+            >
+              <Text style={styles.badgeText}>
+                {userData.isPending ? "PENDENTE" : "ATIVO"}
+              </Text>
+            </View>
           </View>
+
+          {userData.isPending && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Packages")}
+              style={styles.activateBtn}
+            >
+              <Text style={styles.activateBtnText}>
+                ATIVE SUA CONTA / OBTER ID DR
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.grid}>
-          <TouchableOpacity onPress={() => navigation.navigate("Network")} style={[styles.gridItem, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#FFF" }]}>
-             <Ionicons name="people" size={24} color={PALETTE.gold} />
-             <Text style={[styles.gridValue, { color: isDark ? "#FFF" : "#333" }]}>{userData.networkCount}</Text>
-             <Text style={styles.gridLabel}>DIRETOS</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Network")}
+            style={[
+              styles.gridItem,
+              {
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#FFF",
+              },
+            ]}
+          >
+            <Ionicons name="people" size={24} color={PALETTE.gold} />
+            <Text
+              style={[styles.gridValue, { color: isDark ? "#FFF" : "#333" }]}
+            >
+              {userData.networkCount}
+            </Text>
+            <Text style={styles.gridLabel}>DIRETOS</Text>
           </TouchableOpacity>
-          <View style={[styles.gridItem, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#FFF" }]}>
-             <Ionicons name="flash" size={24} color={PALETTE.gold} />
-             <Text style={[styles.gridValue, { color: isDark ? "#FFF" : "#333" }]}>{userData.points}</Text>
-             <Text style={styles.gridLabel}>PONTOS</Text>
+          <View
+            style={[
+              styles.gridItem,
+              {
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#FFF",
+              },
+            ]}
+          >
+            <Ionicons name="flash" size={24} color={PALETTE.gold} />
+            <Text
+              style={[styles.gridValue, { color: isDark ? "#FFF" : "#333" }]}
+            >
+              {userData.points}
+            </Text>
+            <Text style={styles.gridLabel}>PONTOS</Text>
           </View>
         </View>
       </Animated.ScrollView>
@@ -199,26 +322,98 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { justifyContent: "center", alignItems: "center" },
-  header: { position: 'absolute', top: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', zIndex: 1000, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.1)' },
-  themeToggle: { position: 'absolute', top: 50, right: 20, padding: 10, zIndex: 1100 },
-  avatarWrapper: { backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderWidth: 2, borderColor: PALETTE.gold },
-  avatarImg: { width: '100%', height: '100%' },
-  avatarPlaceholder: { flex: 1, backgroundColor: PALETTE.primary, width: '100%', justifyContent: 'center', alignItems: 'center' },
-  avatarLetter: { color: '#FFF', fontWeight: 'bold', fontSize: 24 },
-  rankTitle: { color: PALETTE.gold, fontSize: 10, fontWeight: 'bold', marginTop: 10 },
-  userName: { fontSize: 16, fontWeight: 'bold' },
-  balanceCard: { marginHorizontal: 20, borderRadius: 15, padding: 20, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  themeToggle: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    padding: 10,
+    zIndex: 1100,
+  },
+  avatarWrapper: {
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: PALETTE.gold,
+  },
+  avatarImg: { width: "100%", height: "100%" },
+  avatarPlaceholder: {
+    flex: 1,
+    backgroundColor: PALETTE.primary,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarLetter: { color: "#FFF", fontWeight: "bold", fontSize: 24 },
+  rankTitle: {
+    color: PALETTE.gold,
+    fontSize: 10,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  userName: { fontSize: 16, fontWeight: "bold" },
+  balanceCard: {
+    marginHorizontal: 20,
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   balanceLabel: { color: "#a4bccc", fontSize: 12 },
   currency: { fontSize: 18 },
-  amount: { fontSize: 28, fontWeight: 'bold' },
-  logoMini: { width: 40, height: 40, resizeMode: 'contain' },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 },
-  idText: { color: PALETTE.gold, fontWeight: 'bold' },
+  amount: { fontSize: 28, fontWeight: "bold" },
+  logoMini: { width: 40, height: 40, resizeMode: "contain" },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  idText: { color: PALETTE.gold, fontWeight: "bold" },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 5 },
-  badgeText: { color: '#FFF', fontSize: 10, fontWeight: 'bold' },
-  grid: { flexDirection: 'row', padding: 20, justifyContent: 'space-between' },
-  gridItem: { width: '48%', padding: 20, borderRadius: 15, alignItems: 'center', elevation: 2 },
-  gridValue: { fontSize: 20, fontWeight: 'bold', marginVertical: 5 },
-  gridLabel: { color: "#a4bccc", fontSize: 10 }
+  badgeText: { color: "#FFF", fontSize: 10, fontWeight: "bold" },
+  activateBtn: {
+    marginTop: 14,
+    backgroundColor: PALETTE.gold,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  activateBtnText: {
+    color: PALETTE.dark,
+    fontWeight: "900",
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  grid: {
+    flexDirection: "row",
+    padding: 20,
+    justifyContent: "space-between",
+  },
+  gridItem: {
+    width: "48%",
+    padding: 20,
+    borderRadius: 15,
+    alignItems: "center",
+    elevation: 2,
+  },
+  gridValue: { fontSize: 20, fontWeight: "bold", marginVertical: 5 },
+  gridLabel: { color: "#a4bccc", fontSize: 10 },
 });
