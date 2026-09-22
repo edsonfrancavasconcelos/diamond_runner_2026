@@ -75,6 +75,41 @@ export default function RunnerRegisterScreen() {
     return data;
   }
 
+  const goPackages = () => {
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "PackagesScreen",
+          params: {
+            email: form.email.trim().toLowerCase(),
+            fullName: form.fullName.trim(),
+            documentId: form.documentId.replace(/\D/g, ""),
+            phone: form.phone.replace(/\D/g, ""),
+            sponsorUuid: form.sponsorUuid,
+            sponsorId: form.sponsorId,
+            sponsorName: form.sponsorName,
+          },
+        },
+      ],
+    });
+  };
+
+  const goLogin = () => {
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "LoginDiamond",
+          params: {
+            email: form.email.trim().toLowerCase(),
+            pending: true,
+          },
+        },
+      ],
+    });
+  };
+
   const createPendingAccount = async () => {
     if (loading) return;
 
@@ -151,14 +186,11 @@ export default function RunnerRegisterScreen() {
       });
       if (signUpError) throw signUpError;
 
-  const userId = data.user?.id;
+      const userId = data.user?.id;
+      if (!userId) throw new Error("Não foi possível criar a conta.");
 
-if (!userId)
- throw new Error("Não foi possível criar a conta.");
-
-await supabase.auth.signOut({ scope: "local" });
-
-               const { error: profileError } = await supabase
+      // AINDA LOGADO — update do profile (RLS precisa de sessão)
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           full_name: form.fullName.trim(),
@@ -173,9 +205,10 @@ await supabase.auth.signOut({ scope: "local" });
 
       if (profileError) throw profileError;
 
+      // Só depois tira a sessão para a tela de cadastro não sumir
       await supabase.auth.signOut({ scope: "local" });
       setRegistered(true);
-        } catch (error) {
+    } catch (error) {
       const msg = String(error?.message || "").toLowerCase();
 
       if (msg.includes("rate limit")) {
@@ -187,53 +220,13 @@ await supabase.auth.signOut({ scope: "local" });
       }
 
       if (msg.includes("already registered") || msg.includes("user already")) {
-        navigation.navigate("PackagesScreen", {
-          email: form.email.trim().toLowerCase(),
-          fullName: form.fullName.trim(),
-          documentId: form.documentId.replace(/\D/g, ""),
-          phone: form.phone.replace(/\D/g, ""),
-          sponsorUuid: form.sponsorUuid,
-          sponsorId: form.sponsorId,
-          sponsorName: form.sponsorName,
-        });
+        goPackages();
         return;
       }
 
       warn("Não foi possível cadastrar", error.message || "Tente novamente.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const paymentLinks = {
-    AFILIADO: "https://buy.stripe.com/aFa6oHaxL6bN5td5jaa3u08",
-    DISTRIBUIDOR: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-    BUILDER: "https://buy.stripe.com/9B63cvdJX7fRbRB4f6a3u09",
-    PRIME: "https://buy.stripe.com/8x24gzcFTas34p98vma3u0a",
-    ELITE: "https://buy.stripe.com/aFafZh35j57JaNxbHya3u0b",
-  };
-
-  const openStripe = () => {
-    const plan = `${planName || type || ""}`.toLowerCase();
-    const planKey = plan.includes("elite")
-      ? "ELITE"
-      : plan.includes("prime")
-        ? "PRIME"
-        : plan.includes("builder") ||
-            plan.includes("distributor") ||
-            plan.includes("distribuidor")
-          ? "BUILDER"
-          : "AFILIADO";
-    const link = paymentLinks[planKey];
-    const cleanEmail = form.email.trim().toLowerCase();
-    const separator = link.includes("?") ? "&" : "?";
-    const url = `${link}${separator}prefilled_email=${encodeURIComponent(
-      cleanEmail
-    )}`;
-    if (typeof window !== "undefined" && window.open) {
-      window.open(url, "_blank");
-    } else {
-      Linking.openURL(url);
     }
   };
 
@@ -371,17 +364,7 @@ await supabase.auth.signOut({ scope: "local" });
         ) : (
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() =>
-              navigation.navigate("PackagesScreen", {
-                email: form.email.trim().toLowerCase(),
-                fullName: form.fullName.trim(),
-                documentId: form.documentId.replace(/\D/g, ""),
-                phone: form.phone.replace(/\D/g, ""),
-                sponsorUuid: form.sponsorUuid,
-                sponsorId: form.sponsorId,
-                sponsorName: form.sponsorName,
-              })
-            }
+            onPress={goPackages}
             style={{
               marginTop: 20,
               backgroundColor: "#0c3c74",
@@ -413,20 +396,9 @@ await supabase.auth.signOut({ scope: "local" });
           A conta nasce PENDENTE e sem ID DR. Pague agora ou pague depois.
         </Text>
 
-     {registered && (
-  <Button
-    title="PAGAR DEPOIS / IR PARA LOGIN"
-    onPress={() =>
-      navigation.navigate("LoginDiamond", {
-        email: form.email.trim().toLowerCase(),
-        pending: true,
-        fullName: form.fullName.trim(),
-        status: "PENDING",
-        is_active: false,
-      })
-    }
-  />
-)}
+        {registered && (
+          <Button title="PAGAR DEPOIS / IR PARA LOGIN" onPress={goLogin} />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
