@@ -63,31 +63,28 @@ const [userData, setUserData] = useState({
       } = await supabase.auth.getUser();
       if (authError || !user) return;
 
-      const { data: profile } = await supabase
-        .from("profiles")
-     .select(`
-full_name,
-id_dr,
-status,
-is_active,
-plan_name,
-avatar_url,
-points_total,
-balance,
-email,
-document_id,
-role
-`)
-        .eq("id", user.id)
-        .maybeSingle();
+   const { data: profile, error } = await supabase
+  .from("profiles")
+  .select(`
+    full_name,
+    id_dr,
+    status,
+    is_active,
+    plan_name,
+    avatar_url,
+    points_total,
+    email,
+    document_id,
+    voucher_balance,
+    level
+  `)
+  .eq("id", user.id)
+  .single();
 
-      if (!profile && retryCount < 3) {
-        retryTimeout.current = setTimeout(
-          () => loadDashboardData(retryCount + 1),
-          2000
-        );
-        return;
-      }
+if (error) {
+  console.log(error);
+  return;
+}
 
       let networkCount = 0;
       if (profile) {
@@ -122,7 +119,7 @@ const isPending = !isAdmin && (
 
   idDr: profile?.id_dr || null,
 
-  balance: Number(profile?.balance || 0),
+balance: Number(profile?.voucher_balance || 0),
 
   networkCount,
 
