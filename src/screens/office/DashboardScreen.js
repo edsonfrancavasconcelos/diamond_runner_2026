@@ -64,9 +64,19 @@ export default function DashboardScreen() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select(
-          "full_name, id_dr, status, is_active, plan_name, avatar_url, points_total, email, document_id"
-        )
+     .select(`
+full_name,
+id_dr,
+status,
+is_active,
+plan_name,
+avatar_url,
+points_total,
+balance,
+email,
+document_id,
+role
+`)
         .eq("id", user.id)
         .maybeSingle();
 
@@ -100,7 +110,7 @@ export default function DashboardScreen() {
           "NOVO MEMBRO"
         ).toUpperCase(),
         idDr: profile?.id_dr || null,
-        balance: 0,
+  balance: Number(profile?.balance || 0),
         networkCount,
         status: isPending ? "PENDING" : "ATIVO",
         isPending,
@@ -267,7 +277,7 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          {userData.isPending && (
+        {userData.isPending && !userData.isAdmin && (
             <TouchableOpacity
               onPress={() => navigation.navigate("Packages")}
               style={styles.activateBtn}
