@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
 
-    "icon": "./src/assets/images/logodiamond-light.png",
+    "icon": "./src/assets/images/logodiamond.png",
 
     "scheme": "diamondrunner",
 
@@ -18,7 +18,7 @@
     },
 
     "ios": {
-      "icon": "./src/assets/images/logodiamond-light.png",
+      "icon": "./src/assets/images/logodiamond.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.vascodev.diamondrunner",
       "infoPlist": {
@@ -31,7 +31,7 @@
 
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/logodiamond-light.png",
+        "foregroundImage": "./src/assets/images/logodiamond.png",
         "backgroundColor": "#14508f"
       },
       "package": "com.vascodev.diamondrunner",
@@ -45,7 +45,7 @@
 
     "web": {
       "output": "single",
-      "favicon": "./src/assets/images/logodiamond-light.png",
+      "favicon": "./src/assets/images/logodiamond.png",
       "bundler": "metro",
       "name": "Diamond Runner",
       "shortName": "Diamond Runner",
@@ -57,7 +57,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/logodiamond-light.png",
+          "image": "./src/assets/images/logodiamond.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#0c3c74"
