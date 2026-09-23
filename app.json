@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
 
-    "icon": "./src/assets/images/logodiamond.png",
+    "icon": "./src/assets/images/logodiamond-light.png",
 
     "scheme": "diamondrunner",
 
@@ -18,34 +18,33 @@
     },
 
     "ios": {
-      "icon": "./src/assets/images/logodiamond.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.vascodev.diamondrunner",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         },
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "com.vascodev.diamondrunner"
     },
 
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/logodiamond.png",
-        "backgroundColor": "#14508f"
-      },
-      "package": "com.vascodev.diamondrunner",
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
-      ]
-    },
+"android": {
+  "adaptiveIcon": {
+    "foregroundImage": "./src/assets/images/logodiamond-light.png",
+    "backgroundColor": "#14508f"
+  },
+  "permissions": [
+    "android.permission.RECORD_AUDIO",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+  ],
+  "package": "com.vascodev.diamondrunner"
+},
 
     "web": {
       "output": "single",
-      "favicon": "./src/assets/images/logodiamond.png",
+      "favicon": "./src/assets/images/logodiamond-light.png",
       "bundler": "metro",
       "name": "Diamond Runner",
       "shortName": "Diamond Runner",
@@ -57,7 +56,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/logodiamond.png",
+          "image": "./src/assets/images/logodiamond-light.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#0c3c74"
