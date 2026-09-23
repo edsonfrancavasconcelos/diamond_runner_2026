@@ -275,11 +275,8 @@ balance: Number(profile?.voucher_balance || 0),
                 </Text>
               </Text>
             </View>
-            <Text style={{color:"#FFD700"}}>
-    TEMA ATUAL: {isDark ? "ESCURO" : "CLARO"}
-  </Text>
-           <Image
-  source={isDark ? DiamondLogoLight : DiamondLogoDark}
+          <Image
+  source={DiamondLogoLight}
   style={styles.logoMini}
   resizeMode="contain"
 />
