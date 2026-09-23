@@ -92,11 +92,15 @@ function AppContent() {
           alignItems: "center",
         }}
       >
-        <Image
-          source={require("./src/assets/images/logodiamond.png")}
-          style={{ width: 140, height: 140, marginBottom: 20 }}
-          resizeMode="contain"
-        />
+     <Image
+  source={
+    themeContext.theme.isDark
+      ? require("./src/assets/images/logodiamond-light.png")
+      : require("./src/assets/images/logodiamond.png")
+  }
+  style={{ width: 140, height: 140, marginBottom: 20 }}
+  resizeMode="contain"
+/>
         <Text
           style={{
             color: "#FFD700",

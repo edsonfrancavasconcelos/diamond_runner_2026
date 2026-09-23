@@ -1,70 +1,92 @@
 // src/i18n/hooks/useImageUpload.js
-// Autor: Edson Vasconcelos | Atualizado em 24 de Jan 2026
-// Ajuste: Correção de sintaxe e caminhos para Supabase .ts
 
-import * as ImagePicker from 'expo-image-picker';
-import { Alert } from 'react-native';
-// ✅ AJUSTE: Sobe dois níveis (de hooks para i18n, de i18n para src) e entra em services
-import { supabase } from '../../services/supabase'; 
+import * as ImagePicker from "expo-image-picker";
+import { Alert } from "react-native";
+import { supabase } from "../../services/supabase";
 
 export const handlePickAndUploadAvatar = async (userId, onUploadSuccess) => {
   try {
-    // 1. Solicita permissão de galeria
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Precisamos de acesso às suas fotos para atualizar o perfil.');
+    const { status } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permissão necessária",
+        "Precisamos de acesso às suas fotos."
+      );
       return;
     }
 
-    // 2. Abre a galeria (Padrão 2026: mediaTypes como array)
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
     });
 
-    if (result.canceled || !result.assets || result.assets.length === 0) return;
+    if (result.canceled) return;
 
-    const imageAsset = result.assets[0]; 
-    const fileExtension = imageAsset.uri.split('.').pop();
-    const fileName = `${userId}_${Date.now()}.${fileExtension}`;
+    const imageAsset = result.assets[0];
 
-    // 3. Preparar o arquivo para upload via FormData
+    const extension = imageAsset.uri.split(".").pop();
+
+    const fileName = `${userId}/avatar_${Date.now()}.${extension}`;
+
+
     const formData = new FormData();
-    formData.append('file', {
+
+    formData.append("file", {
       uri: imageAsset.uri,
       name: fileName,
-      type: `image/${fileExtension}`,
+      type: `image/${extension}`,
     });
 
-    // 4. Upload para o Supabase Storage (Bucket: avatars)
+
     const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, formData);
+      .from("avatars")
+      .upload(fileName, formData, {
+        upsert: true,
+      });
+
 
     if (uploadError) throw uploadError;
 
-    // 5. Atualizar o perfil vinculado ao usuário autenticado
+
+    const { data } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(fileName);
+
+
+    const publicUrl = data.publicUrl;
+
+
     const { error: dbError } = await supabase
-      .from('profiles')
-      .update({ avatar_url: fileName })
-      .eq('id', userId);
+      .from("profiles")
+      .update({
+        avatar_url: publicUrl,
+      })
+      .eq("id", userId);
+
 
     if (dbError) throw dbError;
 
-    // 6. Gerar a URL pública para atualização instantânea na tela
-    const { data: publicUrlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
 
     if (onUploadSuccess) {
-      onUploadSuccess(publicUrlData.publicUrl);
+      onUploadSuccess(publicUrl);
     }
 
-    Alert.alert('Sucesso', 'Sua foto de perfil foi atualizada com sucesso!');
+
+    Alert.alert(
+      "Sucesso",
+      "Sua foto de perfil foi atualizada!"
+    );
+
+
   } catch (error) {
-    console.error('Erro no upload:', error.message);
-    Alert.alert('Erro', 'Não foi possível carregar a imagem. Tente novamente.');
+    console.log("Erro upload avatar:", error);
+    Alert.alert(
+      "Erro",
+      "Não foi possível atualizar sua foto."
+    );
   }
 };

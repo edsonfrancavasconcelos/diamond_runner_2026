@@ -28,20 +28,19 @@
       "bundleIdentifier": "com.vascodev.diamondrunner"
     },
 
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/logodiamond-light.png",
-      "background_color": "#14508f",
-"theme_color": "#14508f"
-      },
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
-      ],
-      "package": "com.vascodev.diamondrunner"
-    },
+"android": {
+  "adaptiveIcon": {
+    "foregroundImage": "./src/assets/images/logodiamond-light.png",
+    "backgroundColor": "#14508f"
+  },
+  "permissions": [
+    "android.permission.RECORD_AUDIO",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+  ],
+  "package": "com.vascodev.diamondrunner"
+},
 
     "web": {
       "output": "single",

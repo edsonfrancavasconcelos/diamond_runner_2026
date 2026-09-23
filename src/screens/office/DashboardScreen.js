@@ -1,5 +1,10 @@
+import {
+  useNavigation,
+} from "@react-navigation/native";
+
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
 import DiamondLogoLight from "../../assets/images/logodiamond-light.png";
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   ActivityIndicator,
@@ -13,7 +18,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
@@ -64,9 +68,9 @@ const [userData, setUserData] = useState({
       } = await supabase.auth.getUser();
       if (authError || !user) return;
 
-   const { data: profile, error } = await supabase
-  .from("profiles")
-  .select(`
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select(`
     full_name,
     id_dr,
     status,
@@ -219,10 +223,12 @@ balance: Number(profile?.voucher_balance || 0),
           ]}
         >
           {userData.avatarUrl ? (
-            <Image
-              source={{ uri: userData.avatarUrl }}
-              style={styles.avatarImg}
-            />
+<Image
+  source={{
+    uri: `${userData.avatarUrl}?t=${Date.now()}`
+  }}
+  style={styles.avatarImg}
+/>
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarLetter}>
@@ -275,8 +281,8 @@ balance: Number(profile?.voucher_balance || 0),
                 </Text>
               </Text>
             </View>
-          <Image
-  source={DiamondLogoLight}
+<Image
+  source={isDark ? DiamondLogoLight : DiamondLogoDark}
   style={styles.logoMini}
   resizeMode="contain"
 />
