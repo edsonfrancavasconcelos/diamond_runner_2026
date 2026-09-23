@@ -1,4 +1,5 @@
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
+import DiamondLogoLight from "../../assets/images/logodiamond-light.png";
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   ActivityIndicator,
@@ -275,7 +276,7 @@ balance: Number(profile?.voucher_balance || 0),
               </Text>
             </View>
            <Image
-source={DiamondLogoDark}
+  source={isDark ? DiamondLogoLight : DiamondLogoDark}
   style={styles.logoMini}
   resizeMode="contain"
 />
