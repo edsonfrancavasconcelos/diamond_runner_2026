@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-
 import {
   View,
   Text,
@@ -15,12 +14,10 @@ import {
   TextInput,
   Platform,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import { decode } from "base64-arraybuffer";
-
 import { supabase } from "../../services/supabase";
+import * as ImagePicker from "expo-image-picker"; 
+import { decode } from "base64-arraybuffer"; 
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -277,72 +274,51 @@ export default function ProfileScreen() {
           <Ionicons name={isDarkMode ? "sunny" : "moon"} size={26} color={PALETTE.gold} />
         </TouchableOpacity>
 
-      <View style={styles.avatarContainer}>
+        <TouchableOpacity onPress={handleAvatarPress} style={[styles.avatarCircle, { borderColor: PALETTE.gold }]}>
+          {uploading ? (
+            <ActivityIndicator color={PALETTE.gold} />
+          ) : userData?.avatar_url ? (
+            <Image source={{ uri: userData.avatar_url }} style={styles.avatarImg} />
+          ) : (
+            <Ionicons name="person" size={50} color={PALETTE.gold} />
+          )}
+        </TouchableOpacity>
 
-  <TouchableOpacity
-    onPress={handleAvatarPress}
-    style={[
-      styles.avatarCircle,
-      { borderColor: PALETTE.gold }
-    ]}
-  >
-    {uploading ? (
-      <ActivityIndicator color={PALETTE.gold} />
-    ) : userData?.avatar_url ? (
-      <Image
-        source={{ uri: userData.avatar_url }}
-        style={styles.avatarImg}
-      />
-    ) : (
-      <Ionicons
-        name="person"
-        size={50}
-        color={PALETTE.gold}
-      />
-    )}
-  </TouchableOpacity>
+        <Text style={[styles.userName, { color: theme.text }]}>{userData?.full_name?.toUpperCase()}</Text>
+        <Text style={styles.userID}>ID: {userData?.id_dr}</Text>
+        
+        <View style={[styles.statusBadge, { backgroundColor: isPaid ? '#2ecc71' : '#e74c3c' }]}>
+          <Ionicons name={isPaid ? "checkmark-circle" : "time"} size={14} color="white" style={{marginRight: 5}} />
+          <Text style={styles.statusText}>{isPaid ? "ASSINATURA ATIVA" : "AGUARDANDO PAGAMENTO"}</Text>
+        </View>
+      </View>
 
+      <View style={styles.infoSection}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { color: theme.subtext, marginBottom: 0 }]}>DADOS DA CONTA</Text>
+          <TouchableOpacity onPress={() => setShowSettings(!showSettings)}>
+            <Ionicons name={showSettings ? "close-circle-outline" : "settings-outline"} size={22} color={showSettings ? PALETTE.gold : theme.subtext} />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.infoRow}>
+          <Ionicons name="mail-outline" size={24} color={PALETTE.primary} />
+          <View style={styles.infoTextGroup}>
+            <Text style={[styles.label, { color: theme.subtext }]}>E-MAIL</Text>
+            <Text style={[styles.value, { color: theme.text }]}>{userData?.email}</Text>
+          </View>
+        </View>
 
-  <TouchableOpacity
-    onPress={handleAvatarPress}
-    style={styles.cameraButton}
-  >
-    <Ionicons
-      name="camera"
-      size={18}
-      color="#FFF"
-    />
-  </TouchableOpacity>
-
-</View>
-
-
-<Text style={[styles.userName, { color: theme.text }]}>
-  {userData?.full_name?.toUpperCase()}
-</Text>
-
-<Text style={styles.userID}>
-  ID: {userData?.id_dr || "AGUARDANDO"}
-</Text>
-
-
-<View
-  style={[
-    styles.statusBadge,
-    { backgroundColor: isPaid ? "#2ecc71" : "#e74c3c" }
-  ]}
->
-  <Ionicons
-    name={isPaid ? "checkmark-circle" : "time"}
-    size={14}
-    color="white"
-    style={{ marginRight: 5 }}
-  />
-
-  <Text style={styles.statusText}>
-    {isPaid ? "ASSINATURA ATIVA" : "AGUARDANDO PAGAMENTO"}
-  </Text>
-</View>
+        <View style={styles.infoRow}>
+          <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
+          <View style={styles.infoTextGroup}>
+            <Text style={[styles.label, { color: theme.subtext }]}>WHATSAPP</Text>
+            <Text style={[styles.value, { color: theme.text }]}>{formatWhatsApp(userData?.whatsapp)}</Text>
+          </View>
+          <TouchableOpacity onPress={() => editField("whatsapp", "WhatsApp")} style={{ marginLeft: 'auto', padding: 10 }}>
+             <Ionicons name="create-outline" size={22} color={PALETTE.gold} />
+          </TouchableOpacity>
+        </View>
         {/* PATROCINADOR */}
         {userData?.sponsor_id ? (
           <View style={styles.infoRow}>
@@ -389,24 +365,6 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  avatarContainer: {
-  position: "relative",
-  marginBottom: 15,
-},
-
-cameraButton: {
-  position: "absolute",
-  right: 0,
-  bottom: 5,
-  width: 36,
-  height: 36,
-  borderRadius: 18,
-  backgroundColor: PALETTE.primary,
-  justifyContent: "center",
-  alignItems: "center",
-  borderWidth: 2,
-  borderColor: "#FFF",
-},
   container: { flex: 1 },
   loadingCenter: { flex: 1, justifyContent: "center", alignItems: "center" },
   headerCard: { padding: 30, alignItems: "center" },
