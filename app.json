@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
 
-    "icon": "./src/assets/images/icon.png",
+    "icon": "./src/assets/images/logodiamond.png",
 
     "scheme": "diamondrunner",
 
@@ -21,7 +21,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.vascodev.diamondrunner",
 
-      "icon": "./src/assets/images/icon.png",
+      "icon": "./src/assets/images/logodiamond.png",
 
       "infoPlist": {
         "NSAppTransportSecurity": {
@@ -35,7 +35,7 @@
       "package": "com.vascodev.diamondrunner",
 
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/icon.png",
+        "foregroundImage": "./src/assets/images/logodiamond.png",
         "backgroundColor": "#14508f"
       },
 
@@ -49,7 +49,7 @@
 
     "web": {
       "output": "single",
-      "favicon": "./src/assets/images/icon.png",
+      "favicon": "./src/assets/images/logodiamond.png",
       "bundler": "metro",
       "name": "Diamond Runner",
       "shortName": "Diamond Runner",
