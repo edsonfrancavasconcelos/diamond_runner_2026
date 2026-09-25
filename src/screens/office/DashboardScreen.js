@@ -3,7 +3,7 @@ import {
 } from "@react-navigation/native";
 
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
-import DiamondLogoLight from "../../assets/images/logodiamond-light.png";
+
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
@@ -282,7 +282,7 @@ balance: Number(profile?.voucher_balance || 0),
               </Text>
             </View>
 <Image
-  source={isDark ? DiamondLogoLight : DiamondLogoDark}
+source={DiamondLogoDark}
   style={styles.logoMini}
   resizeMode="contain"
 />
