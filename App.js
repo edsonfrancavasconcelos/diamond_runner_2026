@@ -94,9 +94,7 @@ function AppContent() {
       >
      <Image
   source={
-    themeContext.theme.isDark
-      ? require("./src/assets/images/logodiamond-light.png")
-      : require("./src/assets/images/logodiamond.png")
+    require("./src/assets/images/logodiamond.png")
   }
   style={{ width: 140, height: 140, marginBottom: 20 }}
   resizeMode="contain"

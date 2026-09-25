@@ -97,10 +97,9 @@ export default function WelcomeScreen() {
         <View style={styles.logoContainer}>
       <Image
   source={
-    isDark
-      ? require("../assets/images/logodiamond-light.png")
-      : require("../assets/images/logodiamond.png")
+    require("../assets/images/logodiamond.png")
   }
+  
   style={styles.logo}
   resizeMode="contain"
 />
