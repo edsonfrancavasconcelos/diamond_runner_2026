@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
 
-    "icon": "./src/assets/images/logodiamond.png",
+    "icon": "./src/assets/images/icon.png",
 
     "scheme": "diamondrunner",
 
@@ -19,32 +19,37 @@
 
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.vascodev.diamondrunner",
+
+      "icon": "./src/assets/images/icon.png",
+
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         },
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "bundleIdentifier": "com.vascodev.diamondrunner"
+      }
     },
 
-"android": {
-  "adaptiveIcon": {
-    "foregroundImage": "./src/assets/images/logodiamond.png",
-    "backgroundColor": "#14508f"
-  },
-  "permissions": [
-    "android.permission.RECORD_AUDIO",
-    "android.permission.MODIFY_AUDIO_SETTINGS",
-    "android.permission.FOREGROUND_SERVICE",
-    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
-  ],
-  "package": "com.vascodev.diamondrunner"
-},
+    "android": {
+      "package": "com.vascodev.diamondrunner",
+
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/icon.png",
+        "backgroundColor": "#14508f"
+      },
+
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
+    },
 
     "web": {
       "output": "single",
-      "favicon": "./src/assets/images/logodiamond.png",
+      "favicon": "./src/assets/images/icon.png",
       "bundler": "metro",
       "name": "Diamond Runner",
       "shortName": "Diamond Runner",
