@@ -1,15 +1,64 @@
-import { supabase } from './supabase';
 
-// Cria uma Stripe Checkout Session via Supabase Edge Function (create-checkout)
-// e retorna a URL segura de pagamento. Nenhuma chave do Stripe passa pelo app.
-export const createCheckoutSession = async (planName, email) => {
-  const { data, error } = await supabase.functions.invoke('create-checkout', {
-    body: { planName, email },
-  });
+const API_URL =
+  "https://diamond-runner-backend.onrender.com";
 
-  if (error) {
+
+export const createCheckoutSession = async (
+  planName,
+  email,
+  extraData = {}
+) => {
+
+  try {
+
+    const response = await fetch(
+      `${API_URL}/api/payments/checkout`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          planName,
+          email,
+
+          ...extraData,
+        }),
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Erro ao criar checkout Stripe"
+      );
+
+    }
+
+
+    return {
+      url: data.url,
+      sessionId: data.sessionId,
+    };
+
+
+  } catch (error) {
+
+    console.error(
+      "Erro createCheckoutSession:",
+      error
+    );
+
     throw error;
+
   }
 
-  return { url: data.url, sessionId: data.sessionId };
 };
