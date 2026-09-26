@@ -1,5 +1,4 @@
--- Tabelas para pagamentos Stripe via create-checkout / stripe-webhook.
--- Todos os CREATE usam IF NOT EXISTS: seguro rodar mesmo se parte já existir.
+
 
 create table if not exists public.plans (
   id uuid primary key default gen_random_uuid(),
