@@ -41,8 +41,6 @@ export default function PaymentScreen() {
     amount
   } = params;
 
-
-  const [checkoutStarted, setCheckoutStarted] = useState(false);
   const [loading, setLoading] = useState(false);
 
 
@@ -206,12 +204,7 @@ export default function PaymentScreen() {
           "Stripe não retornou URL."
         );
 
-      }
-
-
-
-
-      setCheckoutStarted(true);
+      } 
 
 
 
@@ -350,39 +343,6 @@ export default function PaymentScreen() {
 
         </TouchableOpacity>
 
-
-
-
-
-        <TouchableOpacity
-
-          style={[
-            styles.payButton,
-            styles.secondaryButton
-          ]}
-
-          disabled={!checkoutStarted}
-
-          onPress={() =>
-            navigation.navigate(
-              "LoginDiamond",
-              {
-                email
-              }
-            )
-          }
-
-        >
-
-          <Text style={styles.btnText}>
-            JÁ PAGUEI / IR PARA LOGIN
-          </Text>
-
-
-        </TouchableOpacity>
-
-
-
       </View>
 
 
@@ -456,14 +416,6 @@ const styles = StyleSheet.create({
     alignItems:"center",
     width:"100%",
   },
-
-
-  secondaryButton:{
-    backgroundColor:"transparent",
-    borderWidth:1,
-    borderColor:PALETTE.primary,
-  },
-
 
   btnText:{
     color:"#FFF",
