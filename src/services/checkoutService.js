@@ -1,4 +1,3 @@
-
 const API_URL =
   "https://diamond-runner-backend.onrender.com";
 
@@ -8,7 +7,6 @@ export const createCheckoutSession = async (
   email,
   extraData = {}
 ) => {
-
   try {
 
     const response = await fetch(
@@ -23,42 +21,54 @@ export const createCheckoutSession = async (
         body: JSON.stringify({
           planName,
           email,
-
           ...extraData,
         }),
       }
     );
 
 
-    const data = await response.json();
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = {
+        message: text,
+      };
+    }
 
 
     if (!response.ok) {
-
       throw new Error(
         data.message ||
         data.error ||
-        "Erro ao criar checkout Stripe"
+        `Erro HTTP ${response.status}`
       );
+    }
 
+
+    if (!data.url) {
+      throw new Error(
+        "Stripe não retornou URL de checkout"
+      );
     }
 
 
     return {
       url: data.url,
-      sessionId: data.sessionId,
+      sessionId: data.sessionId || null,
     };
 
 
   } catch (error) {
 
     console.error(
-      "Erro createCheckoutSession:",
+      "❌ Erro createCheckoutSession:",
       error
     );
 
     throw error;
-
   }
-
 };
