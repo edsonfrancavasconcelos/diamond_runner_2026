@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, useMemo } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, TouchableOpacity, StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // DEFINIÇÃO DA NOVA PALETA 2026
@@ -74,3 +75,58 @@ export const ThemeProvider = ({ children }) => {
 };
 
 export const useTheme = () => useContext(ThemeContext);
+
+// --- COMPONENTES ADICIONADOS NO MESMO FICHEIRO (SEM MEXER NO TEU CÓDIGO ACIMA) ---
+
+export const ThemeToggleButton = () => {
+  const { isDark, toggleTheme } = useTheme();
+
+  return (
+    <TouchableOpacity 
+      style={[
+        styles.button, 
+        { backgroundColor: isDark ? 'rgba(44, 148, 188, 0.3)' : '#E2E8F0' }
+      ]} 
+      onPress={toggleTheme}
+      activeOpacity={0.7}
+    >
+      <Ionicons 
+        name={isDark ? 'sunny' : 'moon'} 
+        size={22} 
+        color={isDark ? '#bcdcf4' : '#0c3c74'} 
+      />
+    </TouchableOpacity>
+  );
+};
+
+export const ThemeContainer = ({ children }) => {
+  const { theme, ready } = useTheme();
+
+  if (!ready) return null;
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.bg }]}>
+      {children}
+      <ThemeToggleButton />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  button: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 9999,
+    padding: 10,
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+});
