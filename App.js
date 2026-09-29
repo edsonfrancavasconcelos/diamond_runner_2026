@@ -15,7 +15,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { CountryProvider } from "./src/i18n/context/CountryContext";
 import { LanguageProvider } from "./src/i18n/context/LanguageContext";
 import { ThemeProvider, useTheme } from "./src/i18n/context/ThemeContext";
-import ThemeToggleButton from "./src/i18n/context/ThemeToggleButton";
 import { supabase } from "./src/services/supabase";
 
 // 3. TELAS DE ONBOARDING
@@ -50,35 +49,27 @@ function AppContent() {
 
   // Sessão: PENDING e ATIVO entram; só EXCLUIDO/BLOQUEADO ficam de fora
   useEffect(() => {
-    let isMounted = true;
-
     const check = async (nextSession) => {
       if (!nextSession?.user?.id) {
-        if (isMounted) setSession(null);
+        setSession(null);
         return;
       }
 
-      try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("is_active, status")
-          .eq("id", nextSession.user.id)
-          .maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_active, status")
+        .eq("id", nextSession.user.id)
+        .maybeSingle();
 
-        const status = String(data?.status || "").toUpperCase();
-        const blocked = status === "EXCLUIDO" || status === "BLOQUEADO";
+      const status = String(data?.status || "").toUpperCase();
+      const blocked =
+        status === "EXCLUIDO" || status === "BLOQUEADO";
 
-        if (isMounted) setSession(blocked ? null : nextSession);
-      } catch (err) {
-        // Se der erro de conexão, libera a sessão para não travar o app no loading
-        if (isMounted) setSession(nextSession);
-      }
+      setSession(blocked ? null : nextSession);
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       check(session);
-    }).catch(() => {
-      if (isMounted) setSession(null);
     });
 
     const {
@@ -87,15 +78,8 @@ function AppContent() {
       check(nextSession);
     });
 
-    return () => {
-      isMounted = false;
-      subscription?.unsubscribe();
-    };
+    return () => subscription?.unsubscribe();
   }, []);
-
-  // Extrai o tema de forma segura
-  const { theme, ready: themeReady } = themeContext || {};
-  const isDark = theme?.isDark ?? true;
 
   // Splash
   if (showSplash) {
@@ -103,16 +87,18 @@ function AppContent() {
       <View
         style={{
           flex: 1,
-          backgroundColor: theme?.bg || "#0c3c74",
+          backgroundColor: "#0c3c74",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Image
-          source={require("./src/assets/images/logodiamond.png")}
-          style={{ width: 140, height: 140, marginBottom: 20 }}
-          resizeMode="contain"
-        />
+     <Image
+  source={
+    require("./src/assets/images/logodiamond.png")
+  }
+  style={{ width: 140, height: 140, marginBottom: 20 }}
+  resizeMode="contain"
+/>
         <Text
           style={{
             color: "#FFD700",
@@ -127,7 +113,7 @@ function AppContent() {
         <ActivityIndicator size="large" color="#2c94bc" />
         <Text
           style={{
-            color: theme?.border || "#a4bccc",
+            color: "#a4bccc",
             marginTop: 16,
             fontSize: 12,
             letterSpacing: 1,
@@ -139,34 +125,34 @@ function AppContent() {
     );
   }
 
-  // Loading de segurança: se demorar mais que o normal, destrava forçadamente
-  if (!themeContext || !theme || session === undefined || themeReady === false) {
+  // Loading de sessão / tema
+  if (!themeContext || !themeContext.theme || session === undefined) {
     return (
       <View
         style={{
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: isDark ? "#0c3c74" : "#14508f",
+        backgroundColor: "#14508f",
         }}
       >
         <ActivityIndicator size="large" color="#2c94bc" />
-        <Text style={{ color: "#a4bccc", marginTop: 12, fontSize: 12 }}>
-          SINCRONIZANDO...
-        </Text>
       </View>
     );
   }
+
+  const { theme } = themeContext;
+  const isDark = theme.isDark;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
     colors: {
       ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
       primary: "#2c94bc",
-      background: theme.bg,
-      card: theme.card,
-      text: theme.text,
-      border: theme.border,
+      background: "#0c3c74",
+      card: "#0c3c74",
+      text: "#ffffff",
+      border: "rgba(255,255,255,0.1)",
     },
   };
 
@@ -178,75 +164,69 @@ function AppContent() {
         translucent
       />
 
-      {/* Container principal com cor de fundo dinâmica adaptada ao tema */}
-      <View style={{ flex: 1, backgroundColor: theme.bg }}>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            animation: "fade",
-            contentStyle: { backgroundColor: theme.bg },
-          }}
-        >
-          {session ? (
-            <Stack.Group>
-              <Stack.Screen name="OfficeDrawer" component={OfficeDrawer} />
-            </Stack.Group>
-          ) : (
-            <Stack.Group>
-              <Stack.Screen name="Welcome" component={WelcomeScreen} />
-              <Stack.Screen name="LoginDiamond" component={LoginDiamondScreen} />
-              <Stack.Screen
-                name="SelectProfile"
-                component={SelectProfileScreen}
-              />
-              <Stack.Screen
-                name="ForgotPassword"
-                component={ForgotPasswordScreen}
-              />
-              <Stack.Screen
-                name="ChooseSponsor"
-                component={ChooseSponsorScreen}
-              />
-              <Stack.Screen name="HasSponsor" component={HasSponsorScreen} />
-              <Stack.Screen name="SponsorData" component={SponsorDataScreen} />
-            </Stack.Group>
-          )}
-
-          <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
-            <Stack.Screen name="FirstAccess" component={FirstAccessScreen} />
-            <Stack.Screen
-              name="PackagesScreen"
-              component={PackagesScreen}
-              options={{
-                headerShown: true,
-                headerTitle: "",
-                headerBackTitle: "",
-                headerTintColor: "#FFD700",
-                headerStyle: { backgroundColor: theme.bg },
-              }}
-            />
-            <Stack.Screen name="FindSponsor" component={FindSponsorScreen} />
-            <Stack.Screen
-              name="RunnerRegister"
-              component={RunnerRegisterScreen}
-            />
-            <Stack.Screen
-              name="PaymentScreen"
-              component={PaymentScreen}
-              options={{
-                headerShown: true,
-                headerTitle: "",
-                headerBackTitle: "",
-                headerTintColor: "#FFD700",
-                headerStyle: { backgroundColor: theme.bg },
-              }}
-            />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+          contentStyle: { backgroundColor: "#0c3c74" },
+        }}
+      >
+        {session ? (
+          <Stack.Group>
+            <Stack.Screen name="OfficeDrawer" component={OfficeDrawer} />
           </Stack.Group>
-        </Stack.Navigator>
+        ) : (
+          <Stack.Group>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="LoginDiamond" component={LoginDiamondScreen} />
+            <Stack.Screen
+              name="SelectProfile"
+              component={SelectProfileScreen}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+            <Stack.Screen
+              name="ChooseSponsor"
+              component={ChooseSponsorScreen}
+            />
+            <Stack.Screen name="HasSponsor" component={HasSponsorScreen} />
+            <Stack.Screen name="SponsorData" component={SponsorDataScreen} />
+          </Stack.Group>
+        )}
 
-        {/* BOTÃO FLUTUANTE DE TEMA (Visível em todas as telas) */}
-        <ThemeToggleButton />
-      </View>
+        <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
+          <Stack.Screen name="FirstAccess" component={FirstAccessScreen} />
+          <Stack.Screen
+            name="PackagesScreen"
+            component={PackagesScreen}
+            options={{
+              headerShown: true,
+              headerTitle: "",
+              headerBackTitle: "",
+              headerTintColor: "#FFD700",
+              headerStyle: { backgroundColor: "#0c3c74" },
+            }}
+          />
+          <Stack.Screen name="FindSponsor" component={FindSponsorScreen} />
+          <Stack.Screen
+            name="RunnerRegister"
+            component={RunnerRegisterScreen}
+          />
+          <Stack.Screen
+            name="PaymentScreen"
+            component={PaymentScreen}
+            options={{
+              headerShown: true,
+              headerTitle: "",
+              headerBackTitle: "",
+              headerTintColor: "#FFD700",
+              headerStyle: { backgroundColor: "#0c3c74" },
+            }}
+          />
+        </Stack.Group>
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
