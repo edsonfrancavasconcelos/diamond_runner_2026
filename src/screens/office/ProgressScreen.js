@@ -99,70 +99,77 @@ if(error){
 }
 
 
-if(profile){
 
-  const ranks = [
-    "EXECUTIVO",
-    "BRONZE",
-    "PRATA",
-    "OURO",
-    "RUBI",
-    "DIAMANTE"
-  ];
+      if(profile){
 
-
-  const goals = [
-    0,
-    5000,
-    15000,
-    50000,
-    100000,
-    160000
-  ];
+        const ranks = [
+          "EXECUTIVO",
+          "BRONZE",
+          "PRATA",
+          "OURO",
+          "RUBI",
+          "DIAMANTE"
+        ];
 
 
-  const index = Number(profile.level || 0);
+        const goals = [
+          0,
+          5000,
+          15000,
+          50000,
+          100000,
+          160000
+        ];
 
 
-  const rankName =
-    ranks[index] || "EXECUTIVO";
+     const rankName =
+String(profile.plan_name || "EXECUTIVO")
+.toUpperCase();
 
 
-  const points =
-    Number(profile.points_total || 0);
+        const index =
+          ranks.indexOf(rankName) >= 0
+          ? ranks.indexOf(rankName)
+          : 0;
 
 
-  const nextGoal =
-    goals[index + 1] || goals[index];
+        const points =
+          Number(profile.points_total || 0);
 
 
-  const percent =
-    nextGoal === 0
-    ? 100
-    : Math.min(
-        (points / nextGoal) * 100,
-        100
-      );
+
+        const nextGoal =
+          goals[index + 1] || goals[index];
 
 
-  setCareerData({
+        const percent =
+          nextGoal === 0
+          ? 100
+          : Math.min(
+              (points / nextGoal) * 100,
+              100
+            );
 
-    currentRank: rankName,
 
-    nextRank:
-      ranks[index + 1] || "MAX LEVEL",
 
-    points,
+        setCareerData({
 
-    goal: nextGoal,
+          currentRank: rankName,
 
-    percent: Math.round(percent),
+          nextRank:
+            ranks[index + 1] || "MAX LEVEL",
 
-    rankIndex: index
+          points,
 
-  });
+          goal: nextGoal,
 
-}
+          percent:
+            Math.round(percent),
+
+          rankIndex:index
+        });
+
+      }
 
 
     } catch(error){
@@ -409,7 +416,7 @@ ATUAL
 
 <Text style={styles.statValue}>
 
-{careerData.points.toLocaleString()}
+{Number(careerData.points || 0).toLocaleString()}
 
 <Text style={styles.unit}>
  PV
@@ -435,7 +442,7 @@ TARGET
 
 <Text style={styles.statValue}>
 
-{careerData.goal.toLocaleString()}
+{Number(careerData.goal || 0).toLocaleString()}
 
 <Text style={styles.unit}>
  PV
