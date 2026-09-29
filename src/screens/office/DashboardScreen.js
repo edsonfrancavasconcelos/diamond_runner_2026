@@ -91,14 +91,22 @@ if (error) {
   return;
 }
 
-      let networkCount = 0;
-      if (profile) {
-        const { count } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("sponsor_id", user.id);
-        networkCount = count || 0;
-      }
+     let networkCount = 0;
+
+if (profile) {
+
+  const { data: network, error: networkError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("sponsor_id", user.id);
+
+  if (networkError) {
+    console.log("Erro ao carregar rede:", networkError.message);
+  } else {
+    networkCount = network?.length || 0;
+  }
+
+}
 
 const statusRaw = String(profile?.status || "")
   .trim()
