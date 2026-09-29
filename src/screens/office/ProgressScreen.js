@@ -1,6 +1,3 @@
-// Autor: Edson Vasconcelos | Diamond Runner 2026
-// Arquivo: src/screens/office/ProgressScreen.js
-
 import React, { useEffect, useState, useContext } from 'react';
 import {
   View,
