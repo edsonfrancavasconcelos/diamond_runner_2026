@@ -27,50 +27,76 @@ export default function EarningsScreen() {
 
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
-  const [financeData, setFinanceData] = useState({
-    balance: 0,
-    directBonus: 0,
-    teamBonus: 0,
-    idDr: '---',
-  });
+const [financeData, setFinanceData] = useState({
+  balance: 0,
+  points: 0,
+  level: 0,
+  idDr: '---',
+});
 
   useEffect(() => {
     fetchFinance();
   }, []);
+async function fetchFinance() {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  async function fetchFinance() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('balance, id_dr, direct_bonus, team_bonus')
-        .eq('id', user.id)
-        .single();
 
-      const { data: transactions } = await supabase
-        .from('earnings')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select(`
+        id_dr,
+        voucher_balance,
+        points_total,
+        level
+      `)
+      .eq("id", user.id)
+      .single();
 
-      if (profile) {
-        setFinanceData({
-          balance: profile.balance || 0,
-          directBonus: profile.direct_bonus || 0,
-          teamBonus: profile.team_bonus || 0,
-          idDr: profile.id_dr || '---',
-        });
-      }
-      setHistory(transactions || []);
-    } catch (error) {
-      console.error("Erro financeiro:", error);
-    } finally {
-      setLoading(false);
+
+    if (error) {
+      console.log("Erro profile:", error.message);
     }
+
+
+    if (profile) {
+
+      setFinanceData({
+
+        balance: profile.voucher_balance || 0,
+
+        directBonus: profile.points_total || 0,
+
+        teamBonus: profile.level || 0,
+
+        idDr: profile.id_dr || "---",
+
+      });
+
+    }
+
+
+    // como ainda não existe tabela earnings
+    setHistory([]);
+
+
+  } catch (error) {
+
+    console.error(
+      "Erro financeiro:",
+      error
+    );
+
+  } finally {
+
+    setLoading(false);
+
   }
+}
 
   const renderTransaction = (item) => (
     <View key={item.id} style={[styles.transactionItem, { backgroundColor: theme.card }]}>
