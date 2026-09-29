@@ -1,13 +1,4 @@
 // 1. IMPORTS DE BIBLIOTECAS
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-} from "@react-navigation/native";
-
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-import { registerRootComponent } from "expo";
 
 import React, { useEffect, useState } from "react";
 
@@ -24,6 +15,16 @@ import { Ionicons } from "@expo/vector-icons";
 
 import "react-native-gesture-handler";
 
+import { registerRootComponent } from "expo";
+
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from "@react-navigation/native";
+
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 
@@ -35,7 +36,7 @@ import { LanguageProvider } from "./src/i18n/context/LanguageContext";
 
 import {
   ThemeProvider,
-  useTheme
+  useTheme,
 } from "./src/i18n/context/ThemeContext";
 
 import { supabase } from "./src/services/supabase";
@@ -410,73 +411,64 @@ function AppContent() {
       />
 
 
+<Stack.Navigator
 
-      <Stack.Navigator
+screenOptions={({navigation}) => ({
 
-        screenOptions={{
+  headerShown:true,
 
-          headerShown:true,
+  headerTitle:"",
 
-          headerTitle:"",
+  headerBackTitle:"",
 
-          headerBackTitle:"",
+  headerTintColor:"#FFD700",
 
-          headerTintColor:"#FFD700",
-
-
-          headerStyle:{
-
-            backgroundColor:"#0c3c74",
-
-          },
+  headerStyle:{
+    backgroundColor:"#0c3c74",
+  },
 
 
-          headerRight:()=>(
-            
-            <TouchableOpacity
+  headerRight:()=>(
+    <TouchableOpacity
 
-              onPress={themeContext.toggleTheme}
+      onPress={themeContext.toggleTheme}
 
-              style={{
-                marginRight:18
-              }}
+      style={{
+        marginRight:18,
+        padding:8,
+      }}
 
-            >
+    >
 
-              <Ionicons
+      <Ionicons
 
-                name={
-                  isDark
-                  ? "sunny-outline"
-                  : "moon-outline"
-                }
+        name={
+          isDark
+          ? "sunny-outline"
+          : "moon-outline"
+        }
 
-                size={25}
+        size={25}
 
-                color="#FFD700"
+        color="#FFD700"
 
-              />
+      />
 
-
-            </TouchableOpacity>
-
-          ),
+    </TouchableOpacity>
+  ),
 
 
-          animation:"fade",
+  animation:"fade",
 
 
-          contentStyle:{
-
-            backgroundColor:theme.bg,
-
-          },
+  contentStyle:{
+    backgroundColor:theme.bg,
+  },
 
 
-        }}
+})}
 
-      >
-
+>
 
 
         {
