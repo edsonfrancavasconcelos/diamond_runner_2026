@@ -1,6 +1,4 @@
-// Local: src/screens/office/OfficeDrawer.js
-// Status: CICLO DE REQUISIÇÃO E MENU DUPLO CORRIGIDOS
-
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
   createDrawerNavigator,
@@ -51,6 +49,7 @@ const PALETTE = {
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
+  const { toggleTheme, isDark } = useTheme();
   const isFocused = useIsFocused();
   const [profile, setProfile] = useState({ name: "...", id_dr: "...", avatar_url: null });
   const [loading, setLoading] = useState(true);
@@ -104,38 +103,57 @@ function CustomDrawerContent(props) {
         <Text style={[styles.userRole, { color: PALETTE.gold }]}>{profile.id_dr}</Text>
       </TouchableOpacity>
 
-      <DrawerItemList {...props} />
-      <TouchableOpacity
-        style={{
-          marginTop: 20,
-          marginHorizontal: 16,
-          marginBottom: 30,
-          padding: 14,
-          borderWidth: 1,
-          borderColor: "#FFD700",
-          borderRadius: 10,
-          alignItems: "center",
-        }}
-        onPress={async () => {
-          const ok =
-            typeof window !== "undefined"
-              ? window.confirm("Deseja realmente sair?")
-              : true;
+  <DrawerItemList {...props} />
 
-          if (!ok) return;
+<TouchableOpacity
+  style={styles.themeButton}
+  onPress={toggleTheme}
+>
+  <Ionicons
+    name={isDark ? "sunny-outline" : "moon-outline"}
+    size={22}
+    color={PALETTE.gold}
+  />
 
-          await supabase.auth.signOut();
-        }}
-      >
-        <Text style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}>
-          SAIR
-        </Text>
-      </TouchableOpacity>
+  <Text style={styles.themeText}>
+    {isDark ? "MODO CLARO" : "MODO ESCURO"}
+  </Text>
+</TouchableOpacity>
+
+
+{/* BOTÃO SAIR */}
+<TouchableOpacity
+  style={{
+    marginTop: 20,
+    marginHorizontal: 16,
+    marginBottom: 30,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    borderRadius: 10,
+    alignItems: "center",
+  }}
+  onPress={async () => {
+    const ok =
+      typeof window !== "undefined"
+        ? window.confirm("Deseja realmente sair?")
+        : true;
+
+    if (!ok) return;
+
+    await supabase.auth.signOut();
+  }}
+>
+  <Text style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}>
+    SAIR
+  </Text>
+</TouchableOpacity>
     </DrawerContentScrollView>
   );
 }
 
 export default function OfficeDrawer() {
+  const { toggleTheme, isDark } = useTheme();
   const { country } = useContext(CountryContext);
   const texts = useMemo(
     () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
@@ -441,4 +459,24 @@ const styles = StyleSheet.create({
   drawerDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.12)", marginVertical: 10, marginHorizontal: 16 },
   drawerLabel: { fontSize: 11, fontWeight: "bold" },
   headerBackButton: { paddingHorizontal: 16, paddingVertical: 10 },
+  themeButton:{
+  marginHorizontal:16,
+  marginTop:20,
+  marginBottom:10,
+  padding:14,
+  borderRadius:10,
+  borderWidth:1,
+  borderColor:PALETTE.gold,
+  flexDirection:"row",
+  alignItems:"center",
+  justifyContent:"center",
+  gap:10,
+},
+
+themeText:{
+  color:PALETTE.gold,
+  fontSize:12,
+  fontWeight:"900",
+  letterSpacing:1,
+},
 });
