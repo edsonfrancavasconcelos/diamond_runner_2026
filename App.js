@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { CountryProvider } from "./src/i18n/context/CountryContext";
 import { LanguageProvider } from "./src/i18n/context/LanguageContext";
 import { ThemeProvider, useTheme } from "./src/i18n/context/ThemeContext";
+import ThemeToggleButton from "./src/i18n/context/ThemeToggleButton";
 import { supabase } from "./src/services/supabase";
 
 // 3. TELAS DE ONBOARDING
@@ -81,24 +82,26 @@ function AppContent() {
     return () => subscription?.unsubscribe();
   }, []);
 
+  // Extrai o tema de forma segura
+  const { theme } = themeContext || {};
+  const isDark = theme?.isDark ?? true;
+
   // Splash
   if (showSplash) {
     return (
       <View
         style={{
           flex: 1,
-          backgroundColor: "#0c3c74",
+          backgroundColor: theme?.bg || "#0c3c74",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-     <Image
-  source={
-    require("./src/assets/images/logodiamond.png")
-  }
-  style={{ width: 140, height: 140, marginBottom: 20 }}
-  resizeMode="contain"
-/>
+        <Image
+          source={require("./src/assets/images/logodiamond.png")}
+          style={{ width: 140, height: 140, marginBottom: 20 }}
+          resizeMode="contain"
+        />
         <Text
           style={{
             color: "#FFD700",
@@ -113,7 +116,7 @@ function AppContent() {
         <ActivityIndicator size="large" color="#2c94bc" />
         <Text
           style={{
-            color: "#a4bccc",
+            color: theme?.border || "#a4bccc",
             marginTop: 16,
             fontSize: 12,
             letterSpacing: 1,
@@ -126,14 +129,14 @@ function AppContent() {
   }
 
   // Loading de sessão / tema
-  if (!themeContext || !themeContext.theme || session === undefined) {
+  if (!themeContext || !theme || session === undefined) {
     return (
       <View
         style={{
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-        backgroundColor: "#14508f",
+          backgroundColor: isDark ? "#0c3c74" : "#14508f",
         }}
       >
         <ActivityIndicator size="large" color="#2c94bc" />
@@ -141,18 +144,15 @@ function AppContent() {
     );
   }
 
-  const { theme } = themeContext;
-  const isDark = theme.isDark;
-
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
     colors: {
       ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
       primary: "#2c94bc",
-      background: "#0c3c74",
-      card: "#0c3c74",
-      text: "#ffffff",
-      border: "rgba(255,255,255,0.1)",
+      background: theme.bg,
+      card: theme.card,
+      text: theme.text,
+      border: theme.border,
     },
   };
 
@@ -164,69 +164,75 @@ function AppContent() {
         translucent
       />
 
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          contentStyle: { backgroundColor: "#0c3c74" },
-        }}
-      >
-        {session ? (
-          <Stack.Group>
-            <Stack.Screen name="OfficeDrawer" component={OfficeDrawer} />
-          </Stack.Group>
-        ) : (
-          <Stack.Group>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="LoginDiamond" component={LoginDiamondScreen} />
-            <Stack.Screen
-              name="SelectProfile"
-              component={SelectProfileScreen}
-            />
-            <Stack.Screen
-              name="ForgotPassword"
-              component={ForgotPasswordScreen}
-            />
-            <Stack.Screen
-              name="ChooseSponsor"
-              component={ChooseSponsorScreen}
-            />
-            <Stack.Screen name="HasSponsor" component={HasSponsorScreen} />
-            <Stack.Screen name="SponsorData" component={SponsorDataScreen} />
-          </Stack.Group>
-        )}
+      {/* Container principal com cor de fundo dinâmica adaptada ao tema */}
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            animation: "fade",
+            contentStyle: { backgroundColor: theme.bg },
+          }}
+        >
+          {session ? (
+            <Stack.Group>
+              <Stack.Screen name="OfficeDrawer" component={OfficeDrawer} />
+            </Stack.Group>
+          ) : (
+            <Stack.Group>
+              <Stack.Screen name="Welcome" component={WelcomeScreen} />
+              <Stack.Screen name="LoginDiamond" component={LoginDiamondScreen} />
+              <Stack.Screen
+                name="SelectProfile"
+                component={SelectProfileScreen}
+              />
+              <Stack.Screen
+                name="ForgotPassword"
+                component={ForgotPasswordScreen}
+              />
+              <Stack.Screen
+                name="ChooseSponsor"
+                component={ChooseSponsorScreen}
+              />
+              <Stack.Screen name="HasSponsor" component={HasSponsorScreen} />
+              <Stack.Screen name="SponsorData" component={SponsorDataScreen} />
+            </Stack.Group>
+          )}
 
-        <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
-          <Stack.Screen name="FirstAccess" component={FirstAccessScreen} />
-          <Stack.Screen
-            name="PackagesScreen"
-            component={PackagesScreen}
-            options={{
-              headerShown: true,
-              headerTitle: "",
-              headerBackTitle: "",
-              headerTintColor: "#FFD700",
-              headerStyle: { backgroundColor: "#0c3c74" },
-            }}
-          />
-          <Stack.Screen name="FindSponsor" component={FindSponsorScreen} />
-          <Stack.Screen
-            name="RunnerRegister"
-            component={RunnerRegisterScreen}
-          />
-          <Stack.Screen
-            name="PaymentScreen"
-            component={PaymentScreen}
-            options={{
-              headerShown: true,
-              headerTitle: "",
-              headerBackTitle: "",
-              headerTintColor: "#FFD700",
-              headerStyle: { backgroundColor: "#0c3c74" },
-            }}
-          />
-        </Stack.Group>
-      </Stack.Navigator>
+          <Stack.Group screenOptions={{ animation: "slide_from_right" }}>
+            <Stack.Screen name="FirstAccess" component={FirstAccessScreen} />
+            <Stack.Screen
+              name="PackagesScreen"
+              component={PackagesScreen}
+              options={{
+                headerShown: true,
+                headerTitle: "",
+                headerBackTitle: "",
+                headerTintColor: "#FFD700",
+                headerStyle: { backgroundColor: theme.bg },
+              }}
+            />
+            <Stack.Screen name="FindSponsor" component={FindSponsorScreen} />
+            <Stack.Screen
+              name="RunnerRegister"
+              component={RunnerRegisterScreen}
+            />
+            <Stack.Screen
+              name="PaymentScreen"
+              component={PaymentScreen}
+              options={{
+                headerShown: true,
+                headerTitle: "",
+                headerBackTitle: "",
+                headerTintColor: "#FFD700",
+                headerStyle: { backgroundColor: theme.bg },
+              }}
+            />
+          </Stack.Group>
+        </Stack.Navigator>
+
+        {/* BOTÃO FLUTUANTE DE TEMA (Visível em todas as telas) */}
+        <ThemeToggleButton />
+      </View>
     </NavigationContainer>
   );
 }
