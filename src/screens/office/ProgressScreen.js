@@ -83,86 +83,86 @@ export default function ProgressScreen() {
       }
 
 
-      const {
-        data: profile
-      } = await supabase
-        .from('profiles')
-        .select('package_level, points_total')
-        .eq('id', user.id)
-        .maybeSingle();
+   const {
+  data: profile,
+  error
+} = await supabase
+  .from('profiles')
+  .select('level, points_total, plan_name')
+  .eq('id', user.id)
+  .maybeSingle();
 
 
-
-      if(profile){
-
-        const ranks = [
-          "EXECUTIVO",
-          "BRONZE",
-          "PRATA",
-          "OURO",
-          "RUBI",
-          "DIAMANTE"
-        ];
+if(error){
+  console.log("Profile error:", error);
+  return;
+}
 
 
-        const goals = [
-          0,
-          5000,
-          15000,
-          50000,
-          100000,
-          160000
-        ];
+if(profile){
+
+  const ranks = [
+    "EXECUTIVO",
+    "BRONZE",
+    "PRATA",
+    "OURO",
+    "RUBI",
+    "DIAMANTE"
+  ];
 
 
-        const rankName =
-          (profile.package_level || "EXECUTIVO")
-          .toUpperCase();
+  const goals = [
+    0,
+    5000,
+    15000,
+    50000,
+    100000,
+    160000
+  ];
 
 
-        const index =
-          ranks.indexOf(rankName) >= 0
-          ? ranks.indexOf(rankName)
-          : 0;
+  const index = Number(profile.level || 0);
 
 
-        const points =
-          Number(profile.points_total || 0);
+  const rankName =
+    ranks[index] || "EXECUTIVO";
 
 
-
-        const nextGoal =
-          goals[index + 1] || goals[index];
-
-
-        const percent =
-          nextGoal === 0
-          ? 100
-          : Math.min(
-              (points / nextGoal) * 100,
-              100
-            );
+  const points =
+    Number(profile.points_total || 0);
 
 
+  const nextGoal =
+    goals[index + 1] || goals[index];
 
-        setCareerData({
 
-          currentRank: rankName,
+  const percent =
+    nextGoal === 0
+    ? 100
+    : Math.min(
+        (points / nextGoal) * 100,
+        100
+      );
 
-          nextRank:
-            ranks[index + 1] || "MAX LEVEL",
 
-          points,
+  setCareerData({
 
-          goal: nextGoal,
+    currentRank: rankName,
 
-          percent:
-            Math.round(percent),
+    nextRank:
+      ranks[index + 1] || "MAX LEVEL",
 
-          rankIndex:index
-        });
+    points,
 
-      }
+    goal: nextGoal,
+
+    percent: Math.round(percent),
+
+    rankIndex: index
+
+  });
+
+}
 
 
     } catch(error){
