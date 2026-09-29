@@ -153,7 +153,6 @@ function CustomDrawerContent(props) {
 }
 
 export default function OfficeDrawer() {
-  const { toggleTheme, isDark } = useTheme();
   const { country } = useContext(CountryContext);
   const texts = useMemo(
     () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
