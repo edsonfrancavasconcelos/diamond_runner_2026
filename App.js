@@ -50,27 +50,35 @@ function AppContent() {
 
   // Sessão: PENDING e ATIVO entram; só EXCLUIDO/BLOQUEADO ficam de fora
   useEffect(() => {
+    let isMounted = true;
+
     const check = async (nextSession) => {
       if (!nextSession?.user?.id) {
-        setSession(null);
+        if (isMounted) setSession(null);
         return;
       }
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("is_active, status")
-        .eq("id", nextSession.user.id)
-        .maybeSingle();
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("is_active, status")
+          .eq("id", nextSession.user.id)
+          .maybeSingle();
 
-      const status = String(data?.status || "").toUpperCase();
-      const blocked =
-        status === "EXCLUIDO" || status === "BLOQUEADO";
+        const status = String(data?.status || "").toUpperCase();
+        const blocked = status === "EXCLUIDO" || status === "BLOQUEADO";
 
-      setSession(blocked ? null : nextSession);
+        if (isMounted) setSession(blocked ? null : nextSession);
+      } catch (err) {
+        // Se der erro de conexão, libera a sessão para não travar o app no loading
+        if (isMounted) setSession(nextSession);
+      }
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       check(session);
+    }).catch(() => {
+      if (isMounted) setSession(null);
     });
 
     const {
@@ -79,11 +87,14 @@ function AppContent() {
       check(nextSession);
     });
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   // Extrai o tema de forma segura
-  const { theme } = themeContext || {};
+  const { theme, ready: themeReady } = themeContext || {};
   const isDark = theme?.isDark ?? true;
 
   // Splash
@@ -128,8 +139,8 @@ function AppContent() {
     );
   }
 
-  // Loading de sessão / tema
-  if (!themeContext || !theme || session === undefined) {
+  // Loading de segurança: se demorar mais que o normal, destrava forçadamente
+  if (!themeContext || !theme || session === undefined || themeReady === false) {
     return (
       <View
         style={{
@@ -140,6 +151,9 @@ function AppContent() {
         }}
       >
         <ActivityIndicator size="large" color="#2c94bc" />
+        <Text style={{ color: "#a4bccc", marginTop: 12, fontSize: 12 }}>
+          SINCRONIZANDO...
+        </Text>
       </View>
     );
   }
