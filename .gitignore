@@ -1,0 +1,29 @@
+# Dependências
+node_modules/
+
+# Expo e Sistemas
+.expo/
+dist/
+web-build/
+node_modules/
+
+# Segurança (Se você for usar .env no mobile)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Binários nativos (Android/iOS)
+android/
+ios/
+
+# Logs e Cache
+npm-debug.log*
+.eslintcache
+
+# Sistema
+.DS_Store
+
+.vercel
+.env*
