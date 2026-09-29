@@ -38,32 +38,73 @@ export default function WithdrawScreen() {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+const fetchData = useCallback(async () => {
+  try {
+    const { data: { user }, error:userError } = await supabase.auth.getUser();
 
-      // 1. Busca Saldo Real
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("balance")
-        .eq("id", user.id)
-        .single();
-      
-      if (profile) setBalance(profile.balance || 0);
-
-      // 2. Busca Histórico de Saques
-      const { data: withdraws } = await supabase
-        .from("withdraw_requests")
-        .select("*")
-        .eq("profile_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (withdraws) setHistory(withdraws);
-    } catch (e) {
-      console.error("Erro ao carregar dados de saque:", e);
+    if (userError || !user) {
+      console.log("Usuário não encontrado");
+      return;
     }
-  }, []);
+
+
+    // BUSCA SALDO
+    const { 
+      data: profile, 
+      error: profileError 
+    } = await supabase
+      .from("profiles")
+      .select("voucher_balance")
+      .eq("id", user.id)
+      .single();
+
+
+    if (profileError) {
+      console.log("Erro saldo:", profileError.message);
+      return;
+    }
+
+
+    setBalance(
+      Number(profile?.voucher_balance || 0)
+    );
+
+
+
+    // BUSCA SAQUES
+    const {
+      data: withdraws,
+      error: withdrawError
+    } = await supabase
+      .from("withdraw_requests")
+      .select("*")
+      .eq("profile_id", user.id)
+      .order("created_at", {
+        ascending:false
+      });
+
+
+    if (withdrawError) {
+      console.log(
+        "Erro histórico:",
+        withdrawError.message
+      );
+      return;
+    }
+
+
+    setHistory(withdraws || []);
+
+
+  } catch(error){
+
+    console.log(
+      "Erro geral:",
+      error
+    );
+
+  }
+}, []);;
 
   useEffect(() => {
     fetchData();
@@ -172,10 +213,16 @@ export default function WithdrawScreen() {
             <View key={item.id} style={styles.historyCard}>
               <View>
                 <Text style={styles.historyDate}>{new Date(item.created_at).toLocaleDateString('pt-BR')}</Text>
-                <Text style={styles.historyAmount}>R$ {Number(item.amount).toFixed(2)}</Text>
+              <Text style={styles.historyAmount}>
+R$ {Number(item.amount || 0).toFixed(2)}
+</Text>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: item.status === 'pending' ? '#FF9800' : PALETTE.primary }]}>
-                <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+              <View style={[styles.statusBadge, {backgroundColor: (item.status || "pending") === 'pending'
+  ? '#FF9800'
+  : PALETTE.primary }]}>
+              <Text style={styles.statusText}>
+  {(item.status || "pending").toUpperCase()}
+</Text>
               </View>
             </View>
           ))}
