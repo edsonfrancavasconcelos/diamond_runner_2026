@@ -26,7 +26,9 @@ const PALETTE = {
   gold: '#FFD700',
   silver: '#C0C0C0',
   bronze: '#cd7f32',
-  black: '#040d1a',
+  black: '#081526',
+  card: '#10243A',
+  white: '#FFFFFF',
   success: '#00f2ff',
   danger: '#ff4b2b',
 };
@@ -237,7 +239,7 @@ const currentMedal =
 
 
   return (
-    <View style={{flex:1, backgroundColor:PALETTE.black}}>
+  <View style={{flex:1, backgroundColor:'#081526'}}>
 
 <StatusBar barStyle="light-content"/>
 
@@ -301,8 +303,8 @@ backgroundColor:rankColor
 <Image
 source={currentMedal}
 style={{
-width:90,
-height:90,
+width:120,
+height:120,
 resizeMode:'contain'
 }}
 />
@@ -734,7 +736,7 @@ borderRadius:80,
 borderWidth:2,
 justifyContent:'center',
 alignItems:'center',
-backgroundColor:'rgba(0,0,0,0.6)',
+backgroundColor:'rgba(255,255,255,0.08)',
 overflow:'hidden'
 },
 
@@ -808,7 +810,7 @@ borderRadius:4,
 
 borderLeftWidth:4,
 
-backgroundColor:'rgba(44,148,188,0.05)',
+backgroundColor:'rgba(44,148,188,0.15)',
 
 shadowColor:'#000',
 
@@ -841,7 +843,7 @@ marginBottom:25
 
 
 teleLabel:{
-color:'rgba(255,255,255,0.4)',
+color:'rgba(255,255,255,0.75)',
 fontSize:9,
 fontWeight:'900',
 letterSpacing:2
@@ -1041,7 +1043,7 @@ alignItems:'center',
 
 marginBottom:25,
 
-backgroundColor:'rgba(255,255,255,0.02)',
+backgroundColor:'rgba(255,255,255,0.08)',
 
 padding:12,
 
