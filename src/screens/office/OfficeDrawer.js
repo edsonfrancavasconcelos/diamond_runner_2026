@@ -49,7 +49,7 @@ const PALETTE = {
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
-  const { toggleTheme, isDark } = useTheme();
+const {} = useTheme();
   const isFocused = useIsFocused();
   const [profile, setProfile] = useState({
     name: "...",
@@ -119,16 +119,7 @@ function CustomDrawerContent(props) {
         </Text>
       </TouchableOpacity>
 
-      <DrawerItemList {...props} />
-
-      <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
-        <Ionicons
-          name={isDark ? "sunny-outline" : "moon-outline"}
-          size={22}
-          color={PALETTE.gold}
-        />
-      
-      </TouchableOpacity>
+      <DrawerItemList {...props} />   
 
       {/* BOTÃO SAIR */}
       <TouchableOpacity
@@ -483,24 +474,5 @@ const styles = StyleSheet.create({
   },
   drawerLabel: { fontSize: 11, fontWeight: "bold" },
   headerBackButton: { paddingHorizontal: 16, paddingVertical: 10 },
-  themeButton: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 10,
-    padding: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: PALETTE.gold,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-
-  themeText: {
-    color: PALETTE.gold,
-    fontSize: 12,
-    fontWeight: "900",
-    letterSpacing: 1,
-  },
+ 
 });
