@@ -34,6 +34,51 @@ const PALETTE = {
   success:"#2c94bc",
 };
 
+const RANKS = [
+  {
+    name:"OBSIDIANA",
+    min:0,
+    max:4999,
+    goal:5000,
+    image:Obsidiana
+  },
+  {
+    name:"TOPAZIO",
+    min:5000,
+    max:14999,
+    goal:15000,
+    image:Topazio
+  },
+  {
+    name:"SAFIRA",
+    min:15000,
+    max:49999,
+    goal:50000,
+    image:Safira
+  },
+  {
+    name:"RUBI",
+    min:50000,
+    max:99999,
+    goal:100000,
+    image:Rubi
+  },
+  {
+    name:"ESMERALDA",
+    min:100000,
+    max:159999,
+    goal:160000,
+    image:Esmeralda
+  },
+  {
+    name:"DIAMANTE",
+    min:160000,
+    max:null,
+    goal:200000,
+    image:Diamante
+  }
+];
+
 export default function ProgressScreen() {
   const { country = "BR" } = useContext(CountryContext) || {};
 
@@ -87,44 +132,54 @@ export default function ProgressScreen() {
         return;
       }
 
-      if (profile) {
-        const ranks = [
-          "OBSIDIANA",
-          "TOPAZIO",
-          "SAFIRA",
-          "RUBI",
-          "ESMERALDA",
-          "DIAMANTE",
-        ];
+    if (profile) {
 
-        const goals = [0, 5000, 15000, 50000, 100000, 160000];
+  const points = Number(profile.points_total || 0);
 
-        const rankName = String(profile.plan_name || "OBSIDIANA").toUpperCase();
 
-        const index =
-          ranks.indexOf(rankName) >= 0 ? ranks.indexOf(rankName) : 0;
+  const index = RANKS.findIndex(rank =>
+    points >= rank.min &&
+    (rank.max === null || points <= rank.max)
+  );
 
-        const points = Number(profile.points_total || 0);
 
-        const nextGoal = goals[index + 1] || goals[index];
+  const currentRank = RANKS[index];
 
-        const percent =
-          nextGoal === 0 ? 100 : Math.min((points / nextGoal) * 100, 100);
 
-        setCareerData({
-          currentRank: rankName,
+  const nextRank =
+    RANKS[index + 1]?.name || "NÍVEL MÁXIMO";
 
-          nextRank: ranks[index + 1] || "PRÓXIMA META",
 
-          points,
+  const percent =
+    currentRank.goal === 0
+      ? 100
+      :
+      Math.min(
+        (
+          (points - currentRank.min) /
+          (currentRank.goal - currentRank.min)
+        ) * 100,
+        100
+      );
 
-          goal: nextGoal,
 
-          percent: Math.round(percent),
+  setCareerData({
 
-          rankIndex: index,
-        });
-      }
+    currentRank: currentRank.name,
+
+    nextRank,
+
+    points,
+
+    goal: currentRank.goal,
+
+    percent: Math.round(percent),
+
+    rankIndex:index,
+
+  });
+
+}
     } catch (error) {
       console.log("Progress error:", error);
     } finally {
