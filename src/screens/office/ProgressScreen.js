@@ -22,15 +22,16 @@ import Esmeralda from "../../assets/images/esmeralda.png";
 import Diamante from "../../assets/images/diamante.png";
 
 const PALETTE = {
-  primary: "#2c94bc", // color1
-  light: "#bcdcf4", // color2
-  dark: "#0c3c74", // color3
-  grayBlue: "#647c9c", // color4
-  softGray: "#a4bccc", // color5
+  primary: "#2c94bc",
+  light: "#bcdcf4",
+  dark: "#0c3c74",
+  grayBlue: "#647c9c",
+  softGray: "#a4bccc",
+  gold:"#FFD700",
 
-  black: "#06111f",
-  white: "#ffffff",
-  success: "#2c94bc",
+  black:"#06111f",
+  white:"#ffffff",
+  success:"#2c94bc",
 };
 
 export default function ProgressScreen() {
@@ -113,7 +114,7 @@ export default function ProgressScreen() {
         setCareerData({
           currentRank: rankName,
 
-          nextRank: ranks[index + 1] || "MAX LEVEL",
+          nextRank: ranks[index + 1] || "PRÓXIMA META",
 
           points,
 
@@ -192,12 +193,7 @@ export default function ProgressScreen() {
               ]}
             >
               <View
-                style={[
-                  styles.scanLine,
-                  {
-                    backgroundColor: rankColor,
-                  },
-                ]}
+               
               />
 
               <Image
@@ -221,7 +217,7 @@ export default function ProgressScreen() {
               },
             ]}
           >
-            PATENTE ATUAL ATIVA
+        PLANO ATUAL ATIVO
           </Text>
         </View>
 
@@ -255,15 +251,15 @@ export default function ProgressScreen() {
           </View>
 
           <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${careerData.percent}%`,
-                  backgroundColor: rankColor,
-                },
-              ]}
-            />
+      <View
+style={[
+styles.progressFill,
+{
+width:`${careerData.percent}%`,
+backgroundColor:PALETTE.gold
+}
+]}
+/>
           </View>
 
           <View style={styles.statsGrid}>
@@ -420,14 +416,6 @@ const styles = StyleSheet.create({
     height: 170,
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  scanLine: {
-    position: "absolute",
-    width: "100%",
-    height: 2,
-    opacity: 0.4,
-    top: "50%",
   },
 
   rankLevelBox: {
