@@ -1,4 +1,3 @@
-
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useContext } from "react";
@@ -45,7 +44,6 @@ export default function ChooseSponsorScreen() {
           <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
         </TouchableOpacity>
 
-    
         <TouchableOpacity
           style={[
             styles.navButton,
@@ -109,8 +107,8 @@ export default function ChooseSponsorScreen() {
             />
           </View>
 
-             <TouchableOpacity
-            style={styles.outlineAction}      
+          <TouchableOpacity
+            style={styles.outlineAction}
             // 💎 CORREÇÃO: Mudamos de "SelectProfile" para "FindSponsor"
             onPress={() => navigation.navigate("FindSponsor", { country })}
           >
@@ -128,7 +126,6 @@ export default function ChooseSponsorScreen() {
               color={isDark ? PALETTE.light : "#8E8E93"}
             />
           </TouchableOpacity>
-
         </View>
       </View>
 

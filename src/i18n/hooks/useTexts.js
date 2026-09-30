@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { CountryContext } from "../context/CountryContext"; 
+import { CountryContext } from "../context/CountryContext";
 
 import {
   chooseSponsorTexts,
@@ -11,15 +11,15 @@ import {
   paymentTexts,
   runnerRegisterTexts,
   welcomeTexts,
-  profileTexts, 
+  profileTexts,
 } from "./texts";
 
 export function useTexts(screen) {
   const context = useContext(CountryContext);
-  const lang = context?.country || "BR"; 
+  const lang = context?.country || "BR";
 
   const getSafeText = (textGroup) => {
-    if (!textGroup) return {}; 
+    if (!textGroup) return {};
     return textGroup[lang] || textGroup["BR"] || {};
   };
 

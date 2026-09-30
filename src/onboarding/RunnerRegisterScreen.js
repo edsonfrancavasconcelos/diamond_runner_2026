@@ -62,7 +62,9 @@ export default function RunnerRegisterScreen() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   async function resolveSponsor(idDr) {
-    const id = String(idDr || "").trim().toUpperCase();
+    const id = String(idDr || "")
+      .trim()
+      .toUpperCase();
     if (id.length < 4) return null;
 
     const { data, error } = await supabase
@@ -123,7 +125,7 @@ export default function RunnerRegisterScreen() {
     ) {
       warn(
         "Dados incompletos",
-        "Preencha nome, CPF, e-mail, WhatsApp, senha e confirmação de senha."
+        "Preencha nome, CPF, e-mail, WhatsApp, senha e confirmação de senha.",
       );
       return;
     }
@@ -160,7 +162,7 @@ export default function RunnerRegisterScreen() {
       if (!uuid) {
         warn(
           "Patrocinador inválido",
-          "Informe o ID DR de quem indicou (ex: DR8602) e aguarde validar."
+          "Informe o ID DR de quem indicou (ex: DR8602) e aguarde validar.",
         );
         return;
       }
@@ -214,7 +216,7 @@ export default function RunnerRegisterScreen() {
       if (msg.includes("rate limit")) {
         warn(
           "Aguarde um pouco",
-          "O Supabase bloqueou cadastro por excesso de e-mail. Espere uns minutos ou use outro e-mail."
+          "O Supabase bloqueou cadastro por excesso de e-mail. Espere uns minutos ou use outro e-mail.",
         );
         return;
       }

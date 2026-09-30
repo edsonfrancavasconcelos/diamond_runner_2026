@@ -33,7 +33,7 @@ import ProfileScreen from "./ProfileScreen"; // 👈 Certifique-se que esta tela
 import ProgressScreen from "./ProgressScreen";
 import ProWayScreen from "./ProWayScreen";
 import WithdrawScreen from "./WithdrawScreen";
-import DiamondStoreApps from "./DiamondStoreAppsScreen"; 
+import DiamondStoreApps from "./DiamondStoreAppsScreen";
 import SettingsScreen from "./SettingsScreen";
 import TermsScreen from "./TermsScreen";
 import PrivacyScreen from "./PrivacyScreen";
@@ -41,7 +41,7 @@ import AboutScreen from "./AboutScreen";
 
 const PALETTE = {
   primary: "#2c94bc",
-  gold: "#FFD700", 
+  gold: "#FFD700",
   darkBlue: "#0c3c74",
   lightGray: "#a4bccc",
 };
@@ -51,12 +51,18 @@ const Drawer = createDrawerNavigator();
 function CustomDrawerContent(props) {
   const { toggleTheme, isDark } = useTheme();
   const isFocused = useIsFocused();
-  const [profile, setProfile] = useState({ name: "...", id_dr: "...", avatar_url: null });
+  const [profile, setProfile] = useState({
+    name: "...",
+    id_dr: "...",
+    avatar_url: null,
+  });
   const [loading, setLoading] = useState(true);
 
   async function fetchProfileData() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from("profiles")
@@ -80,12 +86,17 @@ function CustomDrawerContent(props) {
   }
 
   useEffect(() => {
-    const task = isFocused ? InteractionManager.runAfterInteractions(fetchProfileData) : null;
+    const task = isFocused
+      ? InteractionManager.runAfterInteractions(fetchProfileData)
+      : null;
     return () => task?.cancel();
   }, [isFocused]);
 
   return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: PALETTE.darkBlue }}>
+    <DrawerContentScrollView
+      {...props}
+      style={{ backgroundColor: PALETTE.darkBlue }}
+    >
       <TouchableOpacity
         onPress={() => props.navigation.navigate("MyProfile")} // 👈 Nome único para evitar conflito
         style={styles.drawerHeader}
@@ -94,60 +105,63 @@ function CustomDrawerContent(props) {
           {loading ? (
             <ActivityIndicator color={PALETTE.gold} size="small" />
           ) : profile.avatar_url ? (
-            <Image source={{ uri: profile.avatar_url }} style={styles.avatarImg} />
+            <Image
+              source={{ uri: profile.avatar_url }}
+              style={styles.avatarImg}
+            />
           ) : (
             <Ionicons name="person" size={30} color={PALETTE.gold} />
           )}
         </View>
         <Text style={styles.userName}>{profile.name.toUpperCase()}</Text>
-        <Text style={[styles.userRole, { color: PALETTE.gold }]}>{profile.id_dr}</Text>
+        <Text style={[styles.userRole, { color: PALETTE.gold }]}>
+          {profile.id_dr}
+        </Text>
       </TouchableOpacity>
 
-  <DrawerItemList {...props} />
+      <DrawerItemList {...props} />
 
-<TouchableOpacity
-  style={styles.themeButton}
-  onPress={toggleTheme}
->
-  <Ionicons
-    name={isDark ? "sunny-outline" : "moon-outline"}
-    size={22}
-    color={PALETTE.gold}
-  />
+      <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
+        <Ionicons
+          name={isDark ? "sunny-outline" : "moon-outline"}
+          size={22}
+          color={PALETTE.gold}
+        />
 
-  <Text style={styles.themeText}>
-    {isDark ? "MODO CLARO" : "MODO ESCURO"}
-  </Text>
-</TouchableOpacity>
+        <Text style={styles.themeText}>
+          {isDark ? "MODO CLARO" : "MODO ESCURO"}
+        </Text>
+      </TouchableOpacity>
 
+      {/* BOTÃO SAIR */}
+      <TouchableOpacity
+        style={{
+          marginTop: 20,
+          marginHorizontal: 16,
+          marginBottom: 30,
+          padding: 14,
+          borderWidth: 1,
+          borderColor: "#FFD700",
+          borderRadius: 10,
+          alignItems: "center",
+        }}
+        onPress={async () => {
+          const ok =
+            typeof window !== "undefined"
+              ? window.confirm("Deseja realmente sair?")
+              : true;
 
-{/* BOTÃO SAIR */}
-<TouchableOpacity
-  style={{
-    marginTop: 20,
-    marginHorizontal: 16,
-    marginBottom: 30,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#FFD700",
-    borderRadius: 10,
-    alignItems: "center",
-  }}
-  onPress={async () => {
-    const ok =
-      typeof window !== "undefined"
-        ? window.confirm("Deseja realmente sair?")
-        : true;
+          if (!ok) return;
 
-    if (!ok) return;
-
-    await supabase.auth.signOut();
-  }}
->
-  <Text style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}>
-    SAIR
-  </Text>
-</TouchableOpacity>
+          await supabase.auth.signOut();
+        }}
+      >
+        <Text
+          style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}
+        >
+          SAIR
+        </Text>
+      </TouchableOpacity>
     </DrawerContentScrollView>
   );
 }
@@ -156,7 +170,7 @@ export default function OfficeDrawer() {
   const { country } = useContext(CountryContext);
   const texts = useMemo(
     () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
-    [country]
+    [country],
   );
   const [canUseModules, setCanUseModules] = useState(false);
 
@@ -191,9 +205,7 @@ export default function OfficeDrawer() {
     };
   }, []);
 
-  const hideIfPending = canUseModules
-    ? undefined
-    : { display: "none" };
+  const hideIfPending = canUseModules ? undefined : { display: "none" };
 
   return (
     <Drawer.Navigator
@@ -370,11 +382,7 @@ export default function OfficeDrawer() {
           title: texts.news,
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
-            <Ionicons
-              name="newspaper-outline"
-              size={20}
-              color={PALETTE.gold}
-            />
+            <Ionicons name="newspaper-outline" size={20} color={PALETTE.gold} />
           ),
         }}
       />
@@ -385,11 +393,7 @@ export default function OfficeDrawer() {
         options={{
           title: "CONFIGURAÇÕES",
           drawerIcon: () => (
-            <Ionicons
-              name="settings-outline"
-              size={20}
-              color={PALETTE.gold}
-            />
+            <Ionicons name="settings-outline" size={20} color={PALETTE.gold} />
           ),
         }}
       />
@@ -443,39 +447,63 @@ export default function OfficeDrawer() {
 }
 
 const styles = StyleSheet.create({
-  drawerHeader: { 
-    padding: 25, 
-    borderBottomWidth: 1, 
-    borderBottomColor: "rgba(255,255,255,0.1)", 
+  drawerHeader: {
+    padding: 25,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
     marginBottom: 10,
-    alignItems: 'center', 
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
-  avatarCircle: { width: 80, height: 80, borderRadius: 40, borderWidth: 2, justifyContent: "center", alignItems: "center", marginBottom: 12, overflow: 'hidden' },
-  avatarImg: { width: '100%', height: '100%' },
-  userName: { color: "#FFF", fontWeight: "bold", fontSize: 14, textAlign: 'center' },
-  userRole: { fontSize: 11, fontWeight: "bold", marginTop: 2, textAlign: 'center' },
-  drawerDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.12)", marginVertical: 10, marginHorizontal: 16 },
+  avatarCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  avatarImg: { width: "100%", height: "100%" },
+  userName: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  userRole: {
+    fontSize: 11,
+    fontWeight: "bold",
+    marginTop: 2,
+    textAlign: "center",
+  },
+  drawerDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    marginVertical: 10,
+    marginHorizontal: 16,
+  },
   drawerLabel: { fontSize: 11, fontWeight: "bold" },
   headerBackButton: { paddingHorizontal: 16, paddingVertical: 10 },
-  themeButton:{
-  marginHorizontal:16,
-  marginTop:20,
-  marginBottom:10,
-  padding:14,
-  borderRadius:10,
-  borderWidth:1,
-  borderColor:PALETTE.gold,
-  flexDirection:"row",
-  alignItems:"center",
-  justifyContent:"center",
-  gap:10,
-},
+  themeButton: {
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 10,
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: PALETTE.gold,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
 
-themeText:{
-  color:PALETTE.gold,
-  fontSize:12,
-  fontWeight:"900",
-  letterSpacing:1,
-},
+  themeText: {
+    color: PALETTE.gold,
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
 });

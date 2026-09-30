@@ -6,7 +6,10 @@ export const LanguageContext = createContext(null);
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState("BR");
-  const contextValue = useMemo(() => ({ language, setLanguage, texts }), [language]);
+  const contextValue = useMemo(
+    () => ({ language, setLanguage, texts }),
+    [language],
+  );
 
   return (
     <LanguageContext.Provider value={contextValue}>

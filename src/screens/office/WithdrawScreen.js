@@ -23,11 +23,11 @@ const { width } = Dimensions.get("window");
 
 const PALETTE = {
   primary: "#2c94bc", // Azul Diamond
-  dark: "#0c3c74",    
-  graphite: "#0c467b", 
+  dark: "#0c3c74",
+  graphite: "#0c467b",
   white: "#FFFFFF",
-  gold: "#FFD700",    // Dourado para destaque
-  danger: "#FF4444"
+  gold: "#FFD700", // Dourado para destaque
+  danger: "#FF4444",
 };
 
 export default function WithdrawScreen() {
@@ -38,73 +38,51 @@ export default function WithdrawScreen() {
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
 
-const fetchData = useCallback(async () => {
-  try {
-    const { data: { user }, error:userError } = await supabase.auth.getUser();
+  const fetchData = useCallback(async () => {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      console.log("Usuário não encontrado");
-      return;
+      if (userError || !user) {
+        console.log("Usuário não encontrado");
+        return;
+      }
+
+      // BUSCA SALDO
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("voucher_balance")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.log("Erro saldo:", profileError.message);
+        return;
+      }
+
+      setBalance(Number(profile?.voucher_balance || 0));
+
+      // BUSCA SAQUES
+      const { data: withdraws, error: withdrawError } = await supabase
+        .from("withdraw_requests")
+        .select("*")
+        .eq("profile_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (withdrawError) {
+        console.log("Erro histórico:", withdrawError.message);
+        return;
+      }
+
+      setHistory(withdraws || []);
+    } catch (error) {
+      console.log("Erro geral:", error);
     }
-
-
-    // BUSCA SALDO
-    const { 
-      data: profile, 
-      error: profileError 
-    } = await supabase
-      .from("profiles")
-      .select("voucher_balance")
-      .eq("id", user.id)
-      .single();
-
-
-    if (profileError) {
-      console.log("Erro saldo:", profileError.message);
-      return;
-    }
-
-
-    setBalance(
-      Number(profile?.voucher_balance || 0)
-    );
-
-
-
-    // BUSCA SAQUES
-    const {
-      data: withdraws,
-      error: withdrawError
-    } = await supabase
-      .from("withdraw_requests")
-      .select("*")
-      .eq("profile_id", user.id)
-      .order("created_at", {
-        ascending:false
-      });
-
-
-    if (withdrawError) {
-      console.log(
-        "Erro histórico:",
-        withdrawError.message
-      );
-      return;
-    }
-
-
-    setHistory(withdraws || []);
-
-
-  } catch(error){
-
-    console.log(
-      "Erro geral:",
-      error
-    );
-
-  }
-}, []);;
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -114,22 +92,27 @@ const fetchData = useCallback(async () => {
     const value = parseFloat(amount.replace(",", "."));
 
     if (!value || value <= 0) return Alert.alert("Erro", "Valor inválido.");
-    if (value > balance) return Alert.alert("Saldo Insuficiente", "Resgate maior que o saldo disponível.");
-    if (pixKey.length < 5) return Alert.alert("Erro", "Informe uma chave PIX válida.");
+    if (value > balance)
+      return Alert.alert(
+        "Saldo Insuficiente",
+        "Resgate maior que o saldo disponível.",
+      );
+    if (pixKey.length < 5)
+      return Alert.alert("Erro", "Informe uma chave PIX válida.");
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // Inserção na tabela que criamos via SQL
-      const { error } = await supabase
-        .from("withdraw_requests")
-        .insert({
-          profile_id: user.id,
-          amount: value,
-          pix_key: pixKey,
-          status: 'pending'
-        });
+      const { error } = await supabase.from("withdraw_requests").insert({
+        profile_id: user.id,
+        amount: value,
+        pix_key: pixKey,
+        status: "pending",
+      });
 
       if (error) throw error;
 
@@ -148,24 +131,31 @@ const fetchData = useCallback(async () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
           <Ionicons name="chevron-back" size={28} color={PALETTE.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>SOLICITAR SAQUE</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* CARD DE SALDO */}
         <View style={styles.megaBalanceCard}>
           <View>
             <Text style={styles.megaLabel}>SALDO TOTAL DISPONÍVEL</Text>
             <Text style={styles.megaValue}>
               <Text style={styles.currency}>R$ </Text>
-              {Number(balance).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {Number(balance).toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+              })}
             </Text>
           </View>
           <View style={styles.cardFooter}>
@@ -197,12 +187,16 @@ const fetchData = useCallback(async () => {
             onChangeText={setPixKey}
           />
 
-          <TouchableOpacity 
-            style={[styles.actionButton, loading && { opacity: 0.7 }]} 
+          <TouchableOpacity
+            style={[styles.actionButton, loading && { opacity: 0.7 }]}
             onPress={handleWithdraw}
             disabled={loading}
           >
-            {loading ? <ActivityIndicator color={PALETTE.dark} /> : <Text style={styles.actionButtonText}>EFETUAR RESGATE</Text>}
+            {loading ? (
+              <ActivityIndicator color={PALETTE.dark} />
+            ) : (
+              <Text style={styles.actionButtonText}>EFETUAR RESGATE</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -212,22 +206,31 @@ const fetchData = useCallback(async () => {
           {history.map((item) => (
             <View key={item.id} style={styles.historyCard}>
               <View>
-                <Text style={styles.historyDate}>{new Date(item.created_at).toLocaleDateString('pt-BR')}</Text>
-              <Text style={styles.historyAmount}>
-R$ {Number(item.amount || 0).toFixed(2)}
-</Text>
+                <Text style={styles.historyDate}>
+                  {new Date(item.created_at).toLocaleDateString("pt-BR")}
+                </Text>
+                <Text style={styles.historyAmount}>
+                  R$ {Number(item.amount || 0).toFixed(2)}
+                </Text>
               </View>
-              <View style={[styles.statusBadge, {backgroundColor: (item.status || "pending") === 'pending'
-  ? '#FF9800'
-  : PALETTE.primary }]}>
-              <Text style={styles.statusText}>
-  {(item.status || "pending").toUpperCase()}
-</Text>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {
+                    backgroundColor:
+                      (item.status || "pending") === "pending"
+                        ? "#FF9800"
+                        : PALETTE.primary,
+                  },
+                ]}
+              >
+                <Text style={styles.statusText}>
+                  {(item.status || "pending").toUpperCase()}
+                </Text>
               </View>
             </View>
           ))}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -235,27 +238,94 @@ R$ {Number(item.amount || 0).toFixed(2)}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: PALETTE.dark },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 10 },
-  headerTitle: { color: PALETTE.white, fontSize: 14, fontWeight: 'bold', letterSpacing: 2 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  headerTitle: {
+    color: PALETTE.white,
+    fontSize: 14,
+    fontWeight: "bold",
+    letterSpacing: 2,
+  },
   scrollContent: { paddingBottom: 40 },
-  megaBalanceCard: { width: width - 40, height: 180, backgroundColor: PALETTE.graphite, alignSelf: 'center', borderRadius: 30, padding: 25, justifyContent: 'space-between', marginTop: 20 },
-  megaLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 'bold' },
-  megaValue: { color: PALETTE.white, fontSize: 38, fontWeight: 'bold' },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  cardBrand: { color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: 2 },
+  megaBalanceCard: {
+    width: width - 40,
+    height: 180,
+    backgroundColor: PALETTE.graphite,
+    alignSelf: "center",
+    borderRadius: 30,
+    padding: 25,
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  megaLabel: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  megaValue: { color: PALETTE.white, fontSize: 38, fontWeight: "bold" },
+  cardFooter: { flexDirection: "row", justifyContent: "space-between" },
+  cardBrand: { color: "rgba(255,255,255,0.3)", fontSize: 9, letterSpacing: 2 },
   form: { paddingHorizontal: 25, marginTop: 30 },
-  fieldLabel: { color: PALETTE.white, fontSize: 10, fontWeight: 'bold', opacity: 0.5, marginBottom: 10 },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.1)' },
+  fieldLabel: {
+    color: PALETTE.white,
+    fontSize: 10,
+    fontWeight: "bold",
+    opacity: 0.5,
+    marginBottom: 10,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
+  },
   prefix: { color: PALETTE.white, fontSize: 20, marginRight: 10 },
-  mainInput: { flex: 1, color: PALETTE.white, fontSize: 32, fontWeight: 'bold' },
-  secondaryInput: { backgroundColor: 'rgba(255,255,255,0.05)', height: 55, borderRadius: 15, paddingHorizontal: 15, color: PALETTE.white },
-  actionButton: { backgroundColor: PALETTE.gold, height: 55, borderRadius: 15, justifyContent: 'center', alignItems: 'center', marginTop: 30 },
-  actionButtonText: { color: PALETTE.dark, fontWeight: 'bold', fontSize: 16 },
+  mainInput: {
+    flex: 1,
+    color: PALETTE.white,
+    fontSize: 32,
+    fontWeight: "bold",
+  },
+  secondaryInput: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    height: 55,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    color: PALETTE.white,
+  },
+  actionButton: {
+    backgroundColor: PALETTE.gold,
+    height: 55,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  actionButtonText: { color: PALETTE.dark, fontWeight: "bold", fontSize: 16 },
   historySection: { marginTop: 40, paddingHorizontal: 25 },
-  sectionTitle: { color: PALETTE.white, fontSize: 12, fontWeight: 'bold', marginBottom: 15, opacity: 0.5 },
-  historyCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', padding: 15, borderRadius: 15, marginBottom: 10 },
-  historyDate: { color: 'rgba(255,255,255,0.4)', fontSize: 10 },
-  historyAmount: { color: '#FFF', fontWeight: 'bold' },
+  sectionTitle: {
+    color: PALETTE.white,
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 15,
+    opacity: 0.5,
+  },
+  historyCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 10,
+  },
+  historyDate: { color: "rgba(255,255,255,0.4)", fontSize: 10 },
+  historyAmount: { color: "#FFF", fontWeight: "bold" },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  statusText: { color: '#FFF', fontSize: 8, fontWeight: 'bold' }
+  statusText: { color: "#FFF", fontSize: 8, fontWeight: "bold" },
 });

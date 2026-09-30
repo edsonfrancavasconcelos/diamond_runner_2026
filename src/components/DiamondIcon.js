@@ -1,8 +1,7 @@
-import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { Ionicons } from "@expo/vector-icons";
 
-
-const GOLD = '#FFD700'; 
+const GOLD = "#FFD700";
 
 export default function DiamondIcon({
   name,
@@ -10,12 +9,5 @@ export default function DiamondIcon({
   color = GOLD, // Now GOLD is correctly referenced
   style,
 }) {
-  return (
-    <Ionicons
-      name={name}
-      size={size}
-      color={color}
-      style={style}
-    />
-  );
+  return <Ionicons name={name} size={size} color={color} style={style} />;
 }

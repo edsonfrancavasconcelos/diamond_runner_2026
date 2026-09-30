@@ -2,8 +2,14 @@
 // Arquivo: src/i18n/context/CountryContext.js
 // Descrição: Gerenciamento global do país/idioma com persistência local (AsyncStorage)
 
-import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const CountryContext = createContext({
   country: null,
@@ -19,12 +25,12 @@ export function CountryProvider({ children }) {
   useEffect(() => {
     async function loadSavedCountry() {
       try {
-        const savedCountry = await AsyncStorage.getItem('APP_COUNTRY');
+        const savedCountry = await AsyncStorage.getItem("APP_COUNTRY");
         if (savedCountry) {
           setCountry(savedCountry);
         }
       } catch (e) {
-        console.error('Erro ao carregar país do AsyncStorage:', e);
+        console.error("Erro ao carregar país do AsyncStorage:", e);
       } finally {
         setLoading(false); // Finaliza o carregamento independente de sucesso ou erro
       }
@@ -32,19 +38,21 @@ export function CountryProvider({ children }) {
     loadSavedCountry();
   }, []);
 
-// Função para mudar o país e salvar permanentemente
-const selectCountry = useCallback(async (countryCode) => {
-  try {
-    const codeFixed = countryCode.toUpperCase(); // Garante 'BR', 'EN' ou 'ES'
-    setCountry(codeFixed);
-    await AsyncStorage.setItem('APP_COUNTRY', codeFixed);
-  } catch (e) {
-    console.error('Erro ao salvar país no AsyncStorage:', e);
-  }
-}, []);
+  // Função para mudar o país e salvar permanentemente
+  const selectCountry = useCallback(async (countryCode) => {
+    try {
+      const codeFixed = countryCode.toUpperCase(); // Garante 'BR', 'EN' ou 'ES'
+      setCountry(codeFixed);
+      await AsyncStorage.setItem("APP_COUNTRY", codeFixed);
+    } catch (e) {
+      console.error("Erro ao salvar país no AsyncStorage:", e);
+    }
+  }, []);
 
-  const contextValue = useMemo(() => ({ country, loading, selectCountry }), [country, loading, selectCountry]);
-
+  const contextValue = useMemo(
+    () => ({ country, loading, selectCountry }),
+    [country, loading, selectCountry],
+  );
 
   return (
     <CountryContext.Provider value={contextValue}>

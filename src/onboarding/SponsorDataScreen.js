@@ -41,36 +41,36 @@ export default function SponsorDataScreen() {
   const [sponsorName, setSponsorName] = useState("");
   const [sponsorId, setSponsorId] = useState("");
   const [loading, setLoading] = useState(false);
-// Dentro da função handleContinue
-async function handleContinue() {
-  if (!sponsorId.trim()) return;
+  // Dentro da função handleContinue
+  async function handleContinue() {
+    if (!sponsorId.trim()) return;
 
-  setLoading(true);
-  try {
-    // Buscamos na tabela PROFILES (mesma tabela)
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, id_dr, full_name") // Pegamos o 'id' (UUID) também!
-      .eq("id_dr", sponsorId.trim().toUpperCase())
-      .maybeSingle();
+    setLoading(true);
+    try {
+      // Buscamos na tabela PROFILES (mesma tabela)
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, id_dr, full_name") // Pegamos o 'id' (UUID) também!
+        .eq("id_dr", sponsorId.trim().toUpperCase())
+        .maybeSingle();
 
-    if (error || !data) {
-      throw new Error("ID de Patrocinador não encontrado no sistema Diamond.");
+      if (error || !data) {
+        throw new Error(
+          "ID de Patrocinador não encontrado no sistema Diamond.",
+        );
+      }
+
+      navigation.navigate("RunnerRegister", {
+        sponsorUuid: data.id,
+        sponsorId: data.id_dr,
+        sponsorName: data.full_name,
+      });
+    } catch (error) {
+      Alert.alert("Verificação", error.message);
+    } finally {
+      setLoading(false);
     }
-
- 
-    navigation.navigate("RunnerRegister", {
-      sponsorUuid: data.id,    
-      sponsorId: data.id_dr,    
-      sponsorName: data.full_name,
-    });
-  } catch (error) {
-    Alert.alert("Verificação", error.message);
-  } finally {
-    setLoading(false);
   }
-}
-
 
   return (
     <KeyboardAvoidingView

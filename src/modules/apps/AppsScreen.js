@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
-import { supabase } from '../../services/supabase';
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { supabase } from "../../services/supabase";
 
 export default function AppsScreen() {
   const [apps, setApps] = useState([]);
@@ -9,18 +9,18 @@ export default function AppsScreen() {
   const loadApps = async () => {
     try {
       const { data, error } = await supabase
-        .from('apps')
-        .select('*')
-        .eq('active', true);
+        .from("apps")
+        .select("*")
+        .eq("active", true);
 
       if (error) {
-        console.log('Erro ao buscar apps:', error);
+        console.log("Erro ao buscar apps:", error);
         return;
       }
 
       setApps(data || []);
     } catch (err) {
-      console.log('Erro inesperado:', err);
+      console.log("Erro inesperado:", err);
     } finally {
       setLoading(false);
     }

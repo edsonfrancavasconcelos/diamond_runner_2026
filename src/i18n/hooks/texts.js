@@ -1,15 +1,55 @@
-
-
 export const welcomeTexts = {
-  BR: { loginButton: 'Sou Diamond Runner', registerButton: 'Quero ser Diamond Runner', changeCountryButton: 'Mudar País', back: 'Voltar' },
-  ES: { loginButton: 'Soy Diamond Runner', registerButton: 'Quiero ser Diamond Runner', changeCountryButton: 'Cambiar País', back: 'Volver' },
-  EN: { loginButton: 'I am Diamond Runner', registerButton: 'I want to be Diamond Runner', changeCountryButton: 'Change Country', back: 'Back' },
+  BR: {
+    loginButton: "Sou Diamond Runner",
+    registerButton: "Quero ser Diamond Runner",
+    changeCountryButton: "Mudar País",
+    back: "Voltar",
+  },
+  ES: {
+    loginButton: "Soy Diamond Runner",
+    registerButton: "Quiero ser Diamond Runner",
+    changeCountryButton: "Cambiar País",
+    back: "Volver",
+  },
+  EN: {
+    loginButton: "I am Diamond Runner",
+    registerButton: "I want to be Diamond Runner",
+    changeCountryButton: "Change Country",
+    back: "Back",
+  },
 };
 
 export const loginTexts = {
-  BR: { title: 'Portal Diamond', subtitle: 'Acesse sua conta para gerenciar seus ativos.', login: 'ID_DR ou E-mail', password: 'Senha', enterButton: 'Entrar', forgotPassword: 'Esqueceu a senha?', firstAccess: 'Primeiro acesso', alertInvalid: 'Credenciais inválidas' },
-  EN: { title: 'Diamond Portal', subtitle: 'Access your account to manage your assets.', login: 'ID_DR or Email', password: 'Password', enterButton: 'Login', forgotPassword: 'Forgot password?', firstAccess: 'First access', alertInvalid: 'Invalid credentials' },
-  ES: { title: 'Portal Diamond', subtitle: 'Acceda a su cuenta para gestionar sus activos.', login: 'ID_DR o Correo', password: 'Contraseña', enterButton: 'Entrar', forgotPassword: '¿Olvidó su contraseña?', firstAccess: 'Primer acceso', alertInvalid: 'Credenciales inválidas' }
+  BR: {
+    title: "Portal Diamond",
+    subtitle: "Acesse sua conta para gerenciar seus ativos.",
+    login: "ID_DR ou E-mail",
+    password: "Senha",
+    enterButton: "Entrar",
+    forgotPassword: "Esqueceu a senha?",
+    firstAccess: "Primeiro acesso",
+    alertInvalid: "Credenciais inválidas",
+  },
+  EN: {
+    title: "Diamond Portal",
+    subtitle: "Access your account to manage your assets.",
+    login: "ID_DR or Email",
+    password: "Password",
+    enterButton: "Login",
+    forgotPassword: "Forgot password?",
+    firstAccess: "First access",
+    alertInvalid: "Invalid credentials",
+  },
+  ES: {
+    title: "Portal Diamond",
+    subtitle: "Acceda a su cuenta para gestionar sus activos.",
+    login: "ID_DR o Correo",
+    password: "Contraseña",
+    enterButton: "Entrar",
+    forgotPassword: "¿Olvidó su contraseña?",
+    firstAccess: "Primer acceso",
+    alertInvalid: "Credenciales inválidas",
+  },
 };
 export const runnerRegisterTexts = {
   BR: {
@@ -62,46 +102,156 @@ export const runnerRegisterTexts = {
     phone: "+34 000 000 000",
     continue: "Continuar al pago",
     securityNote: "Sus datos están protegidos con cifrado SSL 256-bit.",
-  }
+  },
 };
 
-
 export const firstAccessTexts = {
-  BR: { 
-    title: 'ATIVAR ACESSO', idLabel: 'IDENTIFICADOR ATIVO', passLabel: 'NOVA SENHA EXECUTIVA', confirmLabel: 'CONFIRMAR SENHA', button: 'CONCLUIR ATIVAÇÃO',
-    errorTitle: 'Erro', fillAllFields: 'Preencha todos os campos', passwordMin: 'A senha deve ter no mínimo 6 caracteres', passwordMismatch: 'As senhas não coincidem', 
-    successTitle: 'ATIVAÇÃO CONCLUÍDA', successMessage: 'Sua chave executiva foi configurada. Bem-vindo!', enterButton: 'ENTRAR NO OFFICE', securityAuth: 'SISTEMA PROTEGIDO POR SUPABASE AUTH'
+  BR: {
+    title: "ATIVAR ACESSO",
+    idLabel: "IDENTIFICADOR ATIVO",
+    passLabel: "NOVA SENHA EXECUTIVA",
+    confirmLabel: "CONFIRMAR SENHA",
+    button: "CONCLUIR ATIVAÇÃO",
+    errorTitle: "Erro",
+    fillAllFields: "Preencha todos os campos",
+    passwordMin: "A senha deve ter no mínimo 6 caracteres",
+    passwordMismatch: "As senhas não coincidem",
+    successTitle: "ATIVAÇÃO CONCLUÍDA",
+    successMessage: "Sua chave executiva foi configurada. Bem-vindo!",
+    enterButton: "ENTRAR NO OFFICE",
+    securityAuth: "SISTEMA PROTEGIDO POR SUPABASE AUTH",
   },
-  EN: { 
-    title: 'ACTIVATE ACCESS', idLabel: 'ACTIVE IDENTIFIER', passLabel: 'NEW EXECUTIVE PASSWORD', confirmLabel: 'CONFIRM PASSWORD', button: 'COMPLETE ACTIVATION',
-    errorTitle: 'Error', fillAllFields: 'Fill in all fields', passwordMin: 'Password must be at least 6 characters', passwordMismatch: 'Passwords do not match', 
-    successTitle: 'ACTIVATION COMPLETED', successMessage: 'Your executive key has been configured. Welcome!', enterButton: 'ENTER OFFICE', securityAuth: 'SYSTEM PROTECTED BY SUPABASE AUTH'
+  EN: {
+    title: "ACTIVATE ACCESS",
+    idLabel: "ACTIVE IDENTIFIER",
+    passLabel: "NEW EXECUTIVE PASSWORD",
+    confirmLabel: "CONFIRM PASSWORD",
+    button: "COMPLETE ACTIVATION",
+    errorTitle: "Error",
+    fillAllFields: "Fill in all fields",
+    passwordMin: "Password must be at least 6 characters",
+    passwordMismatch: "Passwords do not match",
+    successTitle: "ACTIVATION COMPLETED",
+    successMessage: "Your executive key has been configured. Welcome!",
+    enterButton: "ENTER OFFICE",
+    securityAuth: "SYSTEM PROTECTED BY SUPABASE AUTH",
   },
-  ES: { 
-    title: 'ACTIVAR ACCESO', idLabel: 'ACTIVADOR ACTIVO', passLabel: 'NUEVA CONTRASEÑA EJECUTIVA', confirmLabel: 'CONFIRMAR CONTRASEÑA', button: 'CONCLUIR ACTIVACIÓN',
-    errorTitle: 'Error', fillAllFields: 'Complete todos los campos', passwordMin: 'La contraseña debe tener al menos 6 caracteres', passwordMismatch: 'Las contraseñas no coinciden', 
-    successTitle: 'ACTIVACIÓN COMPLETADA', successMessage: 'Su clave ejecutiva ha sido configurada. ¡Bienvenido!', enterButton: 'ENTRAR AL OFFICE', securityAuth: 'SISTEMA PROTEGIDO POR SUPABASE AUTH'
+  ES: {
+    title: "ACTIVAR ACCESO",
+    idLabel: "ACTIVADOR ACTIVO",
+    passLabel: "NUEVA CONTRASEÑA EJECUTIVA",
+    confirmLabel: "CONFIRMAR CONTRASEÑA",
+    button: "CONCLUIR ACTIVACIÓN",
+    errorTitle: "Error",
+    fillAllFields: "Complete todos los campos",
+    passwordMin: "La contraseña debe tener al menos 6 caracteres",
+    passwordMismatch: "Las contraseñas no coinciden",
+    successTitle: "ACTIVACIÓN COMPLETADA",
+    successMessage: "Su clave ejecutiva ha sido configurada. ¡Bienvenido!",
+    enterButton: "ENTRAR AL OFFICE",
+    securityAuth: "SISTEMA PROTEGIDO POR SUPABASE AUTH",
   },
 };
 
 export const chooseSponsorTexts = {
-  BR: { tagline: 'Etapa de Admissão', title: 'Escolher Patrocinador', subtitle: 'Selecione sua forma de entrada no ecossistema Diamond.', hasSponsor: 'Já tenho patrocinador', noSponsor: 'Não tenho patrocinador', selectedCountry: 'País selecionado', back: 'Voltar', footer: 'Protocolos de Afiliação Ativos 2026' },
-  ES: { tagline: 'Etapa de Admisión', title: 'Elegir Patrocinador', subtitle: 'Selecciona tu forma de entrar en el ecosistema Diamond.', hasSponsor: 'Ya tengo patrocinador', noSponsor: 'No tengo patrocinador', selectedCountry: 'País seleccionado', back: 'Volver', footer: 'Protocolos de Afiliación Ativos 2026' },
-  EN: { tagline: 'Admission Step', title: 'Choose Sponsor', subtitle: 'Select your way to enter the Diamond ecosystem.', hasSponsor: 'I already have a sponsor', noSponsor: "I don't have a sponsor", selectedCountry: 'Selected country', back: 'Back', footer: 'Active Affiliation Protocols 2026' },
+  BR: {
+    tagline: "Etapa de Admissão",
+    title: "Escolher Patrocinador",
+    subtitle: "Selecione sua forma de entrada no ecossistema Diamond.",
+    hasSponsor: "Já tenho patrocinador",
+    noSponsor: "Não tenho patrocinador",
+    selectedCountry: "País selecionado",
+    back: "Voltar",
+    footer: "Protocolos de Afiliação Ativos 2026",
+  },
+  ES: {
+    tagline: "Etapa de Admisión",
+    title: "Elegir Patrocinador",
+    subtitle: "Selecciona tu forma de entrar en el ecosistema Diamond.",
+    hasSponsor: "Ya tengo patrocinador",
+    noSponsor: "No tengo patrocinador",
+    selectedCountry: "País seleccionado",
+    back: "Volver",
+    footer: "Protocolos de Afiliación Ativos 2026",
+  },
+  EN: {
+    tagline: "Admission Step",
+    title: "Choose Sponsor",
+    subtitle: "Select your way to enter the Diamond ecosystem.",
+    hasSponsor: "I already have a sponsor",
+    noSponsor: "I don't have a sponsor",
+    selectedCountry: "Selected country",
+    back: "Back",
+    footer: "Active Affiliation Protocols 2026",
+  },
 };
 
 export const hasSponsorTexts = {
-  BR: { headerTag: 'VALIDAÇÃO', title: 'QUEM INDICOU VOCÊ?', subtitle: 'Insira as credenciais do seu patrocinador.', labelId: 'ID DO PATROCINADOR', sponsorId: 'ID_DR do patrocinador', labelName: 'NOME DO PATROCINADOR', sponsorName: 'Nome completo', continue: 'Continuar', infoNote: 'O código de indicação é obrigatório.' },
-  EN: { headerTag: 'VALIDATION', title: 'WHO REFERRED YOU?', subtitle: 'Enter your sponsor credentials to proceed.', labelId: 'SPONSOR ID', sponsorId: 'Sponsor ID_DR', labelName: 'SPONSOR NAME', sponsorName: 'Full name', continue: 'Continue', infoNote: 'Referral code is mandatory.' },
-  ES: { headerTag: 'VALIDACIÓN', title: '¿QUIÉN TE RECOMIENDA?', subtitle: 'Ingrese las credenciales de su patrocinador.', labelId: 'ID PATROCINADOR', sponsorId: 'ID_DR del patrocinador', labelName: 'NOMBRE PATROCINADOR', sponsorName: 'Nombre completo', continue: 'Continuar', infoNote: 'El código es obligatorio.' },
+  BR: {
+    headerTag: "VALIDAÇÃO",
+    title: "QUEM INDICOU VOCÊ?",
+    subtitle: "Insira as credenciais do seu patrocinador.",
+    labelId: "ID DO PATROCINADOR",
+    sponsorId: "ID_DR do patrocinador",
+    labelName: "NOME DO PATROCINADOR",
+    sponsorName: "Nome completo",
+    continue: "Continuar",
+    infoNote: "O código de indicação é obrigatório.",
+  },
+  EN: {
+    headerTag: "VALIDATION",
+    title: "WHO REFERRED YOU?",
+    subtitle: "Enter your sponsor credentials to proceed.",
+    labelId: "SPONSOR ID",
+    sponsorId: "Sponsor ID_DR",
+    labelName: "SPONSOR NAME",
+    sponsorName: "Full name",
+    continue: "Continue",
+    infoNote: "Referral code is mandatory.",
+  },
+  ES: {
+    headerTag: "VALIDACIÓN",
+    title: "¿QUIÉN TE RECOMIENDA?",
+    subtitle: "Ingrese las credenciales de su patrocinador.",
+    labelId: "ID PATROCINADOR",
+    sponsorId: "ID_DR del patrocinador",
+    labelName: "NOMBRE PATROCINADOR",
+    sponsorName: "Nombre completo",
+    continue: "Continuar",
+    infoNote: "El código es obligatorio.",
+  },
 };
 
 export const findSponsorTexts = {
-  BR: { title: "Encontrar Patrocinador", introTitle: "Precisa de um Patrocinador?", introSubtitle1: "Para ser um Distribuidor e acessar o plano binário, você precisa estar vinculado a um líder.", introSubtitle2: "Nossa central indicará o melhor patrocinador para sua região.", dataLabel: "DADOS NECESSÁRIOS:", fields: ["Nome Completo", "Cidade/Estado", "Telefone de Contato"], info: "Ao clicar, você será redirecionado para o suporte oficial.", openEmail: "Solicitar por E-mail", openWhatsApp: "Chamar no WhatsApp", back: "Voltar para Perfis" },
-  EN: { title: "Find a Sponsor", introTitle: "Need a Sponsor?", introSubtitle1: "To be a Distributor and access the binary plan, you need to be linked to a leader.", introSubtitle2: "Our center will indicate the best sponsor for your region.", dataLabel: "REQUIRED DATA:", fields: ["Full Name", "City/State", "Contact Phone"], info: "By clicking, you will be redirected to official support.", openEmail: "Request by Email", openWhatsApp: "Call on WhatsApp", back: "Back to Profiles" }
+  BR: {
+    title: "Encontrar Patrocinador",
+    introTitle: "Precisa de um Patrocinador?",
+    introSubtitle1:
+      "Para ser um Distribuidor e acessar o plano binário, você precisa estar vinculado a um líder.",
+    introSubtitle2:
+      "Nossa central indicará o melhor patrocinador para sua região.",
+    dataLabel: "DADOS NECESSÁRIOS:",
+    fields: ["Nome Completo", "Cidade/Estado", "Telefone de Contato"],
+    info: "Ao clicar, você será redirecionado para o suporte oficial.",
+    openEmail: "Solicitar por E-mail",
+    openWhatsApp: "Chamar no WhatsApp",
+    back: "Voltar para Perfis",
+  },
+  EN: {
+    title: "Find a Sponsor",
+    introTitle: "Need a Sponsor?",
+    introSubtitle1:
+      "To be a Distributor and access the binary plan, you need to be linked to a leader.",
+    introSubtitle2:
+      "Our center will indicate the best sponsor for your region.",
+    dataLabel: "REQUIRED DATA:",
+    fields: ["Full Name", "City/State", "Contact Phone"],
+    info: "By clicking, you will be redirected to official support.",
+    openEmail: "Request by Email",
+    openWhatsApp: "Call on WhatsApp",
+    back: "Back to Profiles",
+  },
 };
-
-
 
 export const profileTexts = {
   BR: {
@@ -112,11 +262,10 @@ export const profileTexts = {
       starting: "A partir de",
     },
     types: {
-    
       afiliado: "AFILIADO",
       afiliadoDesc: "Indique e ganhe bônus diretos na rede.",
       distribuidor: "DISTRIBUIDOR",
-      distribuidorDesc: "Plano completo com binário e liderança."
+      distribuidorDesc: "Plano completo com binário e liderança.",
     },
     action: "PRECISA DE UM CONVITE?",
     localization: {
@@ -134,14 +283,13 @@ export const profileTexts = {
       starting: "Starting at",
     },
     types: {
-     
       afiliado: "AFFILIATE",
       afiliadoDesc: "Refer and earn direct network bonuses.",
       distribuidor: "DISTRIBUTOR",
-      distribuidorDesc: "Full plan with binary and leadership bonuses."
+      distribuidorDesc: "Full plan with binary and leadership bonuses.",
     },
     action: "INVITATION REQUIRED?",
-    localization: { 
+    localization: {
       locale: "en-US",
       currency: "USD",
       symbol: "$",
@@ -156,38 +304,91 @@ export const profileTexts = {
       starting: "A partir de",
     },
     types: {
-      
       afiliado: "AFILIADO",
       afiliadoDesc: "Refiera y gane bonos directos en la red.",
       distribuidor: "DISTRIBUIDOR",
-      distribuidorDesc: "Plan completo con binario y liderazgo."
+      distribuidorDesc: "Plan completo con binario y liderazgo.",
     },
     action: "¿NECESITA UMA INVITACIÓN?",
-    localization: { 
-      locale: "es-ES", 
+    localization: {
+      locale: "es-ES",
       currency: "USD",
-      symbol: "$",   
-      rateToBRL: 0.18, 
+      symbol: "$",
+      rateToBRL: 0.18,
     },
   },
 };
 
 export const packagesTexts = {
- BR: { 
-    title: "PACOTES E UPGRADES 2026", subtitle: "Escolha seu nível de negócio ou evolução", select: "SELECIONAR", upgrade: "UPGRADE PARA", builderName: "PACOTE BUILDER", primeName: "PACOTE PRIME", eliteName: "PACOTE ELITE", vouchers: "Vouchers de Aplicativos", pontosBase: "Pontos Base",
-    btnAdesao: "ADQUIRIR ADESÃO R$ ", btnEliteUpgrade: "UPGRADE PRIME PARA ELITE R$ ", btnBuilderElite: "UPGRADE BUILDER PARA ELITE R$ ",
-    geraPontos: "Gera +", rede: "Pontos na Rede", footer: "* Todos os botões redirecionam para o checkout oficial 2026.", benefits: { points: "Pontos", binary: "Teto Binário", direct: "Indicação", store: "Loja Ativa" } 
+  BR: {
+    title: "PACOTES E UPGRADES 2026",
+    subtitle: "Escolha seu nível de negócio ou evolução",
+    select: "SELECIONAR",
+    upgrade: "UPGRADE PARA",
+    builderName: "PACOTE BUILDER",
+    primeName: "PACOTE PRIME",
+    eliteName: "PACOTE ELITE",
+    vouchers: "Vouchers de Aplicativos",
+    pontosBase: "Pontos Base",
+    btnAdesao: "ADQUIRIR ADESÃO R$ ",
+    btnEliteUpgrade: "UPGRADE PRIME PARA ELITE R$ ",
+    btnBuilderElite: "UPGRADE BUILDER PARA ELITE R$ ",
+    geraPontos: "Gera +",
+    rede: "Pontos na Rede",
+    footer: "* Todos os botões redirecionam para o checkout oficial 2026.",
+    benefits: {
+      points: "Pontos",
+      binary: "Teto Binário",
+      direct: "Indicação",
+      store: "Loja Ativa",
+    },
   },
-  EN: { 
-    title: "DIAMOND PACKS 2026", subtitle: "Choose your business level or evolution", select: "SELECT", upgrade: "UPGRADE TO", builderName: "BUILDER PACK", primeName: "PRIME PACK", eliteName: "ELITE PACK", vouchers: "App Vouchers", pontosBase: "Base Points",
-    btnAdesao: "ACQUIRE MEMBERSHIP $", btnEliteUpgrade: "UPGRADE PRIME TO ELITE $", btnBuilderElite: "UPGRADE BUILDER TO ELITE $",
-    geraPontos: "Generates +", rede: "Network Points", footer: "* All buttons redirect to the official 2026 checkout.", benefits: { points: "Points", binary: "Binary Limit", direct: "Referral", store: "Active Store" } 
+  EN: {
+    title: "DIAMOND PACKS 2026",
+    subtitle: "Choose your business level or evolution",
+    select: "SELECT",
+    upgrade: "UPGRADE TO",
+    builderName: "BUILDER PACK",
+    primeName: "PRIME PACK",
+    eliteName: "ELITE PACK",
+    vouchers: "App Vouchers",
+    pontosBase: "Base Points",
+    btnAdesao: "ACQUIRE MEMBERSHIP $",
+    btnEliteUpgrade: "UPGRADE PRIME TO ELITE $",
+    btnBuilderElite: "UPGRADE BUILDER TO ELITE $",
+    geraPontos: "Generates +",
+    rede: "Network Points",
+    footer: "* All buttons redirect to the official 2026 checkout.",
+    benefits: {
+      points: "Points",
+      binary: "Binary Limit",
+      direct: "Referral",
+      store: "Active Store",
+    },
   },
-   ES: { 
-    title: "PAQUETES DIAMOND 2026", subtitle: "Elija su nivel de negocio o evolución", select: "SELECCIONAR", upgrade: "UPGRADE PARA", builderName: "PAQUETE BUILDER", primeName: "PAQUETE PRIME", eliteName: "PAQUETE ELITE", vouchers: "Vouchers de Aplicaciones", pontosBase: "Puntos Base",
-    btnAdesao: "ADQUIRIR AFILIACIÓN €", btnEliteUpgrade: "UPGRADE PRIME PARA ELITE €", btnBuilderElite: "UPGRADE BUILDER PARA ELITE €",
-    geraPontos: "Genera +", rede: "Puntos en Red", footer: "* Todos los botones redirigen al checkout oficial 2026.", benefits: { points: "Puntos", binary: "Techo Binario", direct: "Referencia", store: "Tienda Activa" } 
-  }
+  ES: {
+    title: "PAQUETES DIAMOND 2026",
+    subtitle: "Elija su nivel de negocio o evolución",
+    select: "SELECCIONAR",
+    upgrade: "UPGRADE PARA",
+    builderName: "PAQUETE BUILDER",
+    primeName: "PAQUETE PRIME",
+    eliteName: "PAQUETE ELITE",
+    vouchers: "Vouchers de Aplicaciones",
+    pontosBase: "Puntos Base",
+    btnAdesao: "ADQUIRIR AFILIACIÓN €",
+    btnEliteUpgrade: "UPGRADE PRIME PARA ELITE €",
+    btnBuilderElite: "UPGRADE BUILDER PARA ELITE €",
+    geraPontos: "Genera +",
+    rede: "Puntos en Red",
+    footer: "* Todos los botones redirigen al checkout oficial 2026.",
+    benefits: {
+      points: "Puntos",
+      binary: "Techo Binario",
+      direct: "Referencia",
+      store: "Tienda Activa",
+    },
+  },
 };
 
 export const officeTexts = {
@@ -269,35 +470,35 @@ export const officeTexts = {
 
 export const dashboardTexts = {
   BR: {
-    balanceLabel: 'SALDO DISPONÍVEL',
-    network: 'MINHA REDE',
-    progress: 'PROGRESSO',
-    pendingPayment: 'PAGAMENTO PENDENTE',
-    waitingActivation: 'AGUARDANDO ATIVAÇÃO',
-    newExecutive: 'NOVO EXECUTIVO',
-    currency: 'BRL',
-    locale: 'pt-BR'
+    balanceLabel: "SALDO DISPONÍVEL",
+    network: "MINHA REDE",
+    progress: "PROGRESSO",
+    pendingPayment: "PAGAMENTO PENDENTE",
+    waitingActivation: "AGUARDANDO ATIVAÇÃO",
+    newExecutive: "NOVO EXECUTIVO",
+    currency: "BRL",
+    locale: "pt-BR",
   },
   US: {
-    balanceLabel: 'AVAILABLE BALANCE',
-    network: 'MY NETWORK',
-    progress: 'PROGRESS',
-    pendingPayment: 'PENDING PAYMENT',
-    waitingActivation: 'WAITING ACTIVATION',
-    newExecutive: 'NEW EXECUTIVE',
-    currency: 'USD',
-    locale: 'en-US'
+    balanceLabel: "AVAILABLE BALANCE",
+    network: "MY NETWORK",
+    progress: "PROGRESS",
+    pendingPayment: "PENDING PAYMENT",
+    waitingActivation: "WAITING ACTIVATION",
+    newExecutive: "NEW EXECUTIVE",
+    currency: "USD",
+    locale: "en-US",
   },
   ES: {
-    balanceLabel: 'SALDO DISPONIBLE',
-    network: 'MI RED',
-    progress: 'PROGRESO',
-    pendingPayment: 'PAGO PENDIENTE',
-    waitingActivation: 'ESPERANDO ACTIVACIÓN',
-    newExecutive: 'NUEVO EJECUTIVO',
-    currency: 'USD',
-    locale: 'es-ES'
-  }
+    balanceLabel: "SALDO DISPONIBLE",
+    network: "MI RED",
+    progress: "PROGRESO",
+    pendingPayment: "PAGO PENDIENTE",
+    waitingActivation: "ESPERANDO ACTIVACIÓN",
+    newExecutive: "NUEVO EJECUTIVO",
+    currency: "USD",
+    locale: "es-ES",
+  },
 };
 export const networkTexts = {
   BR: {
@@ -341,7 +542,7 @@ export const networkTexts = {
     spilloverEsq: "IZQ",
     spilloverDir: "DER",
     spilloverAuto: "AUTO",
-  }
+  },
 };
 export const newsTexts = {
   BR: {
@@ -364,7 +565,7 @@ export const newsTexts = {
     readMore: "Leer más",
     lastUpdate: "Última actualización:",
     important: "IMPORTANTE",
-  }
+  },
 };
 export const progressTexts = {
   BR: {
@@ -377,7 +578,7 @@ export const progressTexts = {
     missing: "Faltam",
     pointsSuffix: "PV (Pontos)",
     ranks: ["EXECUTIVO", "BRONZE", "PRATA", "OURO", "RUBI", "DIAMANTE"],
-    diamondVolume: "Volume de Diamante"
+    diamondVolume: "Volume de Diamante",
   },
   EN: {
     title: "My Progress",
@@ -389,7 +590,7 @@ export const progressTexts = {
     missing: "Missing",
     pointsSuffix: "PV (Points)",
     ranks: ["EXECUTIVE", "BRONZE", "SILVER", "GOLD", "RUBY", "DIAMOND"],
-    diamondVolume: "Diamond Volume"
+    diamondVolume: "Diamond Volume",
   },
   ES: {
     title: "Mi Progreso",
@@ -401,8 +602,8 @@ export const progressTexts = {
     missing: "Faltan",
     pointsSuffix: "PV (Puntos)",
     ranks: ["EJECUTIVO", "BRONZE", "PLATA", "ORO", "RUBÍ", "DIAMANTE"],
-    diamondVolume: "Volumen de Diamante"
-  }
+    diamondVolume: "Volumen de Diamante",
+  },
 };
 export const prowayTexts = {
   BR: {
@@ -446,20 +647,46 @@ export const prowayTexts = {
     course1: "Mentalidad Diamante 2026",
     course2: "Estrategia de Ventas 2.0",
     course3: "Liderazgo Global",
-  }
+  },
 };
 
-
 export const earningsTexts = {
-  BR: { title: 'FINANCEIRO', available: 'SALDO DISPONÍVEL', directs: 'DIRETOS', leadershipBonus: 'BÔNUS LIDERANÇA', history: 'HISTÓRICO', network: 'EQUIPE', locale: 'pt-BR', currency: 'BRL' },
-  EN: { title: 'FINANCIAL', available: 'AVAILABLE BALANCE', directs: 'DIRECTS', leadershipBonus: 'LEADERSHIP BONUS', history: 'HISTORY', network: 'TEAM', locale: 'en-US', currency: 'USD' },
-  ES: { title: 'FINANCIERO', available: 'SALDO DISPONIBLE', directs: 'DIRECTOS', leadershipBonus: 'BONO LIDERAZGO', history: 'HISTORIAL', network: 'EQUIPO', locale: 'es-ES', currency: 'USD' }
+  BR: {
+    title: "FINANCEIRO",
+    available: "SALDO DISPONÍVEL",
+    directs: "DIRETOS",
+    leadershipBonus: "BÔNUS LIDERANÇA",
+    history: "HISTÓRICO",
+    network: "EQUIPE",
+    locale: "pt-BR",
+    currency: "BRL",
+  },
+  EN: {
+    title: "FINANCIAL",
+    available: "AVAILABLE BALANCE",
+    directs: "DIRECTS",
+    leadershipBonus: "LEADERSHIP BONUS",
+    history: "HISTORY",
+    network: "TEAM",
+    locale: "en-US",
+    currency: "USD",
+  },
+  ES: {
+    title: "FINANCIERO",
+    available: "SALDO DISPONIBLE",
+    directs: "DIRECTOS",
+    leadershipBonus: "BONO LIDERAZGO",
+    history: "HISTORIAL",
+    network: "EQUIPO",
+    locale: "es-ES",
+    currency: "USD",
+  },
 };
 export const marketingTexts = {
   BR: {
     locale: "pt-BR",
     currency: "R$",
-    rateToBRL: 1, 
+    rateToBRL: 1,
     title: "PLANO DE MARKETING OFICIAL 2026",
     resaleBonus: "Bônus de Revenda (Base)",
     valueApp: "por app",
@@ -467,7 +694,8 @@ export const marketingTexts = {
     directReferral: "Indicação Direta",
     level: "Nível",
     binaryBonus: "Bônus Binário",
-    calculatedOnSmallerLeg: "Calculado sobre o volume da perna menor. Pagamento semanal.",
+    calculatedOnSmallerLeg:
+      "Calculado sobre o volume da perna menor. Pagamento semanal.",
     entryPackages: "Pacotes de Entrada",
     registrationTypes: "Tipos de Cadastro",
     noCommission: "Sem comissão",
@@ -505,11 +733,11 @@ export const marketingTexts = {
       bronze: "Ativo + 4 Diretos + 1 Runner",
       silver: "Ativo + 9 Diretos + 2 Bronze",
       gold: "Ativo + 30 Diretos + 2 Silver",
-      diamond: "Ativo + 2 Gold"
-    }
+      diamond: "Ativo + 2 Gold",
+    },
   },
   EN: {
-     locale: "en-US",
+    locale: "en-US",
     currency: "$",
     rateToBRL: 0.18,
     title: "OFFICIAL MARKETING PLAN 2026",
@@ -556,11 +784,11 @@ export const marketingTexts = {
       bronze: "Active + 4 Directs + 1 Runner",
       silver: "Active + 9 Directs + 2 Bronze",
       gold: "Active + 30 Directs + 2 Silver",
-      diamond: "Active + 2 Gold"
-    }
+      diamond: "Active + 2 Gold",
+    },
   },
   ES: {
-     locale: "en-US",
+    locale: "en-US",
     currency: "$",
     rateToBRL: 0.18,
     title: "PLAN DE MARKETING OFICIAL 2026",
@@ -570,7 +798,8 @@ export const marketingTexts = {
     directReferral: "Referido Directo",
     level: "Nivel",
     binaryBonus: "Bono Binario",
-    calculatedOnSmallerLeg: "Calculado sobre el volumen de la pierna menor. Pago semanal.",
+    calculatedOnSmallerLeg:
+      "Calculado sobre el volumen de la pierna menor. Pago semanal.",
     entryPackages: "Paquetes de Entrada",
     registrationTypes: "Tipos de Registro",
     noCommission: "Sin comisión",
@@ -607,9 +836,9 @@ export const marketingTexts = {
       bronze: "Activo + 4 Directos + 1 Runner",
       silver: "Activo + 9 Directos + 2 Bronze",
       gold: "Activo + 30 Directos + 2 Silver",
-      diamond: "Activo + 2 Gold"
-    }
-  }
+      diamond: "Activo + 2 Gold",
+    },
+  },
 };
 
 export const paymentTexts = {
@@ -632,16 +861,15 @@ export const paymentTexts = {
     pointsText: "Pontuação",
 
     locale: "pt-BR",
-    currency: "R$", 
+    currency: "R$",
     symbol: "R$",
-    rateToBRL: 1, 
-   
+    rateToBRL: 1,
   },
   EN: {
     // Textos de UI
     tagline: "EXECUTIVE ACTIVATION",
     title: "MEMBERSHIP PAYMENT",
-    planExecutive: "EXECUTIVE PLAN", 
+    planExecutive: "EXECUTIVE PLAN",
     payNow: "PAY NOW",
     price: "299",
     benefit1: "Full access to Virtual Office",
@@ -658,13 +886,12 @@ export const paymentTexts = {
     locale: "en-US",
     currency: "USD",
     symbol: "$",
-    rateToBRL: 0.18, 
-   
+    rateToBRL: 0.18,
   },
   ES: {
     tagline: "ACTIVACIÓN EJECUTIVA",
     title: "PAGO DE ADHESIÓN",
-    planExecutive: "PLAN EJECUTIVO", 
+    planExecutive: "PLAN EJECUTIVO",
     payNow: "PAGAR AHORA",
     price: "299",
     benefit1: "Acceso total a la Oficina Virtual",
@@ -678,13 +905,9 @@ export const paymentTexts = {
     upgradeTitle: "ACTUALIZACIÓN DE PLAN",
     pointsText: "Puntos",
 
-    locale: "es-ES", 
-    currency: "USD", 
-    symbol: "$", 
-    rateToBRL: 0.18, 
-  }
+    locale: "es-ES",
+    currency: "USD",
+    symbol: "$",
+    rateToBRL: 0.18,
+  },
 };
-
-
-
-

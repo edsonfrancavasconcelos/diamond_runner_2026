@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -95,14 +94,12 @@ export default function WelcomeScreen() {
 
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-      <Image
-  source={
-    require("../assets/images/logodiamond.png")
-  }
-  
-  style={styles.logo}
-  resizeMode="contain"
-/>
+          <Image
+            source={require("../assets/images/logodiamond.png")}
+
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.welcomeHeader}>
@@ -155,9 +152,7 @@ export default function WelcomeScreen() {
             title={String(texts.registerButton || "CADASTRAR").toUpperCase()}
             variant="outline"
             onPress={() =>
-              country
-                ? navigation.navigate("HasSponsor")
-                : setShowModal(true)
+              country ? navigation.navigate("HasSponsor") : setShowModal(true)
             }
             style={{
               borderColor: PALETTE.primary,

@@ -1,31 +1,24 @@
-const API_URL =
-  "https://diamond-runner-backend.onrender.com";
-
+const API_URL = "https://diamond-runner-backend.onrender.com";
 
 export const createCheckoutSession = async (
   planName,
   email,
-  extraData = {}
+  extraData = {},
 ) => {
   try {
+    const response = await fetch(`${API_URL}/api/payments/checkout`, {
+      method: "POST",
 
-    const response = await fetch(
-      `${API_URL}/api/payments/checkout`,
-      {
-        method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          planName,
-          email,
-          ...extraData,
-        }),
-      }
-    );
-
+      body: JSON.stringify({
+        planName,
+        email,
+        ...extraData,
+      }),
+    });
 
     const text = await response.text();
 
@@ -39,35 +32,22 @@ export const createCheckoutSession = async (
       };
     }
 
-
     if (!response.ok) {
       throw new Error(
-        data.message ||
-        data.error ||
-        `Erro HTTP ${response.status}`
+        data.message || data.error || `Erro HTTP ${response.status}`,
       );
     }
-
 
     if (!data.url) {
-      throw new Error(
-        "Stripe não retornou URL de checkout"
-      );
+      throw new Error("Stripe não retornou URL de checkout");
     }
-
 
     return {
       url: data.url,
       sessionId: data.sessionId || null,
     };
-
-
   } catch (error) {
-
-    console.error(
-      "❌ Erro createCheckoutSession:",
-      error
-    );
+    console.error("❌ Erro createCheckoutSession:", error);
 
     throw error;
   }

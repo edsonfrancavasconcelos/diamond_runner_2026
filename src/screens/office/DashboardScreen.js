@@ -1,9 +1,6 @@
-import {
-  useNavigation,
-} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
-
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
@@ -23,7 +20,7 @@ import { supabase } from "../../services/supabase";
 
 const PALETTE = {
   primary: "#2c94bc",
- dark: "#14508f",
+  dark: "#14508f",
   gold: "#FFD700",
   white: "#FFFFFF",
   gray: "#a4bccc",
@@ -43,23 +40,23 @@ export default function DashboardScreen() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-const [userData, setUserData] = useState({
-  fullName: "CARREGANDO...",
-  idDr: null,
-  balance: 0,
-  networkCount: 0,
-  status: "PENDING",
-  isPending: true,
-  isAdmin: false,
-  rankName: "CONSULTOR",
-  avatarUrl: null,
-  points: 0,
-  email: "",
-  documentId: "",
-});
+  const [userData, setUserData] = useState({
+    fullName: "CARREGANDO...",
+    idDr: null,
+    balance: 0,
+    networkCount: 0,
+    status: "PENDING",
+    isPending: true,
+    isAdmin: false,
+    rankName: "CONSULTOR",
+    avatarUrl: null,
+    points: 0,
+    email: "",
+    documentId: "",
+  });
 
   const fetchDashboardData = useCallback(async function loadDashboardData(
-    retryCount = 0
+    retryCount = 0,
   ) {
     try {
       const {
@@ -70,7 +67,8 @@ const [userData, setUserData] = useState({
 
       const { data: profile, error } = await supabase
         .from("profiles")
-        .select(`
+        .select(
+          `
     full_name,
     id_dr,
     status,
@@ -82,78 +80,75 @@ const [userData, setUserData] = useState({
     document_id,
     voucher_balance,
     level
-  `)
-  .eq("id", user.id)
-  .single();
+  `,
+        )
+        .eq("id", user.id)
+        .single();
 
-if (error) {
-  console.log(error);
-  return;
-}
+      if (error) {
+        console.log(error);
+        return;
+      }
 
-     let networkCount = 0;
+      let networkCount = 0;
 
-if (profile) {
+      if (profile) {
+        const { data: network, error: networkError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("sponsor_id", user.id);
 
-  const { data: network, error: networkError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("sponsor_id", user.id);
+        if (networkError) {
+          console.log("Erro ao carregar rede:", networkError.message);
+        } else {
+          networkCount = network?.length || 0;
+        }
+      }
 
-  if (networkError) {
-    console.log("Erro ao carregar rede:", networkError.message);
-  } else {
-    networkCount = network?.length || 0;
-  }
+      const statusRaw = String(profile?.status || "")
+        .trim()
+        .toUpperCase();
 
-}
+      const isAdmin =
+        profile?.role === "admin" ||
+        profile?.id_dr === "DR8602" ||
+        profile?.id_dr === "DR8603";
 
-const statusRaw = String(profile?.status || "")
-  .trim()
-  .toUpperCase();
+      const isPending =
+        !isAdmin &&
+        (!profile?.id_dr ||
+          profile?.is_active !== true ||
+          statusRaw !== "ATIVO");
 
-const isAdmin =
-  profile?.role === "admin" ||
-  profile?.id_dr === "DR8602" ||
-  profile?.id_dr === "DR8603";
+      setUserData({
+        fullName: (
+          profile?.full_name ||
+          user?.user_metadata?.full_name ||
+          "NOVO MEMBRO"
+        ).toUpperCase(),
 
-const isPending = !isAdmin && (
-  !profile?.id_dr ||
-  profile?.is_active !== true ||
-  statusRaw !== "ATIVO"
-);
+        idDr: profile?.id_dr || null,
 
-  setUserData({
-  fullName: (
-    profile?.full_name ||
-    user?.user_metadata?.full_name ||
-    "NOVO MEMBRO"
-  ).toUpperCase(),
+        balance: Number(profile?.voucher_balance || 0),
 
-  idDr: profile?.id_dr || null,
+        networkCount,
 
-balance: Number(profile?.voucher_balance || 0),
+        status: isPending ? "PENDING" : "ATIVO",
 
-  networkCount,
+        isPending,
 
-  status: isPending ? "PENDING" : "ATIVO",
+        isAdmin,
 
-  isPending,
+        rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
 
-  isAdmin,
+        avatarUrl: profile?.avatar_url || null,
 
-  rankName: (
-    profile?.plan_name || "DISTRIBUIDOR"
-  ).toUpperCase(),
+        points: profile?.points_total || 0,
 
-  avatarUrl: profile?.avatar_url || null,
+        email: profile?.email || user?.email || "",
 
-  points: profile?.points_total || 0,
-
-  email: profile?.email || user?.email || "",
-
-  documentId: profile?.document_id || "",
-});;
+        documentId: profile?.document_id || "",
+      });
     } catch (e) {
       console.log("Erro ao carregar Dashboard:", e.message);
     } finally {
@@ -231,12 +226,12 @@ balance: Number(profile?.voucher_balance || 0),
           ]}
         >
           {userData.avatarUrl ? (
-<Image
-  source={{
-    uri: `${userData.avatarUrl}?t=${Date.now()}`
-  }}
-  style={styles.avatarImg}
-/>
+            <Image
+              source={{
+                uri: `${userData.avatarUrl}?t=${Date.now()}`,
+              }}
+              style={styles.avatarImg}
+            />
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarLetter}>
@@ -258,7 +253,7 @@ balance: Number(profile?.voucher_balance || 0),
         }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
+          { useNativeDriver: false },
         )}
         refreshControl={
           <RefreshControl
@@ -289,17 +284,16 @@ balance: Number(profile?.voucher_balance || 0),
                 </Text>
               </Text>
             </View>
-<Image
-source={DiamondLogoDark}
-  style={styles.logoMini}
-  resizeMode="contain"
-/>
+            <Image
+              source={DiamondLogoDark}
+              style={styles.logoMini}
+              resizeMode="contain"
+            />
           </View>
 
           <View style={styles.cardFooter}>
             <Text style={styles.idText}>
-              ID:{" "}
-              {userData.idDr ? userData.idDr : "AGUARDANDO ATIVAÇÃO"}
+              ID: {userData.idDr ? userData.idDr : "AGUARDANDO ATIVAÇÃO"}
             </Text>
             <View
               style={[
@@ -317,7 +311,7 @@ source={DiamondLogoDark}
             </View>
           </View>
 
-        {userData.isPending && !userData.isAdmin && (
+          {userData.isPending && !userData.isAdmin && (
             <TouchableOpacity
               onPress={() => navigation.navigate("Packages")}
               style={styles.activateBtn}

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { createSSOToken } from '../../services/ssoService';
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { WebView } from "react-native-webview";
+import { createSSOToken } from "../../services/ssoService";
 
 export default function AppWebViewScreen({ route }) {
   const { app } = route.params; // 👈 agora app está definido
@@ -15,7 +15,7 @@ export default function AppWebViewScreen({ route }) {
       const finalUrl = `${app.url}?sso=${token}`;
       setUrl(finalUrl);
     } catch (error) {
-      console.log('Erro ao gerar SSO:', error);
+      console.log("Erro ao gerar SSO:", error);
     } finally {
       setLoading(false);
     }
@@ -27,7 +27,7 @@ export default function AppWebViewScreen({ route }) {
 
   if (loading || !url) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
     );
