@@ -127,10 +127,7 @@ function CustomDrawerContent(props) {
           size={22}
           color={PALETTE.gold}
         />
-
-        <Text style={styles.themeText}>
-          {isDark ? "MODO CLARO" : "MODO ESCURO"}
-        </Text>
+      
       </TouchableOpacity>
 
       {/* BOTÃO SAIR */}
