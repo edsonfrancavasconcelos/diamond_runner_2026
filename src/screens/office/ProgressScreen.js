@@ -6,14 +6,20 @@ import {
   ScrollView,
   ActivityIndicator,
   StatusBar,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../services/supabase';
-
-import { CountryContext } from '../../i18n/context/CountryContext';
 import { useTheme } from '../../i18n/context/ThemeContext';
+import { CountryContext } from '../../i18n/context/CountryContext';
+import Obsidiana from '../../assets/images/obsidiana.png';
+import Topazio from '../../assets/images/topazio.png';
+import Safira from '../../assets/images/safira.png';
+import Rubi from '../../assets/images/rubi.png';
+import Esmeralda from '../../assets/images/esmeralda.png';
+import Diamante from '../../assets/images/diamante.png';
 
 const PALETTE = {
   primary: '#2c94bc',
@@ -48,19 +54,19 @@ export default function ProgressScreen() {
   }, [country]);
 
 
-  const getRankColor = (index) => {
+const getRankColor = (index) => {
 
-    const colors = [
-      PALETTE.primary,
-      PALETTE.bronze,
-      PALETTE.silver,
-      PALETTE.gold,
-      '#e67e22',
-      PALETTE.success
-    ];
+  const colors = [
+    '#111111', // OBSIDIANA
+    '#D19A3A', // TOPAZIO
+    '#287BFF', // SAFIRA
+    '#E00030', // RUBI
+    '#00A86B', // ESMERALDA
+    '#00E5FF'  // DIAMANTE
+  ];
 
-    return colors[index] || PALETTE.primary;
-  };
+  return colors[index] || PALETTE.primary;
+};
 
 
   async function fetchCareerProgress(){
@@ -99,28 +105,28 @@ if(error){
 
       if(profile){
 
-        const ranks = [
-          "EXECUTIVO",
-          "BRONZE",
-          "PRATA",
-          "OURO",
-          "RUBI",
-          "DIAMANTE"
-        ];
+const ranks = [
+  "OBSIDIANA",
+  "TOPAZIO",
+  "SAFIRA",
+  "RUBI",
+  "ESMERALDA",
+  "DIAMANTE"
+];
 
 
-        const goals = [
-          0,
-          5000,
-          15000,
-          50000,
-          100000,
-          160000
-        ];
+const goals = [
+  0,
+  5000,
+  15000,
+  50000,
+  100000,
+  160000
+];
 
 
      const rankName =
-String(profile.plan_name || "EXECUTIVO")
+String(profile.plan_name || "OBSIDIANA")
 .toUpperCase();
 
 
@@ -217,6 +223,17 @@ String(profile.plan_name || "EXECUTIVO")
     getRankColor(
       careerData.rankIndex
     );
+ const rankImages = [
+  Obsidiana,
+  Topazio,
+  Safira,
+  Rubi,
+  Esmeralda,
+  Diamante
+];
+
+const currentMedal =
+  rankImages[careerData.rankIndex];
 
 
   return (
@@ -281,10 +298,13 @@ backgroundColor:rankColor
 />
 
 
-<Ionicons
-name="aperture-outline"
-size={70}
-color={rankColor}
+<Image
+source={currentMedal}
+style={{
+width:90,
+height:90,
+resizeMode:'contain'
+}}
 />
 
 
