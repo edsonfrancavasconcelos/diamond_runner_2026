@@ -8,10 +8,7 @@ import {
   StatusBar,
   Text,
   View,
-  TouchableOpacity,
 } from "react-native";
-
-import { Ionicons } from "@expo/vector-icons";
 
 import "react-native-gesture-handler";
 
@@ -412,7 +409,6 @@ function AppContent() {
 
 
 <Stack.Navigator
-
 screenOptions={({navigation}) => ({
 
   headerShown:true,
@@ -427,44 +423,11 @@ screenOptions={({navigation}) => ({
     backgroundColor:"#0c3c74",
   },
 
-
-  headerRight:()=>(
-    <TouchableOpacity
-
-      onPress={themeContext.toggleTheme}
-
-      style={{
-        marginRight:18,
-        padding:8,
-      }}
-
-    >
-
-      <Ionicons
-
-        name={
-          isDark
-          ? "sunny-outline"
-          : "moon-outline"
-        }
-
-        size={25}
-
-        color="#FFD700"
-
-      />
-
-    </TouchableOpacity>
-  ),
-
-
   animation:"fade",
-
 
   contentStyle:{
     backgroundColor:theme.bg,
   },
-
 
 })}
 
