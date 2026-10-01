@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 
 const COLORS = {
@@ -21,7 +21,14 @@ export default function AboutScreen() {
         <Text style={styles.label}>Nome</Text>
         <Text style={styles.value}>Diamond Runner</Text>
         <Text style={styles.label}>Desenvolvido por</Text>
-        <Text style={styles.value}>EFVasconcelos Sistemas</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.value}>EFVasconcelos Sistemas</Text>
+          <Image
+            source={require("../../assets/images/logo_vasconcelos.png")}
+            resizeMode="contain"
+            style={{ width: 36, height: 36, marginLeft: 10 }}
+          />
+        </View>
         <Text style={styles.label}>Versão</Text>
         <Text style={styles.value}>1.0.0</Text>
         <Text style={styles.paragraph}>
