@@ -1,23 +1,26 @@
 // 1. IMPORTS DE BIBLIOTECAS
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
-  ActivityIndicator,
-  Image,
-  StatusBar,
-  Text,
-  View,
+    ActivityIndicator,
+    Image,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+
+import { Ionicons } from "@expo/vector-icons";
 
 import "react-native-gesture-handler";
 
 import { registerRootComponent } from "expo";
 
 import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
+    DarkTheme,
+    DefaultTheme,
+    NavigationContainer,
 } from "@react-navigation/native";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -32,8 +35,8 @@ import { CountryProvider } from "./src/i18n/context/CountryContext";
 import { LanguageProvider } from "./src/i18n/context/LanguageContext";
 
 import {
-  ThemeProvider,
-  useTheme,
+    ThemeProvider,
+    useTheme,
 } from "./src/i18n/context/ThemeContext";
 
 import { supabase } from "./src/services/supabase";
@@ -422,6 +425,21 @@ screenOptions={({navigation}) => ({
   headerStyle:{
     backgroundColor:"#0c3c74",
   },
+
+  headerRight:()=>(
+    <TouchableOpacity
+      onPress={themeContext.toggleTheme}
+      accessibilityRole="button"
+      accessibilityLabel={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+      style={{paddingHorizontal:12,paddingVertical:8}}
+    >
+      <Ionicons
+        name={isDark ? "sunny-outline" : "moon-outline"}
+        size={22}
+        color="#FFD700"
+      />
+    </TouchableOpacity>
+  ),
 
   animation:"fade",
 

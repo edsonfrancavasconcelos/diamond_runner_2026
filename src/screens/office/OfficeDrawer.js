@@ -1,43 +1,43 @@
-import { useTheme } from "../../i18n/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItemList,
+    createDrawerNavigator,
+    DrawerContentScrollView,
+    DrawerItemList,
 } from "@react-navigation/drawer";
 import { useIsFocused } from "@react-navigation/native";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  InteractionManager,
+    ActivityIndicator,
+    Image,
+    InteractionManager,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
 import { officeTexts } from "../../i18n/hooks/texts";
 import { supabase } from "../../services/supabase";
 
 // 💎 IMPORTAÇÃO DAS TELAS
+import AboutScreen from "./AboutScreen";
 import DashboardScreen from "./DashboardScreen";
+import DiamondStoreApps from "./DiamondStoreAppsScreen";
 import EarningsScreen from "./EarningsScreen";
 import GPSScreen from "./GPSScreen";
 import MarketingPlanScreen from "./MarketingPlanScreen";
 import NetworkScreen from "./NetworkScreen";
 import NewsScreen from "./NewsScreen";
 import PackagesScreen from "./PackagesScreen";
+import PrivacyScreen from "./PrivacyScreen";
 import ProfileScreen from "./ProfileScreen"; // 👈 Certifique-se que esta tela NÃO importa o OfficeDrawer
 import ProgressScreen from "./ProgressScreen";
 import ProWayScreen from "./ProWayScreen";
-import WithdrawScreen from "./WithdrawScreen";
-import DiamondStoreApps from "./DiamondStoreAppsScreen";
 import SettingsScreen from "./SettingsScreen";
 import TermsScreen from "./TermsScreen";
-import PrivacyScreen from "./PrivacyScreen";
-import AboutScreen from "./AboutScreen";
+import WithdrawScreen from "./WithdrawScreen";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -155,6 +155,7 @@ const {} = useTheme();
 }
 
 export default function OfficeDrawer() {
+  const { isDark, toggleTheme } = useTheme();
   const { country } = useContext(CountryContext);
   const texts = useMemo(
     () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
@@ -218,6 +219,20 @@ export default function OfficeDrawer() {
               name={route.name === "Dashboard" ? "menu" : "arrow-back"}
               size={26}
               color={tintColor || "#FFF"}
+            />
+          </TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+          >
+            <Ionicons
+              name={isDark ? "sunny-outline" : "moon-outline"}
+              size={22}
+              color={PALETTE.gold}
             />
           </TouchableOpacity>
         ),
