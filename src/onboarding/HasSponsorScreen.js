@@ -3,18 +3,18 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import Button from "../components/Button";
@@ -32,7 +32,7 @@ const PALETTE = {
 export default function HasSponsorScreen() {
   const navigation = useNavigation();
   const { country } = useContext(CountryContext);
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   const texts = hasSponsorTexts?.[country] || hasSponsorTexts?.BR || {};
 
   const [sponsorId, setSponsorId] = useState("");
@@ -88,13 +88,6 @@ export default function HasSponsorScreen() {
           <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navButton} onPress={toggleTheme}>
-          <Ionicons
-            name={isDark ? "sunny" : "moon"}
-            size={22}
-            color={isDark ? "#FFD700" : PALETTE.primary}
-          />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>

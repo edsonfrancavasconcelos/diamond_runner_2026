@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -30,7 +30,7 @@ const PALETTE = {
 
 export default function WelcomeScreen() {
   const navigation = useNavigation();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   const countryContext = useContext(CountryContext);
   const [showModal, setShowModal] = useState(false);
 
@@ -70,27 +70,6 @@ export default function WelcomeScreen() {
       style={[styles.container, { backgroundColor: themeStyles.bg }]}
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-
-      <View style={styles.topActions}>
-        <TouchableOpacity
-          style={[
-            styles.themeToggle,
-            {
-              backgroundColor: isDark
-                ? "rgba(255,255,255,0.08)"
-                : "rgba(0,0,0,0.05)",
-              borderColor: themeStyles.border,
-            },
-          ]}
-          onPress={toggleTheme}
-        >
-          <Ionicons
-            name={isDark ? "sunny" : "moon"}
-            size={20}
-            color={PALETTE.primary}
-          />
-        </TouchableOpacity>
-      </View>
 
       <View style={styles.content}>
         <View style={styles.logoContainer}>
@@ -207,15 +186,6 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  topActions: { position: "absolute", top: 60, right: 25, zIndex: 99 },
-  themeToggle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
   content: { paddingHorizontal: 35, flex: 1, justifyContent: "center" },
   logoContainer: { alignItems: "center", marginBottom: 50 },
   logo: { width: 200, height: 200 },

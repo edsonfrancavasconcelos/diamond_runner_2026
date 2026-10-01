@@ -3,23 +3,23 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import {
-  useNavigation,
-  useRoute,
-  CommonActions,
+    CommonActions,
+    useNavigation,
+    useRoute,
 } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { CountryContext } from "../i18n/context/CountryContext";
@@ -39,7 +39,7 @@ export default function FirstAccessScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { country: contextCountry } = useContext(CountryContext) || {};
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, isDark } = useTheme();
 
   const country = route.params?.country || contextCountry || "BR";
   const texts = firstAccessTexts[country] || firstAccessTexts.BR;
@@ -128,13 +128,6 @@ export default function FirstAccessScreen() {
             style={styles.backBtn}
           >
             <Ionicons name="close" size={28} color="#FFF" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggleTheme} style={styles.themeBtn}>
-            <Ionicons
-              name={isDark ? "sunny" : "moon"}
-              size={20}
-              color={isDark ? PALETTE.gold : PALETTE.white}
-            />
           </TouchableOpacity>
         </View>
 
@@ -271,14 +264,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   backBtn: { width: 45, height: 45, justifyContent: "center" },
-  themeBtn: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   idCard: {
     width: "100%",
     padding: 25,

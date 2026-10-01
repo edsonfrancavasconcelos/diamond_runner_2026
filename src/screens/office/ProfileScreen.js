@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  RefreshControl,
-  InteractionManager,
-  Modal,
-  TextInput,
-  Platform,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../services/supabase";
-import * as ImagePicker from "expo-image-picker";
 import { decode } from "base64-arraybuffer";
+import * as ImagePicker from "expo-image-picker";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    InteractionManager,
+    Modal,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
+import { supabase } from "../../services/supabase";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -42,19 +43,19 @@ const formatWhatsApp = (phone) => {
 };
 
 export default function ProfileScreen() {
+  const { isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [editingField, setEditingField] = useState(null);
 
   const theme = {
-    bg: isDarkMode ? PALETTE.bgDark : PALETTE.bgLight,
-    card: isDarkMode ? PALETTE.darkBlue : PALETTE.white,
-    text: isDarkMode ? PALETTE.white : PALETTE.textDark,
-    subtext: isDarkMode ? PALETTE.lightGray : "#666",
+    bg: isDark ? PALETTE.bgDark : PALETTE.bgLight,
+    card: isDark ? PALETTE.darkBlue : PALETTE.white,
+    text: isDark ? PALETTE.white : PALETTE.textDark,
+    subtext: isDark ? PALETTE.lightGray : "#666",
   };
 
   async function fetchProfile() {
@@ -321,17 +322,6 @@ export default function ProfileScreen() {
       >
         <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
           <TouchableOpacity
-            style={styles.themeIconButton}
-            onPress={() => setIsDarkMode(!isDarkMode)}
-          >
-            <Ionicons
-              name={isDarkMode ? "sunny" : "moon"}
-              size={26}
-              color={PALETTE.gold}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
             onPress={handleAvatarPress}
             style={[styles.avatarCircle, { borderColor: PALETTE.gold }]}
           >
@@ -524,7 +514,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingCenter: { flex: 1, justifyContent: "center", alignItems: "center" },
   headerCard: { padding: 30, alignItems: "center" },
-  themeIconButton: { position: "absolute", top: 15, right: 20, padding: 10 },
   avatarCircle: {
     width: 100,
     height: 100,

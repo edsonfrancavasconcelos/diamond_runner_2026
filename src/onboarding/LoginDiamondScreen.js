@@ -3,17 +3,17 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import Button from "../components/Button";
@@ -36,7 +36,7 @@ export default function LoginDiamondScreen() {
   const themeCtx = useTheme();
 
   const country = countryCtx?.country || "BR";
-  const { toggleTheme, isDark } = themeCtx || { isDark: true };
+  const { isDark } = themeCtx || { isDark: true };
 
   const theme = {
     bg: isDark ? PALETTE.dark : "#F5F5F7",
@@ -140,19 +140,6 @@ export default function LoginDiamondScreen() {
           <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            { backgroundColor: theme.card, borderColor: theme.border },
-          ]}
-          onPress={toggleTheme}
-        >
-          <Ionicons
-            name={isDark ? "sunny" : "moon"}
-            size={22}
-            color={isDark ? "#FFD700" : PALETTE.primary}
-          />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>

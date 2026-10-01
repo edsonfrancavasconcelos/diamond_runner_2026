@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import {
-  Linking,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Animated,
-  Alert,
+    Alert,
+    Animated,
+    Linking,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +31,7 @@ export default function FindSponsorScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { country = "BR" } = useContext(CountryContext) || {};
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   const texts = findSponsorTexts[country] || findSponsorTexts.BR;
   const params = route.params || {};
 
@@ -119,13 +119,6 @@ export default function FindSponsorScreen() {
           <Text style={[styles.headerTitle, { color: theme.text }]}>
             SUPORTE AO ATLETA
           </Text>
-          <TouchableOpacity onPress={toggleTheme} style={styles.iconCircle}>
-            <Ionicons
-              name={isDark ? "sunny" : "moon"}
-              size={20}
-              color={isDark ? PALETTE.gold : PALETTE.primary}
-            />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.hero}>

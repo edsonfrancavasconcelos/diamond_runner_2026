@@ -2,19 +2,19 @@ import { useNavigation } from "@react-navigation/native";
 
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  StatusBar,
-  RefreshControl,
-  Animated,
-  TouchableOpacity,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+    ActivityIndicator,
+    Animated,
+    Image,
+    RefreshControl,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
@@ -34,7 +34,7 @@ const SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 export default function DashboardScreen() {
   const navigation = useNavigation();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
   const [scrollY] = useState(() => new Animated.Value(0));
   const retryTimeout = useRef(null);
 
@@ -211,14 +211,6 @@ export default function DashboardScreen() {
           },
         ]}
       >
-        <TouchableOpacity style={styles.themeToggle} onPress={toggleTheme}>
-          <Ionicons
-            name={isDark ? "sunny" : "moon"}
-            size={24}
-            color={PALETTE.gold}
-          />
-        </TouchableOpacity>
-
         <Animated.View
           style={[
             styles.avatarWrapper,
@@ -376,13 +368,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
-  },
-  themeToggle: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    padding: 10,
-    zIndex: 1100,
   },
   avatarWrapper: {
     backgroundColor: "#FFF",
