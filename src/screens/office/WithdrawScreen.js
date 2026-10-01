@@ -1,22 +1,23 @@
 // Arquivo: src/screens/office/WithdrawScreen.js
 // Status: 100% FUNCIONAL | Integrado com Supabase & Histórico
 
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Alert,
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
 const { width } = Dimensions.get("window");
@@ -31,6 +32,8 @@ const PALETTE = {
 };
 
 export default function WithdrawScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation();
   const [amount, setAmount] = useState("");
   const [pixKey, setPixKey] = useState("");
@@ -130,14 +133,14 @@ export default function WithdrawScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backBtn}
         >
-          <Ionicons name="chevron-back" size={28} color={PALETTE.white} />
+          <Ionicons name="chevron-back" size={28} color={theme.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>SOLICITAR SAQUE</Text>
         <View style={{ width: 40 }} />
@@ -171,7 +174,7 @@ export default function WithdrawScreen() {
             <TextInput
               style={styles.mainInput}
               placeholder="0,00"
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholderTextColor={theme.border}
               keyboardType="numeric"
               value={amount}
               onChangeText={setAmount}
@@ -182,7 +185,7 @@ export default function WithdrawScreen() {
           <TextInput
             style={styles.secondaryInput}
             placeholder="CPF, E-mail ou Telefone"
-            placeholderTextColor="rgba(255,255,255,0.2)"
+            placeholderTextColor={theme.border}
             value={pixKey}
             onChangeText={setPixKey}
           />
@@ -193,7 +196,7 @@ export default function WithdrawScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={PALETTE.dark} />
+              <ActivityIndicator color={theme.text} />
             ) : (
               <Text style={styles.actionButtonText}>EFETUAR RESGATE</Text>
             )}
@@ -236,8 +239,8 @@ export default function WithdrawScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: PALETTE.dark },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerTitle: {
-    color: PALETTE.white,
+    color: theme.text,
     fontSize: 14,
     fontWeight: "bold",
     letterSpacing: 2,
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
   megaBalanceCard: {
     width: width - 40,
     height: 180,
-    backgroundColor: PALETTE.graphite,
+    backgroundColor: theme.card,
     alignSelf: "center",
     borderRadius: 30,
     padding: 25,
@@ -263,16 +266,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   megaLabel: {
-    color: "rgba(255,255,255,0.5)",
+    color: theme.text,
     fontSize: 10,
     fontWeight: "bold",
   },
-  megaValue: { color: PALETTE.white, fontSize: 38, fontWeight: "bold" },
+  megaValue: { color: theme.text, fontSize: 38, fontWeight: "bold" },
   cardFooter: { flexDirection: "row", justifyContent: "space-between" },
   cardBrand: { color: "rgba(255,255,255,0.3)", fontSize: 9, letterSpacing: 2 },
   form: { paddingHorizontal: 25, marginTop: 30 },
   fieldLabel: {
-    color: PALETTE.white,
+    color: theme.text,
     fontSize: 10,
     fontWeight: "bold",
     opacity: 0.5,
@@ -282,34 +285,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.1)",
+    borderBottomColor: theme.border,
   },
-  prefix: { color: PALETTE.white, fontSize: 20, marginRight: 10 },
+  prefix: { color: theme.text, fontSize: 20, marginRight: 10 },
   mainInput: {
     flex: 1,
-    color: PALETTE.white,
+    color: theme.text,
     fontSize: 32,
     fontWeight: "bold",
   },
   secondaryInput: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: theme.input,
     height: 55,
     borderRadius: 15,
     paddingHorizontal: 15,
-    color: PALETTE.white,
+    color: theme.text,
   },
   actionButton: {
-    backgroundColor: PALETTE.gold,
+    backgroundColor: theme.button,
     height: 55,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 30,
   },
-  actionButtonText: { color: PALETTE.dark, fontWeight: "bold", fontSize: 16 },
+  actionButtonText: { color: "#FFF", fontWeight: "bold", fontSize: 16 },
   historySection: { marginTop: 40, paddingHorizontal: 25 },
   sectionTitle: {
-    color: PALETTE.white,
+    color: theme.text,
     fontSize: 12,
     fontWeight: "bold",
     marginBottom: 15,
@@ -319,13 +322,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: theme.card,
     padding: 15,
     borderRadius: 15,
     marginBottom: 10,
   },
-  historyDate: { color: "rgba(255,255,255,0.4)", fontSize: 10 },
-  historyAmount: { color: "#FFF", fontWeight: "bold" },
+  historyDate: { color: theme.text, fontSize: 10, opacity: 0.7 },
+  historyAmount: { color: theme.text, fontWeight: "bold" },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusText: { color: "#FFF", fontSize: 8, fontWeight: "bold" },
 });

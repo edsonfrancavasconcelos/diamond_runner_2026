@@ -1,24 +1,25 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026
 // PackagesScreen corrigido - fluxo Stripe completo
 
+import { useContext, useEffect, useState } from "react";
 import { supabase } from "../../services/supabase";
-import React, { useContext, useEffect, useState } from "react";
 
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Platform,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { marketingTexts } from "../../i18n/hooks/texts";
 
 const COLORS = {
@@ -32,6 +33,8 @@ const COLORS = {
 };
 
 export default function PackagesScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -115,7 +118,7 @@ export default function PackagesScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
         <Text style={styles.mainTitle}>DIAMOND PACKS</Text>
@@ -279,10 +282,10 @@ export default function PackagesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: theme.bg,
   },
 
   header: {
@@ -292,7 +295,7 @@ const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    color: "#fff",
+    color: theme.text,
     fontSize: 20,
     fontWeight: "900",
     letterSpacing: 3,
@@ -310,7 +313,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.card,
     borderRadius: 24,
     padding: 20,
     marginBottom: 20,
@@ -323,13 +326,13 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: {
-    color: "#fff",
+    color: theme.text,
     fontSize: 22,
     fontWeight: "900",
   },
 
   cardPrice: {
-    color: "#fff",
+    color: theme.text,
     fontSize: 32,
     fontWeight: "900",
     marginVertical: 10,
@@ -340,7 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: COLORS.primary,
+    backgroundColor: theme.button,
   },
 
   upgradeRow: {

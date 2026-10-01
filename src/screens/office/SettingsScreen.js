@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
 const COLORS = {
@@ -13,6 +14,8 @@ const COLORS = {
 };
 
 export default function SettingsScreen({ navigation }) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [deleting, setDeleting] = useState(false);
 
   const deleteAccount = () => {
@@ -81,7 +84,7 @@ export default function SettingsScreen({ navigation }) {
       <TouchableOpacity style={styles.item} onPress={() => navigateTo("Terms")}>
         <Ionicons name="document-text-outline" size={22} color={COLORS.gold} />
         <Text style={styles.itemText}>TERMOS DE USO</Text>
-        <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
+        <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.item}
@@ -93,7 +96,7 @@ export default function SettingsScreen({ navigation }) {
           color={COLORS.gold}
         />
         <Text style={styles.itemText}>PRIVACIDADE</Text>
-        <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
+        <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.item} onPress={() => navigateTo("About")}>
         <Ionicons
@@ -102,7 +105,7 @@ export default function SettingsScreen({ navigation }) {
           color={COLORS.gold}
         />
         <Text style={styles.itemText}>SOBRE / EMPRESA</Text>
-        <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
+        <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.item, styles.deleteItem]}
@@ -118,17 +121,17 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg, padding: 22 },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg, padding: 22 },
   title: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 1,
     marginBottom: 8,
   },
   subtitle: {
-    color: COLORS.muted,
+    color: theme.text,
     fontSize: 14,
     lineHeight: 21,
     marginBottom: 22,
@@ -136,14 +139,14 @@ const styles = StyleSheet.create({
   item: {
     minHeight: 58,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.12)",
+    borderBottomColor: theme.border,
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
   },
   itemText: {
     flex: 1,
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 13,
     fontWeight: "800",
     letterSpacing: 0.5,

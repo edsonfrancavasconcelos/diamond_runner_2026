@@ -1,28 +1,29 @@
 // Local: src/screens/office/NetworkScreen.js
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
 import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  Image,
+    ActivityIndicator,
+    Alert,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import {
-  GestureDetector,
-  Gesture,
-  GestureHandlerRootView,
+    Gesture,
+    GestureDetector,
+    GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
 } from "react-native-reanimated";
-import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -36,6 +37,8 @@ const PALETTE = {
 };
 
 const NetworkNode = ({ member, isRoot = false }) => {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [isOpen, setIsOpen] = useState(false);
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -103,7 +106,7 @@ const NetworkNode = ({ member, isRoot = false }) => {
               <Ionicons
                 name={isOpen ? "chevron-up" : "chevron-down"}
                 size={14}
-                color={PALETTE.gray}
+                color={theme.border}
               />
             )}
           </View>
@@ -140,6 +143,8 @@ const NetworkNode = ({ member, isRoot = false }) => {
 };
 
 export default function NetworkScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation();
   const [rootMember, setRootMember] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -211,20 +216,20 @@ export default function NetworkScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView
-        style={[styles.container, { backgroundColor: PALETTE.dark }]}
+        style={styles.container}
       >
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={styles.backBtn}
           >
-            <Ionicons name="chevron-back" size={24} color="#FFF" />
+            <Ionicons name="chevron-back" size={24} color={theme.text} />
           </TouchableOpacity>
           <View style={{ marginLeft: 10, flex: 1 }}>
             <Text style={styles.headerTitle}>REDE DIAMOND</Text>
             <Text
-              style={{ color: PALETTE.gray, fontSize: 10, fontWeight: "600" }}
+              style={{ color: theme.text, fontSize: 10, fontWeight: "600" }}
             >
               FEV 2026 • GESTÃO ATIVA
             </Text>
@@ -256,33 +261,33 @@ export default function NetworkScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#0a2e5a",
+    backgroundColor: theme.card,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,215,0,0.2)",
+    borderBottomColor: theme.border,
   },
   headerTitle: {
-    color: "#FFF",
+    color: theme.text,
     fontSize: 16,
     fontWeight: "900",
     letterSpacing: 1,
   },
   resetBtn: {
     padding: 10,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: theme.input,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,215,0,0.3)",
+    borderColor: theme.border,
   },
 
-  canvasContainer: { flex: 1, backgroundColor: "#081f3d" },
+  canvasContainer: { flex: 1, backgroundColor: theme.bg },
   canvas: {
     flex: 1,
     alignItems: "center",
@@ -295,7 +300,7 @@ const styles = StyleSheet.create({
   nodeWrapper: { alignItems: "center", width: 180 },
   memberCard: {
     width: 140,
-    backgroundColor: "#11407c",
+    backgroundColor: theme.card,
     padding: 15,
     borderRadius: 24,
     borderWidth: 2,
@@ -310,26 +315,26 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: PALETTE.dark,
+    backgroundColor: theme.bg,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: theme.border,
     overflow: "hidden",
   },
   avatarRoot: { borderColor: PALETTE.gold, borderWidth: 3 },
   avatarImage: { width: "100%", height: "100%", resizeMode: "cover" },
 
   name: {
-    color: "#FFF",
+    color: theme.text,
     fontWeight: "900",
     fontSize: 11,
     marginBottom: 4,
     letterSpacing: 0.5,
   },
   idBadge: {
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: theme.input,
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: 12,
@@ -340,16 +345,16 @@ const styles = StyleSheet.create({
   verticalLineTop: {
     width: 2,
     height: 30,
-    backgroundColor: "rgba(164, 188, 204, 0.3)",
+    backgroundColor: theme.border,
   },
   verticalLineBottom: {
     width: 2,
     height: 30,
-    backgroundColor: "rgba(164, 188, 204, 0.3)",
+    backgroundColor: theme.border,
   },
   horizontalLine: {
     height: 2,
-    backgroundColor: "rgba(164, 188, 204, 0.3)",
+    backgroundColor: theme.border,
     position: "absolute",
     top: 0,
     width: "100%",

@@ -1,19 +1,20 @@
-import React, { useEffect, useState, useMemo } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  InteractionManager,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useEffect, useMemo, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    InteractionManager,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -126,6 +127,8 @@ const DIAMOND_APPS = [
 ];
 
 export default function DiamondStoreApps() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({
@@ -204,7 +207,7 @@ export default function DiamondStoreApps() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.hero}>
         <View style={styles.heroCopy}>
@@ -283,11 +286,11 @@ export default function DiamondStoreApps() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: PALETTE.dark, padding: 16 },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg, padding: 16 },
   center: {
     flex: 1,
-    backgroundColor: PALETTE.dark,
+    backgroundColor: theme.bg,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -297,7 +300,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
     borderRadius: 20,
-    backgroundColor: "#103f78",
+    backgroundColor: theme.card,
     marginBottom: 12,
   },
   heroCopy: { flex: 1, paddingRight: 16 },
@@ -308,32 +311,32 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginBottom: 8,
   },
-  title: { color: PALETTE.white, fontSize: 24, fontWeight: "900" },
-  subtitle: { color: PALETTE.gray, fontSize: 11, lineHeight: 17, marginTop: 8 },
+  title: { color: theme.text, fontSize: 24, fontWeight: "900" },
+  subtitle: { color: theme.text, fontSize: 11, lineHeight: 17, marginTop: 8 },
   balanceCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 18,
     borderRadius: 16,
-    backgroundColor: "rgba(255,215,0,0.07)",
+    backgroundColor: theme.card,
     borderWidth: 1,
-    borderColor: "rgba(255,215,0,0.35)",
+    borderColor: theme.border,
     marginBottom: 24,
   },
-  headerLabel: { color: PALETTE.gray, fontSize: 10, fontWeight: "bold" },
+  headerLabel: { color: theme.text, fontSize: 10, fontWeight: "bold" },
   headerValue: {
     color: PALETTE.gold,
     fontSize: 30,
     fontWeight: "900",
     marginTop: 4,
   },
-  planLabel: { color: PALETTE.gray, fontSize: 10, marginTop: 4 },
+  planLabel: { color: theme.text, fontSize: 10, marginTop: 4 },
   walletIcon: {
     width: 52,
     height: 52,
     borderRadius: 16,
-    backgroundColor: "rgba(255,215,0,0.12)",
+    backgroundColor: theme.input,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -343,18 +346,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  sectionTitle: { color: PALETTE.white, fontSize: 16, fontWeight: "800" },
-  sectionMeta: { color: PALETTE.gray, fontSize: 10 },
+  sectionTitle: { color: theme.text, fontSize: 16, fontWeight: "800" },
+  sectionMeta: { color: theme.text, fontSize: 10 },
   row: { justifyContent: "space-between" },
   appCard: {
     width: "48%",
     minHeight: 166,
-    backgroundColor: "rgba(255,255,255,0.055)",
+    backgroundColor: theme.card,
     marginVertical: 6,
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: theme.border,
   },
   appCardEnabled: {
     borderColor: "rgba(87,214,154,0.45)",
@@ -369,15 +372,15 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 16,
-    backgroundColor: PALETTE.white,
+    backgroundColor: theme.card,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     marginBottom: 16,
   },
   appLogo: { width: "100%", height: "100%", resizeMode: "cover" },
-  appName: { color: "#FFF", fontWeight: "800", fontSize: 11, minHeight: 28 },
-  appDescription: { color: PALETTE.gray, fontSize: 9, marginTop: 3 },
+  appName: { color: theme.text, fontWeight: "800", fontSize: 11, minHeight: 28 },
+  appDescription: { color: theme.text, fontSize: 9, marginTop: 3 },
   appFooter: {
     flexDirection: "row",
     alignItems: "center",

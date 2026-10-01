@@ -1,5 +1,5 @@
-import React from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 
 const COLORS = {
   bg: "#0c3c74",
@@ -9,6 +9,9 @@ const COLORS = {
 };
 
 export default function PrivacyScreen() {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>POLÍTICA DE PRIVACIDADE (LGPD)</Text>
@@ -64,11 +67,11 @@ export default function PrivacyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 22, paddingBottom: 42 },
   title: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 1,
@@ -82,7 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   paragraph: {
-    color: COLORS.muted,
+    color: theme.text,
     fontSize: 15,
     lineHeight: 24,
     marginBottom: 12,

@@ -1,15 +1,16 @@
-import React, { useState, useContext } from "react";
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Dimensions,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useContext, useState } from "react";
+import {
+    Dimensions,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 
 // Traduções
 import { CountryContext } from "../../i18n/context/CountryContext";
@@ -29,6 +30,8 @@ const COLORS = {
 };
 
 const Section = ({ title, children, icon, color = COLORS.primary }) => {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -52,7 +55,7 @@ const Section = ({ title, children, icon, color = COLORS.primary }) => {
         <Ionicons
           name={isOpen ? "chevron-up" : "chevron-down"}
           size={18}
-          color={COLORS.textSub}
+          color={theme.text}
         />
       </TouchableOpacity>
 
@@ -62,6 +65,8 @@ const Section = ({ title, children, icon, color = COLORS.primary }) => {
 };
 
 export default function MarketingPlanScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const navigation = useNavigation();
   const { country = "BR" } = useContext(CountryContext) || {};
   const texts =
@@ -81,7 +86,7 @@ export default function MarketingPlanScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.headerArea}>
         <Text style={styles.mainTitle}>DIAMOND RUNNER</Text>
@@ -98,7 +103,7 @@ export default function MarketingPlanScreen() {
             <Text
               style={[
                 styles.infoText,
-                { fontStyle: "normal", color: COLORS.textMain },
+                { fontStyle: "normal", color: theme.text },
               ]}
             >
               Para ser considerado{" "}
@@ -326,7 +331,7 @@ export default function MarketingPlanScreen() {
             <Text
               style={[
                 styles.complianceFootnote,
-                { color: COLORS.textMain, textAlign: "center" },
+                { color: theme.text, textAlign: "center" },
               ]}
             >
               *Valores baseados no Pacote Elite. Ganhos proporcionais ao pacote
@@ -347,7 +352,7 @@ export default function MarketingPlanScreen() {
               styles.ruleBox,
               {
                 borderColor: COLORS.gold,
-                backgroundColor: "rgba(255, 215, 0, 0.05)",
+                backgroundColor: theme.card,
               },
             ]}
           >
@@ -365,7 +370,7 @@ export default function MarketingPlanScreen() {
             <Text
               style={[
                 styles.infoText,
-                { marginTop: 5, color: COLORS.textMain },
+                { marginTop: 5, color: theme.text },
               ]}
             >
               • Estar {'"Ativo"'} (50 pts pessoais no mês).{"\n"}• Ter 1 direto
@@ -447,7 +452,7 @@ export default function MarketingPlanScreen() {
             {
               width: "100%",
               marginBottom: 15,
-              backgroundColor: "rgba(44, 148, 188, 0.15)",
+              backgroundColor: theme.card,
               borderStyle: "dashed",
               borderColor: COLORS.primary,
               borderWidth: 1,
@@ -480,7 +485,7 @@ export default function MarketingPlanScreen() {
               <Text
                 style={[
                   styles.pkgApps,
-                  { textAlign: "left", marginTop: 4, color: COLORS.textMain },
+                  { textAlign: "left", marginTop: 4, color: theme.text },
                 ]}
               >
                 {texts.uniqueFee || "Taxa Única de Licença Anual"}
@@ -488,7 +493,7 @@ export default function MarketingPlanScreen() {
             </View>
             <View style={{ alignItems: "flex-end" }}>
               <Text
-                style={[styles.pkgPrice, { fontSize: 18, color: COLORS.white }]}
+                style={[styles.pkgPrice, { fontSize: 18, color: theme.text }]}
               >
                 {cur} {formatCurrency(99.0)}
               </Text>
@@ -530,7 +535,7 @@ export default function MarketingPlanScreen() {
                   alignItems: "center",
                   backgroundColor: pkg.gold
                     ? "rgba(255, 215, 0, 0.1)"
-                    : COLORS.card,
+                    : theme.card,
                 },
                 pkg.gold && {
                   borderColor: COLORS.gold,
@@ -554,7 +559,7 @@ export default function MarketingPlanScreen() {
                     style={{
                       fontSize: 8,
                       fontWeight: "bold",
-                      color: COLORS.background,
+                      color: theme.button,
                     }}
                   >
                     TOP
@@ -633,7 +638,7 @@ export default function MarketingPlanScreen() {
                     width: 32,
                     height: 32,
                     borderRadius: 16,
-                    backgroundColor: "rgba(255,255,255,0.05)",
+                    backgroundColor: theme.card,
                     alignItems: "center",
                     justifyContent: "center",
                     borderWidth: 1,
@@ -652,7 +657,7 @@ export default function MarketingPlanScreen() {
                     style={{
                       width: 2,
                       height: 15,
-                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: theme.border,
                       marginTop: 5,
                     }}
                   />
@@ -672,7 +677,7 @@ export default function MarketingPlanScreen() {
                     paddingHorizontal: 15,
                     backgroundColor: item.elite
                       ? "rgba(0, 242, 255, 0.05)"
-                      : "rgba(255,255,255,0.03)",
+                      : theme.card,
                     borderLeftWidth: 3,
                     borderLeftColor: item.c,
                     marginBottom: 0, // Reseta o margin do style original
@@ -704,12 +709,12 @@ export default function MarketingPlanScreen() {
                   <Text
                     style={[
                       styles.rankPoints,
-                      { color: COLORS.white, fontWeight: "bold" },
+                      { color: theme.text, fontWeight: "bold" },
                     ]}
                   >
                     {item.p}
                   </Text>
-                  <Text style={{ fontSize: 9, color: COLORS.textSub }}>
+                  <Text style={{ fontSize: 9, color: theme.text }}>
                     PONTOS
                   </Text>
                 </View>
@@ -720,7 +725,7 @@ export default function MarketingPlanScreen() {
           <View
             style={[
               styles.ruleBox,
-              { marginTop: 20, backgroundColor: "rgba(255,255,255,0.02)" },
+              { marginTop: 20, backgroundColor: theme.card },
             ]}
           >
             <Text style={[styles.complianceFootnote, { textAlign: "center" }]}>
@@ -753,7 +758,7 @@ export default function MarketingPlanScreen() {
                   width: "48%",
                   marginBottom: 10,
                   alignItems: "center",
-                  backgroundColor: "rgba(44, 148, 188, 0.05)",
+                  backgroundColor: theme.card,
                 },
               ]}
             >
@@ -763,7 +768,7 @@ export default function MarketingPlanScreen() {
               </Text>
               <Text
                 style={{
-                  color: COLORS.white,
+                  color: theme.text,
                   fontWeight: "bold",
                   fontSize: 16,
                 }}
@@ -780,7 +785,7 @@ export default function MarketingPlanScreen() {
                   width: "48%",
                   marginBottom: 10,
                   alignItems: "center",
-                  backgroundColor: "rgba(46, 204, 113, 0.05)",
+                  backgroundColor: theme.card,
                 },
               ]}
             >
@@ -790,7 +795,7 @@ export default function MarketingPlanScreen() {
               </Text>
               <Text
                 style={{
-                  color: COLORS.white,
+                  color: theme.text,
                   fontWeight: "bold",
                   fontSize: 16,
                 }}
@@ -808,7 +813,7 @@ export default function MarketingPlanScreen() {
                   marginBottom: 10,
                   flexDirection: "row",
                   justifyContent: "space-around",
-                  backgroundColor: "rgba(255, 215, 0, 0.05)",
+                  backgroundColor: theme.card,
                 },
               ]}
             >
@@ -824,7 +829,7 @@ export default function MarketingPlanScreen() {
                 style={{
                   width: 1,
                   height: "100%",
-                  backgroundColor: COLORS.border,
+                  backgroundColor: theme.border,
                 }}
               />
               <View style={{ alignItems: "center" }}>
@@ -843,7 +848,7 @@ export default function MarketingPlanScreen() {
             style={[
               styles.activeCard,
               {
-                backgroundColor: "rgba(0,0,0,0.3)",
+                backgroundColor: theme.card,
                 borderLeftWidth: 4,
                 borderLeftColor: COLORS.primary,
               },
@@ -855,7 +860,7 @@ export default function MarketingPlanScreen() {
             <Text
               style={[
                 styles.infoText,
-                { color: COLORS.textMain, lineHeight: 18 },
+                { color: theme.text, lineHeight: 18 },
               ]}
             >
               Para manter o status{" "}
@@ -886,7 +891,7 @@ export default function MarketingPlanScreen() {
                   style={{
                     fontSize: 10,
                     fontWeight: "bold",
-                    color: COLORS.white,
+                    color: "#FFF",
                   }}
                 >
                   EXEMPLO
@@ -906,7 +911,7 @@ export default function MarketingPlanScreen() {
               borderRadius: 8,
               borderStyle: "dotted",
               borderWidth: 1,
-              borderColor: COLORS.border,
+              borderColor: theme.border,
             }}
           >
             <Text
@@ -927,25 +932,25 @@ export default function MarketingPlanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16, paddingBottom: 40 },
   headerArea: { alignItems: "center", marginVertical: 30 },
   mainTitle: {
     fontSize: 28,
     fontWeight: "900",
-    color: COLORS.textMain,
+    color: theme.text,
     letterSpacing: 2,
   },
   subtitle: { color: COLORS.primary, fontSize: 14, fontWeight: "600" },
 
   sectionContainer: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.card,
     borderRadius: 12,
     marginBottom: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: theme.border,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -953,12 +958,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
   },
-  sectionTitle: { color: COLORS.textMain, fontSize: 13, fontWeight: "700" },
+  sectionTitle: { color: theme.text, fontSize: 13, fontWeight: "700" },
   sectionContent: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    borderTopColor: theme.border,
+    backgroundColor: theme.card,
   },
   row: { flexDirection: "row", alignItems: "center" },
   rowBetween: {
@@ -968,7 +973,7 @@ const styles = StyleSheet.create({
   },
 
   activeCard: {
-    backgroundColor: "rgba(255, 215, 0, 0.05)",
+    backgroundColor: theme.card,
     padding: 15,
     borderRadius: 10,
     borderWidth: 1,
@@ -982,49 +987,49 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   highlightCard: {
-    backgroundColor: "rgba(44, 148, 188, 0.1)",
+    backgroundColor: theme.card,
     padding: 16,
     borderRadius: 8,
   },
-  highlightValue: { fontSize: 22, fontWeight: "900", color: COLORS.textMain },
+  highlightValue: { fontSize: 22, fontWeight: "900", color: theme.text },
 
   comboTable: {
     marginVertical: 12,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: theme.card,
     borderRadius: 8,
     padding: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,215,0,0.1)",
+    borderColor: theme.border,
   },
   comboRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 6,
     borderBottomWidth: 0.5,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: theme.border,
   },
-  comboText: { color: COLORS.textMain, fontSize: 12 },
+  comboText: { color: theme.text, fontSize: 12 },
   successIcon: { color: COLORS.success, fontWeight: "bold" },
 
   financeBox: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "rgba(44, 148, 188, 0.1)",
+    backgroundColor: theme.card,
     padding: 10,
     borderRadius: 8,
     marginTop: 10,
   },
-  financeLabel: { color: COLORS.textSub, fontSize: 10, marginBottom: 2 },
+  financeLabel: { color: theme.text, fontSize: 10, marginBottom: 2 },
   financeText: { color: COLORS.success, fontWeight: "bold", fontSize: 12 },
   lockNotice: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: theme.input,
     padding: 8,
     borderRadius: 5,
     marginBottom: 10,
   },
-  lockNoticeText: { color: COLORS.textSub, fontSize: 11, marginLeft: 8 },
+  lockNoticeText: { color: theme.text, fontSize: 11, marginLeft: 8 },
   warningText: {
     color: COLORS.gold,
     fontSize: 11,
@@ -1032,7 +1037,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   complianceFootnote: {
-    color: COLORS.textSub,
+    color: theme.text,
     fontSize: 10,
     textAlign: "center",
     marginTop: 10,
@@ -1045,25 +1050,25 @@ const styles = StyleSheet.create({
   pkgRow: { flexDirection: "row", justifyContent: "space-between" },
   pkgCard: {
     width: (width - 60) / 3,
-    backgroundColor: COLORS.background,
+    backgroundColor: theme.bg,
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.primary,
     alignItems: "center",
   },
-  pkgTitle: { color: COLORS.textSub, fontSize: 10, fontWeight: "bold" },
+  pkgTitle: { color: theme.text, fontSize: 10, fontWeight: "bold" },
   pkgPrice: {
-    color: COLORS.textMain,
+    color: theme.text,
     fontSize: 14,
     fontWeight: "bold",
     marginVertical: 4,
   },
   pkgApps: { color: COLORS.primary, fontSize: 10 },
 
-  planText: { color: COLORS.textSub, fontSize: 14, marginTop: 4 },
+  planText: { color: theme.text, fontSize: 14, marginTop: 4 },
   infoText: {
-    color: COLORS.textSub,
+    color: theme.text,
     fontSize: 12,
     fontStyle: "italic",
     marginTop: 12,
@@ -1071,7 +1076,7 @@ const styles = StyleSheet.create({
   typeBox: {
     marginBottom: 12,
     padding: 10,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: theme.card,
     borderRadius: 8,
   },
   typeTitle: { color: COLORS.primary, fontWeight: "bold", fontSize: 14 },
@@ -1080,9 +1085,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: theme.border,
   },
-  rankName: { color: COLORS.textMain, fontWeight: "bold" },
+  rankName: { color: theme.text, fontWeight: "bold" },
   rankPoints: { color: COLORS.gold, fontWeight: "bold" },
   ruleBox: {
     marginVertical: 10,
@@ -1091,7 +1096,7 @@ const styles = StyleSheet.create({
     borderLeftColor: COLORS.primary,
   },
   touchHint: {
-    color: COLORS.textSub,
+    color: theme.text,
     fontSize: 12,
     marginBottom: 10,
     fontStyle: "italic",

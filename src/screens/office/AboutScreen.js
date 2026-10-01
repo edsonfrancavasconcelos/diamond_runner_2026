@@ -1,5 +1,5 @@
-import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 
 const COLORS = {
   bg: "#0c3c74",
@@ -10,6 +10,9 @@ const COLORS = {
 };
 
 export default function AboutScreen() {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>SOBRE / EMPRESA</Text>
@@ -72,11 +75,11 @@ export default function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bg },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 22, paddingBottom: 42 },
   title: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 1,
@@ -95,9 +98,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 18,
   },
-  label: { color: COLORS.muted, fontSize: 12, marginTop: 10 },
+  label: { color: theme.text, fontSize: 12, marginTop: 10 },
   value: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 15,
     lineHeight: 22,
     fontWeight: "600",
@@ -110,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   paragraph: {
-    color: COLORS.muted,
+    color: theme.text,
     fontSize: 15,
     lineHeight: 24,
     marginTop: 12,

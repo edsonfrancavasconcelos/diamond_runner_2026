@@ -1,20 +1,21 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026
 // Status: TELA DE NOTÍCIAS - Visual Moderno Blue Diamond
 
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  StatusBar,
-  RefreshControl,
-  Linking,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Image,
+    Linking,
+    RefreshControl,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import { supabase } from "../../services/supabase";
 
 const COLORS = {
@@ -27,6 +28,8 @@ const COLORS = {
 };
 
 export default function NewsScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [news, setNews] = useState([]);
@@ -75,7 +78,7 @@ export default function NewsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>NOTÍCIAS & AVISOS</Text>
@@ -141,12 +144,12 @@ export default function NewsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const createStyles = (theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.bg },
   center: { justifyContent: "center", alignItems: "center" },
   header: { paddingHorizontal: 25, paddingTop: 60, paddingBottom: 20 },
   headerTitle: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 22,
     fontWeight: "900",
     letterSpacing: 1,
@@ -159,12 +162,12 @@ const styles = StyleSheet.create({
   },
   scroll: { paddingHorizontal: 20, paddingBottom: 40 },
   newsCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: theme.card,
     borderRadius: 25,
     overflow: "hidden",
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.05)",
+    borderBottomColor: theme.border,
   },
   newsImage: { width: "100%", height: 180, resizeMode: "cover" },
   newsContent: { padding: 20 },
@@ -176,13 +179,13 @@ const styles = StyleSheet.create({
   },
   newsDate: { color: COLORS.gold, fontSize: 11, fontWeight: "bold" },
   newsTitle: {
-    color: COLORS.white,
+    color: theme.text,
     fontSize: 18,
     fontWeight: "900",
     marginBottom: 8,
   },
   newsDesc: {
-    color: COLORS.textSub,
+    color: theme.text,
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 15,
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: "row", alignItems: "center", gap: 5 },
   readMore: { color: COLORS.primary, fontSize: 11, fontWeight: "900" },
   emptyText: {
-    color: COLORS.textSub,
+    color: theme.text,
     textAlign: "center",
     marginTop: 50,
     fontSize: 14,

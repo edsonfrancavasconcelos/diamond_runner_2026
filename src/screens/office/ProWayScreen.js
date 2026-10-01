@@ -1,19 +1,20 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026 | Refatorado para expo-video (CORRIGIDO)
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useContext, useEffect } from "react";
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Dimensions,
-  Image,
-} from "react-native";
 import { VideoView, useVideoPlayer } from "expo-video";
+import { useContext, useEffect, useState } from "react";
+import {
+    Dimensions,
+    Image,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
+import { useTheme } from "../../i18n/context/ThemeContext";
 import * as AllTexts from "../../i18n/hooks/texts";
 
 const videoPrincipal = require("../../assets/videos/DIAMONDRUNNER_UP.mp4");
@@ -27,6 +28,8 @@ const PALETTE = {
 };
 
 export default function ProWayScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const { country = "BR" } = useContext(CountryContext) || {};
   const t = AllTexts.prowayTexts?.[country] || AllTexts.prowayTexts?.BR || {};
 
@@ -68,8 +71,8 @@ export default function ProWayScreen() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: PALETTE.darkBg }}>
-      <StatusBar barStyle="light-content" />
+    <View style={{ flex: 1, backgroundColor: theme.bg }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.topContainer}>
         {currentVideoSource ? (
@@ -132,12 +135,12 @@ export default function ProWayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: { flex: 1 },
   topContainer: {
     width: width,
     height: VIDEO_HEIGHT + 60,
-    backgroundColor: "#000",
+    backgroundColor: theme.bg,
     justifyContent: "center",
   },
   videoBox: { width: "100%", height: VIDEO_HEIGHT + 40 },
@@ -159,14 +162,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   headerTitle: {
-    color: "#FFF",
+    color: theme.text,
     fontSize: 12,
     fontWeight: "900",
     letterSpacing: 3,
   },
   content: { padding: 20 },
   sectionTitle: {
-    color: "#FFF",
+    color: theme.text,
     fontSize: 11,
     fontWeight: "900",
     marginBottom: 20,
@@ -178,15 +181,15 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 15,
     marginBottom: 15,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: theme.card,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: theme.border,
   },
   cardThumb: {
     width: 70,
     height: 70,
     borderRadius: 10,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: theme.card,
   },
   courseInfo: { flex: 1, marginLeft: 15 },
   catText: {
@@ -195,7 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginBottom: 4,
   },
-  courseTitle: { color: "#FFF", fontSize: 14, fontWeight: "bold" },
+  courseTitle: { color: theme.text, fontSize: 14, fontWeight: "bold" },
   playBtn: {
     width: 35,
     height: 35,

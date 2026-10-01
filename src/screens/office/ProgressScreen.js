@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  StatusBar,
-  Platform,
-  Image,
+    ActivityIndicator,
+    Image,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-import { supabase } from "../../services/supabase";
-import { useTheme } from "../../i18n/context/ThemeContext";
-import { CountryContext } from "../../i18n/context/CountryContext";
-import Obsidiana from "../../assets/images/obsidiana.png";
-import Topazio from "../../assets/images/topazio.png";
-import Safira from "../../assets/images/safira.png";
-import Rubi from "../../assets/images/rubi.png";
-import Esmeralda from "../../assets/images/esmeralda.png";
 import Diamante from "../../assets/images/diamante.png";
+import Esmeralda from "../../assets/images/esmeralda.png";
+import Obsidiana from "../../assets/images/obsidiana.png";
+import Rubi from "../../assets/images/rubi.png";
+import Safira from "../../assets/images/safira.png";
+import Topazio from "../../assets/images/topazio.png";
+import { CountryContext } from "../../i18n/context/CountryContext";
+import { useTheme } from "../../i18n/context/ThemeContext";
+import { supabase } from "../../services/supabase";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -80,6 +80,8 @@ const RANKS = [
 ];
 
 export default function ProgressScreen() {
+  const { theme, isDark } = useTheme();
+  const styles = createStyles(theme);
   const { country = "BR" } = useContext(CountryContext) || {};
 
   const [loading, setLoading] = useState(true);
@@ -194,7 +196,7 @@ export default function ProgressScreen() {
           styles.container,
           styles.center,
           {
-            backgroundColor: PALETTE.black,
+            backgroundColor: theme.bg,
           },
         ]}
       >
@@ -209,13 +211,8 @@ export default function ProgressScreen() {
   const currentMedal = rankImages[careerData.rankIndex];
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: PALETTE.dark,
-      }}
-    >
-      <StatusBar barStyle="light-content" />
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -381,7 +378,7 @@ backgroundColor:PALETTE.gold
                   backgroundColor:
                     careerData.percent >= 100
                       ? "rgba(0,242,255,0.1)"
-                      : "rgba(255,255,255,0.05)",
+                      : theme.input,
                 },
               ]}
             >
@@ -390,7 +387,7 @@ backgroundColor:PALETTE.gold
 
                 size={16}
 
-                color={careerData.percent >= 100 ? PALETTE.success : "#444"}
+                color={careerData.percent >= 100 ? PALETTE.success : theme.border}
               />
             </View>
 
@@ -401,7 +398,7 @@ backgroundColor:PALETTE.gold
                 style={[
                   styles.taskValue,
                   {
-                    color: careerData.percent >= 100 ? PALETTE.success : "#666",
+                    color: careerData.percent >= 100 ? PALETTE.success : theme.text,
                   },
                 ]}
               >
@@ -422,7 +419,7 @@ backgroundColor:PALETTE.gold
     </View>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -452,7 +449,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "900",
     letterSpacing: 5,
-    color: "#FFF",
+    color: theme.text,
   },
 
   hero: {
@@ -488,13 +485,13 @@ const styles = StyleSheet.create({
   },
 
   currentRankName: {
-    color: "#FFF",
+    color: theme.text,
     fontSize: 38,
     fontWeight: "900",
     marginTop: 15,
     letterSpacing: 6,
     textAlign: "center",
-    textShadowColor: "rgba(255,255,255,0.3)",
+    textShadowColor: theme.border,
     textShadowOffset: {
       width: 0,
       height: 0,
@@ -521,7 +518,7 @@ const styles = StyleSheet.create({
 
     borderLeftWidth: 4,
 
-    backgroundColor: "rgba(44,148,188,0.15)",
+    backgroundColor: theme.card,
 
     shadowColor: "#000",
 
@@ -546,14 +543,14 @@ const styles = StyleSheet.create({
   },
 
   teleLabel: {
-    color: "rgba(255,255,255,0.75)",
+    color: theme.text,
     fontSize: 9,
     fontWeight: "900",
     letterSpacing: 2,
   },
 
   teleGoal: {
-    color: "#FFF",
+    color: theme.text,
     fontSize: 22,
     fontWeight: "800",
   },
@@ -567,13 +564,13 @@ const styles = StyleSheet.create({
 
     borderWidth: 2,
 
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: theme.border,
 
     justifyContent: "center",
 
     alignItems: "center",
 
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: theme.card,
   },
 
   percentValue: {
@@ -587,7 +584,7 @@ const styles = StyleSheet.create({
   progressTrack: {
     height: 6,
 
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: theme.input,
 
     overflow: "hidden",
 
@@ -603,7 +600,7 @@ const styles = StyleSheet.create({
 
     justifyContent: "space-between",
 
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: theme.card,
 
     padding: 15,
 
@@ -615,7 +612,7 @@ const styles = StyleSheet.create({
   },
 
   statLabel: {
-    color: PALETTE.softGray,
+    color: theme.text,
 
     fontSize: 10,
 
@@ -625,7 +622,7 @@ const styles = StyleSheet.create({
   },
 
   statValue: {
-    color: "#FFF",
+    color: theme.text,
 
     fontSize: 20,
 
@@ -637,13 +634,13 @@ const styles = StyleSheet.create({
   unit: {
     fontSize: 12,
 
-    color: "rgba(255,255,255,0.3)",
+    color: theme.border,
   },
 
   statDivider: {
     width: 1,
 
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: theme.border,
 
     marginHorizontal: 15,
   },
@@ -655,7 +652,7 @@ const styles = StyleSheet.create({
   },
 
   missionTitle: {
-    color: "#FFF",
+    color: theme.text,
 
     fontSize: 12,
 
@@ -679,7 +676,7 @@ const styles = StyleSheet.create({
 
     marginBottom: 25,
 
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: theme.card,
 
     padding: 12,
 
@@ -687,7 +684,7 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
 
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: theme.border,
   },
 
   taskIcon: {
@@ -709,7 +706,7 @@ const styles = StyleSheet.create({
   },
 
   taskLabel: {
-    color: PALETTE.grayBlue,
+    color: theme.text,
 
     fontSize: 10,
 
@@ -731,7 +728,7 @@ const styles = StyleSheet.create({
   footerNote: {
     textAlign: "center",
 
-    color: PALETTE.grayBlue,
+    color: theme.text,
 
     fontSize: 9,
 
