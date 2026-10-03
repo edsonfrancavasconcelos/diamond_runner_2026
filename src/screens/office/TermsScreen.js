@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 
 const COLORS = {
   bg: "#0c3c74",
@@ -10,56 +11,45 @@ const COLORS = {
 
 export default function TermsScreen() {
   const { theme } = useTheme();
+  const texts = useTexts("terms");
   const styles = createStyles(theme);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>TERMOS DE USO</Text>
+      <Text style={styles.title}>{texts.title}</Text>
       <Text style={styles.paragraph}>
-        O app e o ecossistema Diamond Runner são operados por EFVasconcelos
-        Sistemas.
+        {texts.companyOperation}
       </Text>
-      <Text style={styles.heading}>Cadastro e conta</Text>
+      <Text style={styles.heading}>{texts.accountHeading}</Text>
       <Text style={styles.paragraph}>
-        O cadastro exige dados verdadeiros, completos e atualizados. A conta só
-        fica ATIVA após o pagamento ser confirmado. Antes disso, o status é
-        PENDENTE e não há ID DR.
+        {texts.registration}
       </Text>
       <Text style={styles.paragraph}>
-        O usuário é responsável pela sua senha, pela guarda de seus dados de
-        acesso e pelo uso da conta.
+        {texts.accountSecurity}
       </Text>
-      <Text style={styles.heading}>Uso da plataforma</Text>
+      <Text style={styles.heading}>{texts.platformHeading}</Text>
       <Text style={styles.paragraph}>
-        O app oferece ferramentas de escritório, rede, pontuação, vendas de
-        aplicativos e conteúdos de apoio.
+        {texts.platformServices}
       </Text>
       <Text style={styles.paragraph}>
-        Ganhos, bônus ou pontuação dependem de vendas reais, uso dos aplicativos
-        e regras do plano vigente.
+        {texts.earningsRules}
       </Text>
       <Text style={styles.paragraph}>
-        Não há promessa de renda, lucro, resultado financeiro ou enriquecimento.
-        A Diamond Runner não é investimento, aplicação financeira, sorteio ou
-        esquema de pirâmide.
+        {texts.noIncomePromise}
       </Text>
       <Text style={styles.paragraph}>
-        Recrutamento sem venda ou atividade real não gera direito a remuneração.
+        {texts.recruitment}
       </Text>
-      <Text style={styles.heading}>Regras e segurança</Text>
+      <Text style={styles.heading}>{texts.securityHeading}</Text>
       <Text style={styles.paragraph}>
-        A empresa pode atualizar planos, pontuação e regras, avisando no app.
-        Uso indevido, fraude, spam ou deturpação do modelo pode gerar bloqueio
-        da conta.
+        {texts.companyChanges}
       </Text>
       <Text style={styles.paragraph}>
-        Este documento segue o foro do Brasil, com respeito ao Código de Defesa
-        do Consumidor e à Lei Geral de Proteção de Dados.
+        {texts.jurisdiction}
       </Text>
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          EFVasconcelos Sistemas — Diamond Runner. Documento informativo. Não
-          substitui contrato específico.
+          {texts.footer}
         </Text>
       </View>
     </ScrollView>

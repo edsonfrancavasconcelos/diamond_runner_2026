@@ -24,6 +24,7 @@ import Animated, {
     withSpring,
 } from "react-native-reanimated";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -38,6 +39,7 @@ const PALETTE = {
 
 const NetworkNode = ({ member, isRoot = false }) => {
   const { theme } = useTheme();
+  const texts = useTexts("network");
   const styles = createStyles(theme);
   const [isOpen, setIsOpen] = useState(false);
   const [children, setChildren] = useState([]);
@@ -55,7 +57,7 @@ const NetworkNode = ({ member, isRoot = false }) => {
         if (error) throw error;
         setChildren(data || []);
       } catch (err) {
-        Alert.alert("Erro", "Falha ao carregar rede.");
+        Alert.alert(texts.errorTitle, texts.loadError);
       } finally {
         setLoading(false);
       }
@@ -144,6 +146,7 @@ const NetworkNode = ({ member, isRoot = false }) => {
 
 export default function NetworkScreen() {
   const { theme, isDark } = useTheme();
+  const texts = useTexts("network");
   const styles = createStyles(theme);
   const navigation = useNavigation();
   const [rootMember, setRootMember] = useState(null);
@@ -227,11 +230,11 @@ export default function NetworkScreen() {
             <Ionicons name="chevron-back" size={24} color={theme.text} />
           </TouchableOpacity>
           <View style={{ marginLeft: 10, flex: 1 }}>
-            <Text style={styles.headerTitle}>REDE DIAMOND</Text>
+            <Text style={styles.headerTitle}>{texts.headerTitle}</Text>
             <Text
               style={{ color: theme.text, fontSize: 10, fontWeight: "600" }}
             >
-              FEV 2026 • GESTÃO ATIVA
+              {texts.headerStatus}
             </Text>
           </View>
           <TouchableOpacity onPress={resetPosition} style={styles.resetBtn}>

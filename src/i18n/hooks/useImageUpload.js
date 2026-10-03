@@ -2,16 +2,23 @@
 
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
+import { imageUploadTexts } from "./texts";
 import { supabase } from "../../services/supabase";
 
-export const handlePickAndUploadAvatar = async (userId, onUploadSuccess) => {
+export const handlePickAndUploadAvatar = async (
+  userId,
+  onUploadSuccess,
+  language = "BR",
+) => {
+  const texts = imageUploadTexts[language] || imageUploadTexts.BR;
+
   try {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
       Alert.alert(
-        "Permissão necessária",
-        "Precisamos de acesso às suas fotos.",
+        texts.permissionTitle,
+        texts.permissionMessage,
       );
       return;
     }
@@ -64,9 +71,9 @@ export const handlePickAndUploadAvatar = async (userId, onUploadSuccess) => {
       onUploadSuccess(publicUrl);
     }
 
-    Alert.alert("Sucesso", "Sua foto de perfil foi atualizada!");
+    Alert.alert(texts.successTitle, texts.successMessage);
   } catch (error) {
     console.log("Erro upload avatar:", error);
-    Alert.alert("Erro", "Não foi possível atualizar sua foto.");
+    Alert.alert(texts.errorTitle, texts.errorMessage);
   }
 };

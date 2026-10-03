@@ -58,10 +58,10 @@ export default function ChooseSponsorScreen() {
 
       <View style={styles.content}>
         <Text style={[styles.tagline, { color: PALETTE.primary }]}>
-          {texts.tagline?.toUpperCase() || "ETAPA DE ADMISSÃO"}
+          {texts.tagline.toUpperCase()}
         </Text>
         <Text style={[styles.title, { color: theme.text }]}>
-          {texts.title?.toUpperCase() || "ESCOLHA SUA OPÇÃO"}
+          {texts.title.toUpperCase()}
         </Text>
         <Text
           style={[
@@ -69,14 +69,13 @@ export default function ChooseSponsorScreen() {
             { color: isDark ? PALETTE.softGray : "#535355" },
           ]}
         >
-          {texts.subtitle ||
-            "Selecione sua forma de entrada no ecossistema Diamond."}
+          {texts.subtitle}
         </Text>
 
         <View style={styles.actionBox}>
           <View style={styles.buttonWrapper}>
             <Button
-              title={texts.hasSponsor?.toUpperCase() || "TENHO UM PATROCINADOR"}
+              title={texts.hasSponsor.toUpperCase()}
               onPress={() => navigation.navigate("HasSponsor", { country })}
               style={{
                 backgroundColor: PALETTE.primary,
@@ -104,7 +103,7 @@ export default function ChooseSponsorScreen() {
                 { color: isDark ? PALETTE.light : "#6c6c6f" },
               ]}
             >
-              {texts.noSponsor?.toUpperCase() || "NÃO TENHO CONVITE"}
+              {texts.noSponsor.toUpperCase()}
             </Text>
             <Ionicons
               name="arrow-forward"
@@ -127,7 +126,7 @@ export default function ChooseSponsorScreen() {
             { color: isDark ? PALETTE.grayBlue : "#CCC" },
           ]}
         >
-          {texts.footer || "PROTOCOLOS DE AFILIAÇÃO ATIVOS 2026"}
+          {texts.footer}
         </Text>
       </View>
     </View>

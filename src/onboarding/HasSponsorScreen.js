@@ -9,6 +9,7 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StatusBar,
     StyleSheet,
     Text,
@@ -54,9 +55,7 @@ export default function HasSponsorScreen() {
         .single();
 
       if (error || !data) {
-        throw new Error(
-          "Patrocinador não encontrado. Verifique o ID digitado.",
-        );
+        throw new Error(texts.sponsorNotFound);
       }
 
       // SE ACHOU, NAVEGA PARA O REGISTRO
@@ -67,7 +66,12 @@ export default function HasSponsorScreen() {
         sponsorIdDr: idFormatado,
       });
     } catch (error) {
-      Alert.alert("ERRO DE VALIDAÇÃO", error.message);
+      Alert.alert(
+        texts.validationErrorTitle,
+        error.message === texts.sponsorNotFound
+          ? texts.sponsorNotFound
+          : texts.verificationFailed,
+      );
     } finally {
       setLoading(false);
     }
@@ -80,35 +84,39 @@ export default function HasSponsorScreen() {
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
-        </TouchableOpacity>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
+          </TouchableOpacity>
+        </View>
 
-      </View>
-
-      <View style={styles.content}>
+        <View style={styles.content}>
         <Text style={[styles.title, { color: theme.text }]}>
-          VALIDAÇÃO DE REDE
+          {texts.networkValidationTitle}
         </Text>
         <Text style={[styles.subtitle, { color: PALETTE.softGray }]}>
-          Insira o ID de quem te convidou para o time Diamond.
+          {texts.networkValidationSubtitle}
         </Text>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: PALETTE.primary }]}>
-              ID DO PATROCINADOR
+              {texts.labelId}
             </Text>
             <TextInput
               style={[
                 styles.input,
                 { borderBottomColor: PALETTE.primary, color: theme.text },
               ]}
-              placeholder="Ex: DR-1000"
+              placeholder={texts.sponsorPlaceholder}
               placeholderTextColor="#4b4b4b"
               value={sponsorId}
               onChangeText={setSponsorId}
@@ -119,7 +127,7 @@ export default function HasSponsorScreen() {
         </View>
 
         <Button
-          title={loading ? "VERIFICANDO..." : "CONTINUAR"}
+          title={loading ? texts.checkingSponsor : texts.continue}
           onPress={handleContinue}
           disabled={loading || !sponsorId}
           style={{
@@ -135,13 +143,16 @@ export default function HasSponsorScreen() {
             color={PALETTE.primary}
           />
         )}
-      </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -156,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  content: { flex: 1, paddingHorizontal: 35, justifyContent: "center" },
+  content: { flexGrow: 1, paddingHorizontal: 35, justifyContent: "center" },
   title: {
     fontSize: 14,
     fontWeight: "900",

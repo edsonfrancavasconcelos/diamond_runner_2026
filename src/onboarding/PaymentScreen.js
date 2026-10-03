@@ -1,9 +1,10 @@
 // Local: src/onboarding/PaymentScreen.js
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import {
+  Alert,
   Linking,
   StatusBar,
   StyleSheet,
@@ -14,6 +15,8 @@ import {
 } from "react-native";
 
 import { createCheckoutSession } from "../services/checkoutService";
+import { CountryContext } from "../i18n/context/CountryContext";
+import { paymentTexts } from "../i18n/hooks/texts";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -25,10 +28,13 @@ const PALETTE = {
 export default function PaymentScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const { country: contextCountry } = useContext(CountryContext) || {};
 
   const params = route.params || {};
 
   const { type, planName, email, amount } = params;
+  const country = params.country || contextCountry || "BR";
+  const texts = paymentTexts[country] || paymentTexts.BR;
 
   const [loading, setLoading] = useState(false);
 
@@ -67,19 +73,25 @@ export default function PaymentScreen() {
     };
   }, [type, planName, amount]);
 
+  const currencySymbol = params.currencySymbol || texts.symbol;
+  const formattedPrice = Number(planInfo.price).toLocaleString(texts.locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
   async function openStripe() {
     if (loading) return;
 
     const userEmail = email?.trim()?.toLowerCase();
 
     if (!userEmail) {
-      alert("Informe seu email antes de continuar.");
+      Alert.alert(texts.errorTitle, texts.emailRequired);
 
       return;
     }
 
     if (!planInfo.price || planInfo.price <= 0) {
-      alert("Valor do plano inválido.");
+      Alert.alert(texts.errorTitle, texts.invalidPlanPrice);
 
       return;
     }
@@ -111,7 +123,7 @@ export default function PaymentScreen() {
       const url = response?.url;
 
       if (!url) {
-        throw new Error("Stripe não retornou URL.");
+        throw new Error(texts.checkoutUrlMissing);
       }
 
       if (typeof window !== "undefined" && window.open) {
@@ -122,10 +134,10 @@ export default function PaymentScreen() {
     } catch (error) {
       console.error("❌ Checkout erro:", error);
 
-      const message = error?.message || "Falha ao abrir pagamento.";
-
       if (typeof window !== "undefined") {
-        window.alert(message);
+        window.alert(texts.checkoutFailure);
+      } else {
+        Alert.alert(texts.errorTitle, texts.checkoutFailure);
       }
     } finally {
       setLoading(false);
@@ -139,11 +151,13 @@ export default function PaymentScreen() {
       <View style={styles.header}>
         <Ionicons name="diamond" size={60} color={PALETTE.gold} />
 
-        <Text style={styles.title}>FINALIZAR ATIVAÇÃO</Text>
+        <Text style={styles.title}>{texts.checkoutTitle}</Text>
 
         <Text style={styles.planName}>{planInfo.name}</Text>
 
-        <Text style={styles.priceText}>R$ {planInfo.price.toFixed(2)}</Text>
+        <Text style={styles.priceText}>
+          {currencySymbol} {formattedPrice}
+        </Text>
 
         {email && <Text style={styles.emailText}>{email}</Text>}
       </View>
@@ -155,7 +169,7 @@ export default function PaymentScreen() {
           disabled={loading}
         >
           <Text style={styles.btnText}>
-            {loading ? "ABRINDO STRIPE..." : "PAGAR COM STRIPE"}
+            {loading ? texts.checkoutLoading : texts.checkoutButton}
           </Text>
         </TouchableOpacity>
       </View>

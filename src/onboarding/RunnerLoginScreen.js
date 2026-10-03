@@ -40,8 +40,8 @@ export default function RunnerLoginScreen() {
   const handleLogin = () => {
     if (!form.codigo || !form.cpf || !form.email) {
       Alert.alert(
-        "Autenticação",
-        texts.alertFill || "Preencha todos os campos",
+        texts.alertTitle,
+        texts.alertFill,
       );
       return;
     }
@@ -70,13 +70,13 @@ export default function RunnerLoginScreen() {
           <Ionicons name="close-outline" size={24} color={PALETTE.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTag, { color: PALETTE.primary }]}>
-          DIAMOND ACCESS
+          {texts.headerTag}
         </Text>
       </View>
 
       <View style={styles.content}>
         <Text style={[styles.title, { color: theme.text }]}>
-          BEM-VINDO AO CLUBE
+          {texts.welcomeTitle}
         </Text>
         <Text
           style={[
@@ -84,13 +84,13 @@ export default function RunnerLoginScreen() {
             { color: isDark ? PALETTE.softGray : "#999" },
           ]}
         >
-          Identifique-se para acessar seu escritório virtual.
+          {texts.subtitle}
         </Text>
 
         <View style={styles.form}>
           <LoginInput
-            label="CÓDIGO DE DISTRIBUIDOR"
-            placeholder={texts.distributorCode || "CÓDIGO"}
+            label={texts.distributorLabel}
+            placeholder={texts.distributorCode}
             value={form.codigo}
             onChange={(v) => setForm({ ...form, codigo: v })}
             autoCap="characters"
@@ -99,8 +99,8 @@ export default function RunnerLoginScreen() {
           />
 
           <LoginInput
-            label="DOCUMENTO (CPF)"
-            placeholder={texts.cpf || "000.000.000-00"}
+            label={texts.documentLabel}
+            placeholder={texts.cpf}
             value={form.cpf}
             onChange={(v) => setForm({ ...form, cpf: v })}
             keyboard="numeric"
@@ -109,8 +109,8 @@ export default function RunnerLoginScreen() {
           />
 
           <LoginInput
-            label="E-MAIL REGISTRADO"
-            placeholder={texts.email || "seu@email.com"}
+            label={texts.emailLabel}
+            placeholder={texts.email}
             value={form.email}
             onChange={(v) => setForm({ ...form, email: v })}
             keyboard="email-address"
@@ -120,7 +120,7 @@ export default function RunnerLoginScreen() {
         </View>
 
         <Button
-          title={(texts.loginButton || "ENTRAR").toUpperCase()}
+          title={texts.loginButton.toUpperCase()}
           onPress={handleLogin}
           style={{
             backgroundColor: PALETTE.primary,
@@ -139,7 +139,7 @@ export default function RunnerLoginScreen() {
               { color: isDark ? PALETTE.grayBlue : "#aaa" },
             ]}
           >
-            PROBLEMAS COM O ACESSO?
+            {texts.accessHelp}
           </Text>
         </TouchableOpacity>
       </View>

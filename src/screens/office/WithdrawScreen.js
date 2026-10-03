@@ -18,7 +18,13 @@ import {
     View,
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
+import {
+  isValidBrazilianPhone,
+  isValidCPF,
+  isValidEmail,
+} from "../../utils/inputValidation";
 
 const { width } = Dimensions.get("window");
 
@@ -33,6 +39,7 @@ const PALETTE = {
 
 export default function WithdrawScreen() {
   const { theme, isDark } = useTheme();
+  const texts = useTexts("withdraw");
   const styles = createStyles(theme);
   const navigation = useNavigation();
   const [amount, setAmount] = useState("");
@@ -93,15 +100,36 @@ export default function WithdrawScreen() {
 
   const handleWithdraw = async () => {
     const value = parseFloat(amount.replace(",", "."));
+    const trimmedPixKey = pixKey.trim();
+    const pixKeyDigits = trimmedPixKey.replace(/\D/g, "");
+    let pixKeyToSave = trimmedPixKey;
 
-    if (!value || value <= 0) return Alert.alert("Erro", "Valor inválido.");
+    if (!value || value <= 0) return Alert.alert(texts.error, texts.invalidAmount);
     if (value > balance)
       return Alert.alert(
-        "Saldo Insuficiente",
-        "Resgate maior que o saldo disponível.",
+        texts.insufficientBalanceTitle,
+        texts.exceedsBalance,
       );
     if (pixKey.length < 5)
-      return Alert.alert("Erro", "Informe uma chave PIX válida.");
+      return Alert.alert(texts.error, texts.invalidPixKey);
+    if (trimmedPixKey.includes("@") && !isValidEmail(trimmedPixKey))
+      return Alert.alert(texts.error, texts.invalidEmail);
+    if (/^[\d\s().+-]+$/.test(trimmedPixKey) && pixKeyDigits.length === 11) {
+      if (/^(\d)\1{10}$/.test(pixKeyDigits))
+        return Alert.alert(texts.error, texts.invalidCpfOrPhone);
+      const validCPF = isValidCPF(trimmedPixKey);
+      const validPhone = isValidBrazilianPhone(trimmedPixKey);
+      if (!validCPF && !validPhone)
+        return Alert.alert(texts.error, texts.invalidCpfOrPhone);
+      pixKeyToSave = pixKeyDigits;
+    } else if (
+      /^[\d\s().+-]+$/.test(trimmedPixKey) &&
+      pixKeyDigits.length === 10
+    ) {
+      if (!isValidBrazilianPhone(trimmedPixKey))
+        return Alert.alert(texts.error, texts.invalidPhone);
+      pixKeyToSave = pixKeyDigits;
+    }
 
     setLoading(true);
     try {
@@ -113,18 +141,18 @@ export default function WithdrawScreen() {
       const { error } = await supabase.from("withdraw_requests").insert({
         profile_id: user.id,
         amount: value,
-        pix_key: pixKey,
+        pix_key: pixKeyToSave,
         status: "pending",
       });
 
       if (error) throw error;
 
-      Alert.alert("Sucesso", "Solicitação enviada para análise.");
+      Alert.alert(texts.success, texts.requestSuccess);
       setAmount("");
       setPixKey("");
       fetchData(); // Recarrega saldo e histórico
     } catch (e) {
-      Alert.alert("Erro", "Falha ao processar resgate.");
+      Alert.alert(texts.error, texts.requestError);
       console.error(e);
     } finally {
       setLoading(false);
@@ -142,7 +170,7 @@ export default function WithdrawScreen() {
         >
           <Ionicons name="chevron-back" size={28} color={theme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>SOLICITAR SAQUE</Text>
+        <Text style={styles.headerTitle}>{texts.requestTitle}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -153,11 +181,12 @@ export default function WithdrawScreen() {
         {/* CARD DE SALDO */}
         <View style={styles.megaBalanceCard}>
           <View>
-            <Text style={styles.megaLabel}>SALDO TOTAL DISPONÍVEL</Text>
+            <Text style={styles.megaLabel}>{texts.availableBalance}</Text>
             <Text style={styles.megaValue}>
               <Text style={styles.currency}>R$ </Text>
-              {Number(balance).toLocaleString("pt-BR", {
+              {Number(balance).toLocaleString(texts.locale, {
                 minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               })}
             </Text>
           </View>
@@ -168,12 +197,12 @@ export default function WithdrawScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.fieldLabel}>VALOR PARA RETIRADA</Text>
+          <Text style={styles.fieldLabel}>{texts.withdrawalAmount}</Text>
           <View style={styles.inputContainer}>
             <Text style={styles.prefix}>R$</Text>
             <TextInput
               style={styles.mainInput}
-              placeholder="0,00"
+              placeholder={texts.amountPlaceholder}
               placeholderTextColor={theme.border}
               keyboardType="numeric"
               value={amount}
@@ -181,10 +210,10 @@ export default function WithdrawScreen() {
             />
           </View>
 
-          <Text style={[styles.fieldLabel, { marginTop: 30 }]}>CHAVE PIX</Text>
+          <Text style={[styles.fieldLabel, { marginTop: 30 }]}>{texts.pixKey}</Text>
           <TextInput
             style={styles.secondaryInput}
-            placeholder="CPF, E-mail ou Telefone"
+            placeholder={texts.pixPlaceholder}
             placeholderTextColor={theme.border}
             value={pixKey}
             onChangeText={setPixKey}
@@ -198,22 +227,25 @@ export default function WithdrawScreen() {
             {loading ? (
               <ActivityIndicator color={theme.text} />
             ) : (
-              <Text style={styles.actionButtonText}>EFETUAR RESGATE</Text>
+              <Text style={styles.actionButtonText}>{texts.submit}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         {/* LISTAGEM DE HISTÓRICO */}
         <View style={styles.historySection}>
-          <Text style={styles.sectionTitle}>HISTÓRICO RECENTE</Text>
+          <Text style={styles.sectionTitle}>{texts.recentHistory}</Text>
           {history.map((item) => (
             <View key={item.id} style={styles.historyCard}>
               <View>
                 <Text style={styles.historyDate}>
-                  {new Date(item.created_at).toLocaleDateString("pt-BR")}
+                  {new Date(item.created_at).toLocaleDateString(texts.locale)}
                 </Text>
                 <Text style={styles.historyAmount}>
-                  R$ {Number(item.amount || 0).toFixed(2)}
+                  R$ {Number(item.amount || 0).toLocaleString(texts.locale, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </Text>
               </View>
               <View
@@ -228,7 +260,13 @@ export default function WithdrawScreen() {
                 ]}
               >
                 <Text style={styles.statusText}>
-                  {(item.status || "pending").toUpperCase()}
+                  {({
+                    pending: texts.statusPending,
+                    approved: texts.statusApproved,
+                    completed: texts.statusCompleted,
+                    rejected: texts.statusRejected,
+                  }[String(item.status || "pending").toLowerCase()] ||
+                    String(item.status || "pending").toUpperCase())}
                 </Text>
               </View>
             </View>

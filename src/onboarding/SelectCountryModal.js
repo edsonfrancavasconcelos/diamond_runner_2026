@@ -35,12 +35,7 @@ export default function SelectCountryModal({ visible, onClose, onSelect }) {
   const countryContext = useContext(CountryContext);
   const country = countryContext?.country;
 
-  const texts = (welcomeTexts && country
-    ? welcomeTexts[country]
-    : welcomeTexts?.BR) || {
-    changeCountryButton: "Selecionar País",
-    back: "Voltar",
-  };
+  const texts = welcomeTexts[country] || welcomeTexts.BR;
 
   useEffect(() => {
     if (visible) {
@@ -105,7 +100,7 @@ export default function SelectCountryModal({ visible, onClose, onSelect }) {
           />
 
           <Text style={[styles.title, { color: PALETTE.primary }]}>
-            REGIÃO OPERACIONAL
+            {texts.operationalRegion}
           </Text>
           <Text
             style={[
@@ -113,14 +108,14 @@ export default function SelectCountryModal({ visible, onClose, onSelect }) {
               { color: isDark ? PALETTE.softGray : "#999" },
             ]}
           >
-            {String(texts.changeCountryButton || "").toUpperCase()}
+            {texts.changeCountryButton.toUpperCase()}
           </Text>
 
           <View style={styles.optionsGrid}>
             {[
-              { id: "BR", label: "Brasil", flag: "🇧🇷" },
-              { id: "ES", label: "Paraguay", flag: "🇵🇾" },
-              { id: "EN", label: "United States", flag: "🇺🇸" },
+              { id: "BR", label: "countryBrazil", flag: "🇧🇷" },
+              { id: "ES", label: "countryParaguay", flag: "🇵🇾" },
+              { id: "EN", label: "countryUnitedStates", flag: "🇺🇸" },
             ].map((item) => {
               const isSelected = country === item.id;
               return (
@@ -150,7 +145,7 @@ export default function SelectCountryModal({ visible, onClose, onSelect }) {
                       },
                     ]}
                   >
-                    {item.label}
+                    {texts[item.label]}
                   </Text>
                   {isSelected && (
                     <View
@@ -169,7 +164,7 @@ export default function SelectCountryModal({ visible, onClose, onSelect }) {
                 { color: isDark ? PALETTE.softGray : "#aaa" },
               ]}
             >
-              {String(texts.back || "VOLTAR").toUpperCase()}
+              {String(texts.back).toUpperCase()}
             </Text>
           </TouchableOpacity>
         </Animated.View>

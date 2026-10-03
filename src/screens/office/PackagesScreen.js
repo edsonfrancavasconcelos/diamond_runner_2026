@@ -20,7 +20,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { CountryContext } from "../../i18n/context/CountryContext";
 import { useTheme } from "../../i18n/context/ThemeContext";
-import { marketingTexts } from "../../i18n/hooks/texts";
+import { marketingTexts, packagesTexts } from "../../i18n/hooks/texts";
 
 const COLORS = {
   background: "#0a2e5e",
@@ -41,8 +41,9 @@ export default function PackagesScreen() {
   const { country = "BR" } = useContext(CountryContext) || {};
 
   const m = marketingTexts[country] || marketingTexts.BR;
+  const texts = packagesTexts[country] || packagesTexts.BR;
 
-  const cur = m.currency || "R$";
+  const cur = m.currency;
 
   const params = route.params || {};
 
@@ -121,18 +122,18 @@ export default function PackagesScreen() {
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.mainTitle}>DIAMOND PACKS</Text>
+        <Text style={styles.mainTitle}>{texts.pageTitle}</Text>
 
-        <Text style={styles.subTitle}>SISTEMA DE ATIVAÇÃO E UPGRADE</Text>
+        <Text style={styles.subTitle}>{texts.activationUpgrade}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* AFILIADO */}
 
         <View style={styles.card}>
-          <Text style={styles.cardTag}>START</Text>
+          <Text style={styles.cardTag}>{texts.startTag}</Text>
 
-          <Text style={styles.cardTitle}>AFILIADO</Text>
+          <Text style={styles.cardTitle}>{texts.affiliate}</Text>
 
           <Text style={styles.cardPrice}>{cur} 99,00</Text>
 
@@ -141,7 +142,7 @@ export default function PackagesScreen() {
 
             onPress={() => handlePayment(0, 99, 0, "AFILIADO")}
           >
-            <Text style={styles.btnText}>ATIVAR LICENÇA</Text>
+            <Text style={styles.btnText}>{texts.activateLicense}</Text>
           </TouchableOpacity>
         </View>
 
@@ -162,7 +163,7 @@ export default function PackagesScreen() {
 
             onPress={() => handlePayment(1, 299, 299, "BUILDER")}
           >
-            <Text style={styles.btnText}>ATIVAR BUILDER</Text>
+            <Text style={styles.btnText}>{texts.activateBuilder}</Text>
           </TouchableOpacity>
 
           <View style={styles.upgradeRow}>
@@ -176,7 +177,7 @@ export default function PackagesScreen() {
 
               onPress={() => handlePayment(4, 799, 500, "PRIME", "upgrade")}
             >
-              <Text style={styles.upBtnText}>UP PRIME</Text>
+              <Text style={styles.upBtnText}>{texts.upgradePrime}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -190,7 +191,7 @@ export default function PackagesScreen() {
               onPress={() => handlePayment(3, 1599, 1300, "ELITE", "upgrade")}
             >
               <Text style={[styles.upBtnText, { color: "#000" }]}>
-                UP ELITE
+                {texts.upgradeElite}
               </Text>
             </TouchableOpacity>
           </View>
@@ -213,7 +214,7 @@ export default function PackagesScreen() {
 
             onPress={() => handlePayment(4, 799, 799, "PRIME")}
           >
-            <Text style={styles.btnText}>ATIVAR PRIME</Text>
+            <Text style={styles.btnText}>{texts.activatePrime}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -228,7 +229,7 @@ export default function PackagesScreen() {
             onPress={() => handlePayment(3, 1599, 800, "ELITE", "upgrade")}
           >
             <Text style={[styles.btnText, { color: "#000" }]}>
-              UPGRADE ELITE
+              {texts.upgradeToElite}
             </Text>
           </TouchableOpacity>
         </View>
@@ -273,7 +274,7 @@ export default function PackagesScreen() {
                 },
               ]}
             >
-              ATIVAR ELITE
+              {texts.activateElite}
             </Text>
           </TouchableOpacity>
         </View>

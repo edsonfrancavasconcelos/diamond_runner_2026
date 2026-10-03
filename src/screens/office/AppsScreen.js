@@ -12,11 +12,13 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTexts } from "../../i18n/hooks/useTexts";
 
 // 💎 IMPORTA O SUPABASE (Substituindo a api antiga)
 import { supabase } from "../../services/supabase";
 
 export default function AppsScreen() {
+  const texts = useTexts("apps");
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,8 +79,8 @@ export default function AppsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>ECOSSISTEMA DIAMOND</Text>
-        <Text style={styles.headerSubtitle}>APLICATIVOS DISPONÍVEIS</Text>
+        <Text style={styles.headerTitle}>{texts.ecosystem}</Text>
+        <Text style={styles.headerSubtitle}>{texts.availableApps}</Text>
       </View>
 
       <FlatList
@@ -87,7 +89,7 @@ export default function AppsScreen() {
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum app cadastrado no banco.</Text>
+          <Text style={styles.emptyText}>{texts.noApps}</Text>
         }
       />
     </View>

@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     Image,
     Linking,
     RefreshControl,
@@ -16,6 +17,7 @@ import {
     View,
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 const COLORS = {
@@ -29,44 +31,96 @@ const COLORS = {
 
 export default function NewsScreen() {
   const { theme, isDark } = useTheme();
+  const texts = useTexts("news");
   const styles = createStyles(theme);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [news, setNews] = useState([]);
+  const [dismissedNewsIds, setDismissedNewsIds] = useState(new Set());
+  const [expandedNewsId, setExpandedNewsId] = useState(null);
+  const [dismissingNewsId, setDismissingNewsId] = useState(null);
 
   const fetchNews = async () => {
     try {
-      // DICA: Você pode criar uma tabela 'news' no Supabase para gerenciar isso
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) throw new Error("Usuário não autenticado.");
+
       const { data, error } = await supabase
         .from("news")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      const { data: dismissals, error: dismissalsError } = await supabase
+        .from("news_user_dismissals")
+        .select("news_id")
+        .eq("user_id", user.id);
+
+      if (dismissalsError) throw dismissalsError;
       setNews(data || []);
+      setDismissedNewsIds(new Set((dismissals || []).map((row) => row.news_id)));
     } catch (error) {
       console.log("Erro ao carregar notícias:", error.message);
-      // Fallback para teste se a tabela ainda não existir
-      setNews([
-        {
-          id: 1,
-          title: "LANÇAMENTO DIAMOND RUNNER 2026",
-          description:
-            "Seja bem-vindo à nova era do marketing multinível tecnológico. O futuro começou!",
-          image_url: "https://via.placeholder.com",
-          link: "https://seu-site.com",
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      Alert.alert(texts.error, texts.loadError);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  const dismissNews = (item) => {
+    Alert.alert(
+      texts.removeTitle,
+      texts.removeConfirmation,
+      [
+        { text: texts.cancel, style: "cancel" },
+        {
+          text: texts.remove,
+          style: "destructive",
+          onPress: async () => {
+            const newsId = String(item.id);
+            setDismissingNewsId(newsId);
+            try {
+              const {
+                data: { user },
+                error: userError,
+              } = await supabase.auth.getUser();
+              if (userError) throw userError;
+              if (!user) throw new Error("Usuário não autenticado.");
+
+              const { error } = await supabase
+                .from("news_user_dismissals")
+                .insert({ user_id: user.id, news_id: newsId });
+
+              if (error) throw error;
+
+              setDismissedNewsIds((current) =>
+                new Set(current).add(newsId),
+              );
+              setExpandedNewsId(null);
+            } catch (error) {
+              console.log("Erro ao remover aviso:", error.message);
+              Alert.alert(texts.error, texts.removeError);
+            } finally {
+              setDismissingNewsId(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   useEffect(() => {
     fetchNews();
   }, []);
+
+  const visibleNews = news.filter(
+    (item) => !dismissedNewsIds.has(String(item.id)),
+  );
 
   if (loading) {
     return (
@@ -81,8 +135,8 @@ export default function NewsScreen() {
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>NOTÍCIAS & AVISOS</Text>
-        <Text style={styles.headerSub}>Fique por dentro das novidades</Text>
+        <Text style={styles.headerTitle}>{texts.headerTitle}</Text>
+        <Text style={styles.headerSub}>{texts.subtitle}</Text>
       </View>
 
       <ScrollView
@@ -98,45 +152,101 @@ export default function NewsScreen() {
           />
         }
       >
-        {news.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.newsCard}
-            onPress={() => item.link && Linking.openURL(item.link)}
-            activeOpacity={0.8}
-          >
-            <Image source={{ uri: item.image_url }} style={styles.newsImage} />
-            <View style={styles.newsContent}>
-              <View style={styles.dateRow}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={12}
-                  color={COLORS.gold}
-                />
-                <Text style={styles.newsDate}>
-                  {new Date(item.created_at).toLocaleDateString()}
-                </Text>
-              </View>
-              <Text style={styles.newsTitle}>{item.title}</Text>
-              <Text style={styles.newsDesc} numberOfLines={3}>
-                {item.description}
-              </Text>
+        {visibleNews.map((item) => {
+            const isExpanded = expandedNewsId === String(item.id);
+            return (
+              <View key={item.id} style={styles.newsCard}>
+                {item.image_url ? (
+                  <Image
+                    source={{ uri: item.image_url }}
+                    style={styles.newsImage}
+                  />
+                ) : null}
+                <View style={styles.newsContent}>
+                  <View style={styles.dateRow}>
+                    <Ionicons
+                      name="calendar-outline"
+                      size={12}
+                      color={COLORS.gold}
+                    />
+                    <Text style={styles.newsDate}>
+                      {new Date(item.created_at).toLocaleDateString(texts.locale)}
+                    </Text>
+                  </View>
+                  <Text style={styles.newsTitle}>{item.title}</Text>
+                  <Text
+                    style={styles.newsDesc}
+                    numberOfLines={isExpanded ? undefined : 3}
+                  >
+                    {item.description}
+                  </Text>
 
-              <View style={styles.cardFooter}>
-                <Text style={styles.readMore}>LER MAIS</Text>
-                <Ionicons
-                  name="arrow-forward"
-                  size={14}
-                  color={COLORS.primary}
-                />
+                  <View style={styles.cardFooter}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        setExpandedNewsId(isExpanded ? null : String(item.id))
+                      }
+                      activeOpacity={0.75}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        isExpanded
+                          ? texts.collapse
+                          : texts.readMore
+                      }
+                    >
+                      <Text style={styles.readMore}>
+                        {isExpanded ? texts.collapse : texts.readMore.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                    {item.link ? (
+                      <TouchableOpacity
+                        onPress={() => Linking.openURL(item.link)}
+                        activeOpacity={0.75}
+                        accessibilityRole="button"
+                        accessibilityLabel={texts.openOfficial}
+                      >
+                        <Ionicons
+                          name="open-outline"
+                          size={16}
+                          color={COLORS.primary}
+                        />
+                      </TouchableOpacity>
+                    ) : null}
+                    <TouchableOpacity
+                      onPress={() => dismissNews(item)}
+                      disabled={dismissingNewsId === String(item.id)}
+                      activeOpacity={0.75}
+                      accessibilityRole="button"
+                      accessibilityLabel={texts.removeFromList}
+                      style={styles.dismissButton}
+                    >
+                      {dismissingNewsId === String(item.id) ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={COLORS.textSub}
+                        />
+                      ) : (
+                        <>
+                          <Ionicons
+                            name="close-circle-outline"
+                            size={16}
+                            color={COLORS.textSub}
+                          />
+                          <Text style={styles.dismissText}>{texts.remove.toUpperCase()}</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+            );
+          })}
 
-        {news.length === 0 && (
+        {visibleNews.length === 0 && (
           <Text style={styles.emptyText}>
-            Nenhuma notícia publicada no momento.
+            {news.length > 0
+              ? texts.removedAll
+              : texts.noPublishedNews}
           </Text>
         )}
       </ScrollView>
@@ -190,8 +300,21 @@ const createStyles = (theme) => StyleSheet.create({
     lineHeight: 18,
     marginBottom: 15,
   },
-  cardFooter: { flexDirection: "row", alignItems: "center", gap: 5 },
+  cardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 2,
+  },
   readMore: { color: COLORS.primary, fontSize: 11, fontWeight: "900" },
+  dismissButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginLeft: "auto",
+    paddingVertical: 4,
+  },
+  dismissText: { color: COLORS.textSub, fontSize: 10, fontWeight: "800" },
   emptyText: {
     color: theme.text,
     textAlign: "center",

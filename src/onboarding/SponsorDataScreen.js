@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -55,9 +56,7 @@ export default function SponsorDataScreen() {
         .maybeSingle();
 
       if (error || !data) {
-        throw new Error(
-          "ID de Patrocinador não encontrado no sistema Diamond.",
-        );
+        throw new Error(texts.sponsorNotFound);
       }
 
       navigation.navigate("RunnerRegister", {
@@ -66,7 +65,12 @@ export default function SponsorDataScreen() {
         sponsorName: data.full_name,
       });
     } catch (error) {
-      Alert.alert("Verificação", error.message);
+      Alert.alert(
+        texts.verificationTitle,
+        error.message === texts.sponsorNotFound
+          ? texts.sponsorNotFound
+          : texts.verificationFailed,
+      );
     } finally {
       setLoading(false);
     }
@@ -79,29 +83,27 @@ export default function SponsorDataScreen() {
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>
-          {texts.title?.toUpperCase() || "DADOS DO PATROCINADOR"}
-        </Text>
-        <Text
-          style={[
-            styles.subtitle,
-            { color: isDark ? PALETTE.softGray : "#999" },
-          ]}
-        >
-          {texts.subtitle}
-        </Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            {texts.sponsorDataTitle.toUpperCase()}
+          </Text>
+          <Text
+            style={[
+              styles.subtitle,
+              { color: isDark ? PALETTE.softGray : "#999" },
+            ]}
+          >
+            {texts.subtitle}
+          </Text>
 
-        <View style={styles.form}>
+          <View style={styles.form}>
           <Text style={[styles.label, { color: PALETTE.primary }]}>
-            {(
-              texts.labelFullName ||
-              (country === "BR"
-                ? "NOME COMPLETO"
-                : country === "ES"
-                  ? "NOMBRE COMPLETO"
-                  : "FULL NAME")
-            ).toUpperCase()}
+            {texts.labelFullName.toUpperCase()}
           </Text>
           <TextInput
             style={[
@@ -112,7 +114,7 @@ export default function SponsorDataScreen() {
                 color: theme.text,
               },
             ]}
-            placeholder={texts.sponsorNamePlaceholder || "Nome do patrocinador"}
+            placeholder={texts.sponsorNamePlaceholder}
             placeholderTextColor={isDark ? "#444" : "#ccc"}
             value={sponsorName}
             onChangeText={setSponsorName}
@@ -120,14 +122,7 @@ export default function SponsorDataScreen() {
           />
 
           <Text style={[styles.label, { color: PALETTE.primary }]}>
-            {(
-              texts.labelSponsorId ||
-              (country === "BR"
-                ? "CÓDIGO DE IDENTIFICAÇÃO (ID)"
-                : country === "ES"
-                  ? "CÓDIGO DE IDENTIFICACIÓN"
-                  : "IDENTIFICATION CODE")
-            ).toUpperCase()}
+            {texts.labelSponsorId.toUpperCase()}
           </Text>
           <TextInput
             style={[
@@ -139,19 +134,19 @@ export default function SponsorDataScreen() {
               },
               { borderBottomWidth: 3 },
             ]}
-            placeholder={texts.sponsorIdPlaceholder || "DR0000"}
+            placeholder={texts.sponsorIdPlaceholder}
             placeholderTextColor={isDark ? "#444" : "#ccc"}
             value={sponsorId}
             onChangeText={setSponsorId}
             autoCapitalize="characters"
             selectionColor={PALETTE.primary}
           />
-        </View>
+          </View>
 
-        <View style={styles.buttonContainer}>
+          <View style={styles.buttonContainer}>
           <View style={styles.flexButton}>
             <Button
-              title={texts.back?.toUpperCase() || "VOLTAR"}
+              title={texts.back.toUpperCase()}
               variant="outline"
               onPress={() => navigation.goBack()}
               style={{
@@ -169,7 +164,7 @@ export default function SponsorDataScreen() {
                 loading ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
-                  texts.continue?.toUpperCase() || "CONTINUAR"
+                  texts.continue.toUpperCase()
                 )
               }
               onPress={handleContinue}
@@ -184,15 +179,18 @@ export default function SponsorDataScreen() {
               textStyle={{ color: "#FFF", fontWeight: "bold" }}
             />
           </View>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { flex: 1, paddingHorizontal: 35, justifyContent: "center" },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
+  content: { flexGrow: 1, paddingHorizontal: 35, justifyContent: "center" },
   title: {
     fontSize: 18,
     fontWeight: "900",

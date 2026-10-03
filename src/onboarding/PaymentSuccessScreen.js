@@ -24,7 +24,7 @@ export default function PaymentSuccessScreen() {
   const { country: contextCountry } = useContext(CountryContext);
 
   const country = route.params?.country || contextCountry || "BR";
-  const texts = paymentTexts[country] || paymentTexts.BR || {};
+  const texts = paymentTexts[country] || paymentTexts.BR;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -38,7 +38,7 @@ export default function PaymentSuccessScreen() {
 
       <View style={styles.textContent}>
         <Text style={[styles.title, { color: theme.text }]}>
-          {(texts.successTitle || "ACESSO LIBERADO").toUpperCase()}
+          {texts.successTitle.toUpperCase()}
         </Text>
         <View style={[styles.divider, { backgroundColor: PALETTE.primary }]} />
         <Text
@@ -47,14 +47,13 @@ export default function PaymentSuccessScreen() {
             { color: isDark ? PALETTE.softGray : "#666" },
           ]}
         >
-          {texts.successMessage ||
-            "Sua licença Diamond foi ativada. Bem-vindo ao grupo executivo."}
+          {texts.successMessage}
         </Text>
       </View>
 
       <View style={styles.footer}>
         <Button
-          title={(texts.goToOffice || "ENTRAR NO ESCRITÓRIO").toUpperCase()}
+          title={texts.goToOffice.toUpperCase()}
           onPress={() => navigation.replace("Office")}
           style={{
             backgroundColor: PALETTE.primary,

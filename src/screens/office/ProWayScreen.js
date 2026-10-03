@@ -1,10 +1,9 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026 | Refatorado para expo-video (CORRIGIDO)
 import { Ionicons } from "@expo/vector-icons";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Dimensions,
-    Image,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -13,25 +12,24 @@ import {
     View,
 } from "react-native";
 
-import { CountryContext } from "../../i18n/context/CountryContext";
 import { useTheme } from "../../i18n/context/ThemeContext";
-import * as AllTexts from "../../i18n/hooks/texts";
+import { useTexts } from "../../i18n/hooks/useTexts";
 
-const videoPrincipal = require("../../assets/videos/DIAMONDRUNNER_UP.mp4");
+const videoPrincipal = require("../../assets/videos/DIAMONDRUNNER_UP1.mp4");
 const { width } = Dimensions.get("window");
 const VIDEO_HEIGHT = width * (9 / 16);
 
 const PALETTE = {
   primary: "#2c94bc",
+  gold: "#FFD700",
   darkBg: "#0c3c74",
   softGray: "#a4bccc",
 };
 
 export default function ProWayScreen() {
   const { theme, isDark } = useTheme();
+  const texts = useTexts("proway");
   const styles = createStyles(theme);
-  const { country = "BR" } = useContext(CountryContext) || {};
-  const t = AllTexts.prowayTexts?.[country] || AllTexts.prowayTexts?.BR || {};
 
   const [currentVideoSource, setCurrentVideoSource] = useState(null);
 
@@ -49,24 +47,15 @@ export default function ProWayScreen() {
     }
   }, [currentVideoSource]);
 
-  const handleSelectCourse = (course) => {
-    setCurrentVideoSource(course.url);
+  const handleSelectCourse = (video) => {
+    setCurrentVideoSource(video.url);
   };
 
-  const courses = [
+  const videos = [
     {
       id: "1",
-      title: t.course1 || "Diamond Mindset 2026",
+      title: "DIAMONDRUNNER_UP1.mp4",
       url: videoPrincipal,
-      thumbnail: "https://images.unsplash.com",
-      category: "MINDSET",
-    },
-    {
-      id: "2",
-      title: t.course2 || "Sales Strategy 2.0",
-      url: "https://d23dyxeqlo5psv.cloudfront.net",
-      thumbnail: "https://images.unsplash.com",
-      category: "BUSINESS",
     },
   ];
 
@@ -97,36 +86,33 @@ export default function ProWayScreen() {
         ) : (
           <View style={styles.header}>
             <View style={styles.iconCircle}>
-              <Ionicons name="school" size={40} color={PALETTE.primary} />
+              <Ionicons name="play" size={34} color={PALETTE.gold} />
             </View>
-            <Text style={styles.headerTitle}>
-              {(t.academy || "PROWAY ACADEMY").toUpperCase()}
-            </Text>
+            <Text style={styles.headerTitle}>{texts.screenTitle}</Text>
           </View>
         )}
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.sectionTitle}>
-          {(t.trainings || "TREINAMENTOS").toUpperCase()}
-        </Text>
+        <Text style={styles.sectionTitle}>{texts.featured}</Text>
 
-        {courses.map((course) => (
+        {videos.map((video) => (
           <TouchableOpacity
-            key={course.id}
+            key={video.id}
             style={styles.courseCard}
-            onPress={() => handleSelectCourse(course)}
+            onPress={() => handleSelectCourse(video)}
+            activeOpacity={0.88}
           >
-            <Image
-              source={{ uri: course.thumbnail }}
-              style={styles.cardThumb}
-            />
+            <View style={styles.cardThumb}>
+              <Ionicons name="play-circle-outline" size={48} color={PALETTE.gold} />
+            </View>
             <View style={styles.courseInfo}>
-              <Text style={styles.catText}>{course.category}</Text>
-              <Text style={styles.courseTitle}>{course.title}</Text>
+              <Text style={styles.catText}>{texts.featuredVideo}</Text>
+              <Text style={styles.courseTitle}>{video.title}</Text>
             </View>
             <View style={styles.playBtn}>
               <Ionicons name="play" size={16} color="#FFF" />
+              <Text style={styles.playBtnText}>{texts.watch}</Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -153,7 +139,11 @@ const createStyles = (theme) => StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.3)",
     borderRadius: 20,
   },
-  header: { alignItems: "center", justifyContent: "center" },
+  header: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
   iconCircle: {
     padding: 15,
     borderRadius: 50,
@@ -163,9 +153,9 @@ const createStyles = (theme) => StyleSheet.create({
   },
   headerTitle: {
     color: theme.text,
-    fontSize: 12,
+    fontSize: 22,
     fontWeight: "900",
-    letterSpacing: 3,
+    textAlign: "center",
   },
   content: { padding: 20 },
   sectionTitle: {
@@ -176,22 +166,21 @@ const createStyles = (theme) => StyleSheet.create({
     letterSpacing: 1,
   },
   courseCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 15,
+    overflow: "hidden",
+    borderRadius: 16,
+    marginBottom: 18,
     backgroundColor: theme.card,
     borderWidth: 1,
     borderColor: theme.border,
   },
   cardThumb: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
+    width: "100%",
+    height: 170,
     backgroundColor: theme.card,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  courseInfo: { flex: 1, marginLeft: 15 },
+  courseInfo: { paddingHorizontal: 16, paddingTop: 14 },
   catText: {
     color: PALETTE.primary,
     fontSize: 9,
@@ -200,11 +189,20 @@ const createStyles = (theme) => StyleSheet.create({
   },
   courseTitle: { color: theme.text, fontSize: 14, fontWeight: "bold" },
   playBtn: {
-    width: 35,
-    height: 35,
-    borderRadius: 18,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    minHeight: 38,
     backgroundColor: PALETTE.primary,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    margin: 16,
+  },
+  playBtnText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "800",
+    marginLeft: 7,
   },
 });

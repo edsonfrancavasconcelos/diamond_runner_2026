@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 const COLORS = {
@@ -15,26 +16,27 @@ const COLORS = {
 
 export default function SettingsScreen({ navigation }) {
   const { theme } = useTheme();
+  const texts = useTexts("settings");
   const styles = createStyles(theme);
   const [deleting, setDeleting] = useState(false);
 
   const deleteAccount = () => {
     Alert.alert(
-      "Excluir conta",
-      "A exclusão é permanente. Sua conta, pendente ou ativa, será encerrada e o ID DR deixará de valer no app.",
+      texts.deleteTitle,
+      texts.deleteMessage,
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: texts.cancel, style: "cancel" },
         {
-          text: "Continuar",
+          text: texts.continue,
           style: "destructive",
           onPress: () =>
             Alert.alert(
-              "Confirmar exclusão",
-              "Deseja realmente excluir sua conta? Essa ação não pode ser desfeita.",
+              texts.confirmDeleteTitle,
+              texts.confirmDeleteMessage,
               [
-                { text: "Cancelar", style: "cancel" },
+                { text: texts.cancel, style: "cancel" },
                 {
-                  text: "Excluir conta",
+                  text: texts.deleteAccount,
                   style: "destructive",
                   onPress: completeDeletion,
                 },
@@ -59,14 +61,14 @@ export default function SettingsScreen({ navigation }) {
       }
       await supabase.auth.signOut();
       Alert.alert(
-        "Solicitação registrada",
-        "Sua sessão foi encerrada. Para concluir qualquer etapa adicional, entre em contato com o suporte Diamond Runner no app.",
+        texts.requestRecorded,
+        texts.requestSuccess,
       );
     } catch (_error) {
       await supabase.auth.signOut();
       Alert.alert(
-        "Solicitação registrada",
-        "Sua sessão foi encerrada. Entre em contato com o suporte Diamond Runner no app.",
+        texts.requestRecorded,
+        texts.requestFailure,
       );
     } finally {
       setDeleting(false);
@@ -77,13 +79,13 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>CONFIGURAÇÕES</Text>
+      <Text style={styles.title}>{texts.title}</Text>
       <Text style={styles.subtitle}>
-        Gerencie informações e documentos do Diamond Runner.
+        {texts.subtitle}
       </Text>
       <TouchableOpacity style={styles.item} onPress={() => navigateTo("Terms")}>
         <Ionicons name="document-text-outline" size={22} color={COLORS.gold} />
-        <Text style={styles.itemText}>TERMOS DE USO</Text>
+        <Text style={styles.itemText}>{texts.terms}</Text>
         <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity
@@ -95,7 +97,7 @@ export default function SettingsScreen({ navigation }) {
           size={22}
           color={COLORS.gold}
         />
-        <Text style={styles.itemText}>PRIVACIDADE</Text>
+        <Text style={styles.itemText}>{texts.privacy}</Text>
         <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.item} onPress={() => navigateTo("About")}>
@@ -104,7 +106,7 @@ export default function SettingsScreen({ navigation }) {
           size={22}
           color={COLORS.gold}
         />
-        <Text style={styles.itemText}>SOBRE / EMPRESA</Text>
+        <Text style={styles.itemText}>{texts.about}</Text>
         <Ionicons name="chevron-forward" size={20} color={theme.border} />
       </TouchableOpacity>
       <TouchableOpacity
@@ -114,7 +116,7 @@ export default function SettingsScreen({ navigation }) {
       >
         <Ionicons name="trash-outline" size={22} color={COLORS.danger} />
         <Text style={[styles.itemText, { color: COLORS.danger }]}>
-          {deleting ? "ENCERRANDO..." : "EXCLUIR CONTA"}
+          {deleting ? texts.deleting : texts.deleteAccount}
         </Text>
       </TouchableOpacity>
     </View>

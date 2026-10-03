@@ -2,16 +2,36 @@ import { useContext } from "react";
 import { CountryContext } from "../context/CountryContext";
 
 import {
+  commonTexts,
   chooseSponsorTexts,
+  dashboardTexts,
+  earningsTexts,
+  forgotPasswordTexts,
   findSponsorTexts,
   firstAccessTexts,
   hasSponsorTexts,
   loginTexts,
+  marketingTexts,
+  networkTexts,
+  newsTexts,
   officeTexts,
+  packagesTexts,
   paymentTexts,
+  progressTexts,
+  prowayTexts,
   runnerRegisterTexts,
+  runnerLoginTexts,
   welcomeTexts,
   profileTexts,
+  settingsTexts,
+  diamondStoreTexts,
+  gpsTexts,
+  withdrawTexts,
+  aboutTexts,
+  termsTexts,
+  privacyTexts,
+  appsTexts,
+  imageUploadTexts,
 } from "./texts";
 
 export function useTexts(screen) {
@@ -23,28 +43,105 @@ export function useTexts(screen) {
     return textGroup[lang] || textGroup["BR"] || {};
   };
 
+  let textGroup;
+
   switch (screen) {
+    case "common":
+      textGroup = {};
+      break;
     case "welcome":
-      return getSafeText(welcomeTexts);
+      textGroup = welcomeTexts;
+      break;
     case "firstAccess":
-      return getSafeText(firstAccessTexts);
+      textGroup = firstAccessTexts;
+      break;
     case "chooseSponsor":
-      return getSafeText(chooseSponsorTexts);
+      textGroup = chooseSponsorTexts;
+      break;
     case "findSponsor":
-      return getSafeText(findSponsorTexts);
+      textGroup = findSponsorTexts;
+      break;
     case "hasSponsor":
-      return getSafeText(hasSponsorTexts);
+      textGroup = hasSponsorTexts;
+      break;
     case "runnerRegister":
-      return getSafeText(runnerRegisterTexts);
+      textGroup = runnerRegisterTexts;
+      break;
     case "payment":
-      return getSafeText(paymentTexts);
+      textGroup = paymentTexts;
+      break;
     case "login":
-      return getSafeText(loginTexts);
+      textGroup = loginTexts;
+      break;
+    case "runnerLogin":
+      textGroup = runnerLoginTexts;
+      break;
+    case "forgotPassword":
+      textGroup = forgotPasswordTexts;
+      break;
     case "office":
-      return getSafeText(officeTexts);
+      textGroup = officeTexts;
+      break;
     case "profile":
-      return getSafeText(profileTexts);
+      textGroup = profileTexts;
+      break;
+    case "settings":
+      textGroup = settingsTexts;
+      break;
+    case "dashboard":
+      textGroup = dashboardTexts;
+      break;
+    case "earnings":
+      textGroup = earningsTexts;
+      break;
+    case "marketing":
+      textGroup = marketingTexts;
+      break;
+    case "network":
+      textGroup = networkTexts;
+      break;
+    case "news":
+      textGroup = newsTexts;
+      break;
+    case "packages":
+      textGroup = packagesTexts;
+      break;
+    case "progress":
+      textGroup = progressTexts;
+      break;
+    case "proway":
+      textGroup = prowayTexts;
+      break;
+    case "diamondStore":
+      textGroup = diamondStoreTexts;
+      break;
+    case "gps":
+      textGroup = gpsTexts;
+      break;
+    case "withdraw":
+      textGroup = withdrawTexts;
+      break;
+    case "about":
+      textGroup = aboutTexts;
+      break;
+    case "terms":
+      textGroup = termsTexts;
+      break;
+    case "privacy":
+      textGroup = privacyTexts;
+      break;
+    case "apps":
+      textGroup = appsTexts;
+      break;
+    case "imageUpload":
+      textGroup = imageUploadTexts;
+      break;
     default:
       return {};
   }
+
+  return {
+    ...getSafeText(commonTexts),
+    ...getSafeText(textGroup),
+  };
 }

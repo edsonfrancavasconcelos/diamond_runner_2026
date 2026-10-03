@@ -199,7 +199,7 @@ export default function EarningsScreen() {
               },
             ]}
           >
-            {item.description || "Bônus de Rede"}
+            {item.description || texts.networkBonus}
           </Text>
 
           <Text
@@ -259,7 +259,7 @@ export default function EarningsScreen() {
                 },
               ]}
             >
-              MEUS GANHOS
+              {texts.screenTitle}
             </Text>
 
             <Text
@@ -319,7 +319,7 @@ export default function EarningsScreen() {
           </View>
 
           <Text style={styles.cardLabel}>
-            {String(texts.available || "SALDO").toUpperCase()}
+            {texts.available.toUpperCase()}
           </Text>
 
           <Text style={styles.mainBalanceValue}>
@@ -327,9 +327,11 @@ export default function EarningsScreen() {
           </Text>
 
           <View style={styles.cardFooter}>
-            <Text style={styles.footerText}>CICLO 2026</Text>
+            <Text style={styles.footerText}>
+              {texts.cycle} 2026
+            </Text>
 
-            <Text style={styles.systemTag}>SISTEMA GLOBAL</Text>
+            <Text style={styles.systemTag}>{texts.globalSystem}</Text>
           </View>
         </View>
 
@@ -352,7 +354,7 @@ export default function EarningsScreen() {
               color={PALETTE.primary}
             />
 
-            <Text style={styles.miniLabel}>PONTOS</Text>
+            <Text style={styles.miniLabel}>{texts.points}</Text>
 
             <Text
               style={[
@@ -382,7 +384,7 @@ export default function EarningsScreen() {
               color={PALETTE.gold}
             />
 
-            <Text style={styles.miniLabel}>NÍVEL</Text>
+            <Text style={styles.miniLabel}>{texts.level}</Text>
 
             <Text
               style={[
@@ -408,7 +410,7 @@ export default function EarningsScreen() {
               },
             ]}
           >
-            HISTÓRICO
+            {texts.history}
           </Text>
 
           {loading ? (
@@ -437,7 +439,7 @@ export default function EarningsScreen() {
                   marginTop: 10,
                 }}
               >
-                Nenhuma transação encontrada
+                {texts.emptyHistory}
               </Text>
             </View>
           )}

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -17,8 +17,15 @@ import {
 } from "react-native";
 
 import Button from "../components/Button";
+import { CountryContext } from "../i18n/context/CountryContext";
 import { useTheme } from "../i18n/context/ThemeContext";
+import { runnerRegisterTexts } from "../i18n/hooks/texts";
 import { supabase } from "../services/supabase";
+import {
+  isValidBrazilianPhone,
+  isValidCPF,
+  isValidEmail,
+} from "../utils/inputValidation";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -38,6 +45,8 @@ export default function RunnerRegisterScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { theme, isDark } = useTheme();
+  const { country } = useContext(CountryContext) || {};
+  const texts = runnerRegisterTexts[country] || runnerRegisterTexts.BR;
 
   const { sponsorUuid, sponsorId, sponsorName, planName, type } =
     route.params || {};
@@ -124,17 +133,29 @@ export default function RunnerRegisterScreen() {
       !form.confirmPassword
     ) {
       warn(
-        "Dados incompletos",
-        "Preencha nome, CPF, e-mail, WhatsApp, senha e confirmação de senha.",
+        texts.incompleteTitle,
+        texts.incompleteMessage,
       );
       return;
     }
+    if (!isValidCPF(form.documentId)) {
+      warn(texts.invalidCpfTitle, texts.invalidCpf);
+      return;
+    }
+    if (!isValidEmail(form.email)) {
+      warn(texts.invalidEmailTitle, texts.invalidEmail);
+      return;
+    }
+    if (!isValidBrazilianPhone(form.phone)) {
+      warn(texts.invalidPhoneTitle, texts.invalidPhone);
+      return;
+    }
     if (form.password.length < 6) {
-      warn("Senha inválida", "A senha deve ter pelo menos 6 caracteres.");
+      warn(texts.invalidPasswordTitle, texts.passwordTooShort);
       return;
     }
     if (form.password !== form.confirmPassword) {
-      warn("Senha inválida", "As senhas não conferem.");
+      warn(texts.invalidPasswordTitle, texts.passwordMismatch);
       return;
     }
 
@@ -161,8 +182,8 @@ export default function RunnerRegisterScreen() {
 
       if (!uuid) {
         warn(
-          "Patrocinador inválido",
-          "Informe o ID DR de quem indicou (ex: DR8602) e aguarde validar.",
+          texts.invalidSponsorTitle,
+          texts.invalidSponsor,
         );
         return;
       }
@@ -189,7 +210,7 @@ export default function RunnerRegisterScreen() {
       if (signUpError) throw signUpError;
 
       const userId = data.user?.id;
-      if (!userId) throw new Error("Não foi possível criar a conta.");
+      if (!userId) throw new Error(texts.accountCreationFailed);
 
       // AINDA LOGADO — update do profile (RLS precisa de sessão)
       const { error: profileError } = await supabase
@@ -215,8 +236,8 @@ export default function RunnerRegisterScreen() {
 
       if (msg.includes("rate limit")) {
         warn(
-          "Aguarde um pouco",
-          "O Supabase bloqueou cadastro por excesso de e-mail. Espere uns minutos ou use outro e-mail.",
+          texts.waitTitle,
+          texts.rateLimitMessage,
         );
         return;
       }
@@ -226,7 +247,7 @@ export default function RunnerRegisterScreen() {
         return;
       }
 
-      warn("Não foi possível cadastrar", error.message || "Tente novamente.");
+      warn(texts.registrationFailed, texts.tryAgain);
     } finally {
       setLoading(false);
     }
@@ -252,7 +273,7 @@ export default function RunnerRegisterScreen() {
       } else {
         setForm((prev) => ({
           ...prev,
-          sponsorName: "NÃO ENCONTRADO ❌",
+          sponsorName: texts.notFound,
           sponsorUuid: "",
         }));
       }
@@ -261,7 +282,7 @@ export default function RunnerRegisterScreen() {
 
     const debounce = setTimeout(searchSponsor, 800);
     return () => clearTimeout(debounce);
-  }, [form.sponsorId]);
+  }, [form.sponsorId, texts.notFound]);
 
   return (
     <KeyboardAvoidingView
@@ -275,7 +296,7 @@ export default function RunnerRegisterScreen() {
           <Ionicons name="arrow-back" size={28} color={PALETTE.primary} />
         </TouchableOpacity>
         <Text style={[styles.topTitle, { color: theme.text }]}>
-          FINALIZAR CADASTRO
+          {texts.registrationTitle}
         </Text>
       </View>
 
@@ -291,10 +312,10 @@ export default function RunnerRegisterScreen() {
             <Text
               style={{ color: "#a4bccc", fontSize: 10, fontWeight: "bold" }}
             >
-              PATROCINADOR SELECIONADO:
+              {texts.selectedSponsor}
             </Text>
             <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "900" }}>
-              {form.sponsorName || "INFORME O ID DR"}
+              {form.sponsorName || texts.sponsorNameFallback}
             </Text>
             <Text
               style={{
@@ -311,45 +332,45 @@ export default function RunnerRegisterScreen() {
           )}
         </View>
 
-        <Text style={styles.sectionTitle}>SEUS DADOS PESSOAIS</Text>
+        <Text style={styles.sectionTitle}>{texts.sectionTitle}</Text>
         <InputField
-          label="NOME COMPLETO *"
+          label={texts.labelName}
           value={form.fullName}
           onChange={(v) => updateForm("fullName", v)}
         />
         <InputField
-          label="CPF *"
+          label={texts.labelDoc}
           value={form.documentId}
           keyboard="numeric"
           onChange={(v) => updateForm("documentId", v)}
         />
         <InputField
-          label="E-MAIL *"
+          label={texts.labelEmail}
           value={form.email}
           keyboard="email-address"
           onChange={(v) => updateForm("email", v)}
         />
         <InputField
-          label="WHATSAPP *"
+          label={texts.labelPhone}
           value={form.phone}
           keyboard="phone-pad"
           onChange={(v) => updateForm("phone", v)}
         />
         <InputField
-          label="SENHA *"
+          label={texts.fieldPassword}
           value={form.password}
           secure
           onChange={(v) => updateForm("password", v)}
         />
         <InputField
-          label="CONFIRMAR SENHA *"
+          label={texts.fieldConfirmPassword}
           value={form.confirmPassword}
           secure
           onChange={(v) => updateForm("confirmPassword", v)}
         />
 
         <Text style={{ color: "#a4bccc", fontSize: 11, marginTop: 10 }}>
-          ID DR de quem indicou:
+          {texts.sponsorIdLabel}
         </Text>
         <InputField
           label=""
@@ -359,7 +380,9 @@ export default function RunnerRegisterScreen() {
 
         {!registered ? (
           <Button
-            title={loading ? "CRIANDO CONTA..." : "CONFIRMAR CADASTRO"}
+            title={
+              loading ? texts.createAccountLoading : texts.confirmRegistration
+            }
             onPress={createPendingAccount}
             disabled={loading}
           />
@@ -385,21 +408,20 @@ export default function RunnerRegisterScreen() {
                 letterSpacing: 1,
               }}
             >
-              CONTA CRIADA COM SUCESSO
+              {texts.registrationSuccess}
             </Text>
             <Text style={{ color: "#fff", fontSize: 13, lineHeight: 20 }}>
-              Sua conta está inativa. Ative pagando um dos planos. Toque aqui
-              para escolher o plano.
+              {texts.inactiveAccount}
             </Text>
           </TouchableOpacity>
         )}
 
         <Text style={styles.pendingMessage}>
-          A conta nasce PENDENTE e sem ID DR. Pague agora ou pague depois.
+          {texts.pendingAccount}
         </Text>
 
         {registered && (
-          <Button title="PAGAR DEPOIS / IR PARA LOGIN" onPress={goLogin} />
+          <Button title={texts.payLater} onPress={goLogin} />
         )}
       </ScrollView>
     </KeyboardAvoidingView>

@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Image,
+    ScrollView,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -71,7 +72,10 @@ export default function WelcomeScreen() {
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.logoContainer}>
           <Image
             source={require("../assets/images/logodiamond.png")}
@@ -103,7 +107,7 @@ export default function WelcomeScreen() {
           ]}
         >
           <Button
-            title={String(texts.loginButton || "ENTRAR").toUpperCase()}
+            title={String(texts.loginButton).toUpperCase()}
             onPress={() =>
               country ? navigation.navigate("LoginDiamond") : setShowModal(true)
             }
@@ -128,7 +132,7 @@ export default function WelcomeScreen() {
           />
 
           <Button
-            title={String(texts.registerButton || "CADASTRAR").toUpperCase()}
+            title={String(texts.registerButton).toUpperCase()}
             variant="outline"
             onPress={() =>
               country ? navigation.navigate("HasSponsor") : setShowModal(true)
@@ -173,7 +177,7 @@ export default function WelcomeScreen() {
             </View>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
 
       <SelectCountryModal
         visible={showModal}
@@ -186,7 +190,12 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingHorizontal: 35, flex: 1, justifyContent: "center" },
+  content: {
+    paddingHorizontal: 35,
+    paddingVertical: 24,
+    flexGrow: 1,
+    justifyContent: "center",
+  },
   logoContainer: { alignItems: "center", marginBottom: 50 },
   logo: { width: 200, height: 200 },
   welcomeHeader: { alignItems: "center", marginBottom: 40 },

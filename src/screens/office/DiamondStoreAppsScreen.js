@@ -15,6 +15,7 @@ import {
     View,
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -128,6 +129,7 @@ const DIAMOND_APPS = [
 
 export default function DiamondStoreApps() {
   const { theme, isDark } = useTheme();
+  const texts = useTexts("diamondStore");
   const styles = createStyles(theme);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
@@ -161,7 +163,7 @@ export default function DiamondStoreApps() {
           ? profile.status.toString().toLowerCase().trim()
           : "pending",
         vouchers: metadataCredit > 0 ? metadataCredit : profileCredit,
-        type: profile?.plan_name?.toUpperCase() || "CONSULTOR",
+        type: profile?.plan_name?.toUpperCase() || "",
       });
       setEnabledApps(authUser.user_metadata?.enabled_apps || []);
     } catch (e) {
@@ -184,14 +186,14 @@ export default function DiamondStoreApps() {
   const handleDownload = (app) => {
     if (!["active", "ativo"].includes(user.status)) {
       return Alert.alert(
-        "CONTA PENDENTE",
-        "Pague um plano para liberar os módulos.",
+        texts.pendingAccount,
+        texts.payPlanToUnlock,
         [
           {
-            text: "VER PLANOS",
+            text: texts.seePlans,
             onPress: () => navigation.navigate("Packages"),
           },
-          { text: "FECHAR", style: "cancel" },
+          { text: texts.close, style: "cancel" },
         ],
       );
     }
@@ -211,23 +213,22 @@ export default function DiamondStoreApps() {
 
       <View style={styles.hero}>
         <View style={styles.heroCopy}>
-          <Text style={styles.eyebrow}>ECOSSISTEMA DIAMOND RUNNER</Text>
-          <Text style={styles.title}>Sua loja de apps</Text>
-          <Text style={styles.subtitle}>
-            Ative recursos dentro do Escritório Virtual, sem novas contas e sem
-            sair do app.
-          </Text>
+          <Text style={styles.eyebrow}>{texts.ecosystem}</Text>
+          <Text style={styles.title}>{texts.title}</Text>
+          <Text style={styles.subtitle}>{texts.description}</Text>
         </View>
         <Ionicons name="apps" size={42} color={PALETTE.gold} />
       </View>
 
       <View style={styles.balanceCard}>
         <View>
-          <Text style={styles.headerLabel}>CRÉDITO DISPONÍVEL</Text>
+          <Text style={styles.headerLabel}>{texts.availableCredit}</Text>
           <Text style={styles.headerValue}>
             R$ {totalValue.replace(".", ",")}
           </Text>
-          <Text style={styles.planLabel}>{user.type} · acesso integrado</Text>
+          <Text style={styles.planLabel}>
+            {user.type || texts.defaultPlan} · {texts.integratedAccess}
+          </Text>
         </View>
         <View style={styles.walletIcon}>
           <Ionicons name="wallet-outline" size={26} color={PALETTE.gold} />
@@ -235,8 +236,8 @@ export default function DiamondStoreApps() {
       </View>
 
       <View style={styles.sectionHeading}>
-        <Text style={styles.sectionTitle}>Módulos disponíveis</Text>
-        <Text style={styles.sectionMeta}>{DIAMOND_APPS.length} opções</Text>
+        <Text style={styles.sectionTitle}>{texts.availableModules}</Text>
+        <Text style={styles.sectionMeta}>{DIAMOND_APPS.length} {texts.options}</Text>
       </View>
 
       <FlatList
@@ -267,15 +268,15 @@ export default function DiamondStoreApps() {
                 )}
               </View>
               <Text style={styles.appName}>{item.name}</Text>
-              <Text style={styles.appDescription}>Módulo integrado</Text>
+              <Text style={styles.appDescription}>{texts.integratedModule}</Text>
               <View style={styles.appFooter}>
                 <Text style={styles.appPrice}>
-                  {isEnabled ? "DISPONÍVEL" : "PLANO NECESSÁRIO"}
+                  {isEnabled ? texts.available : texts.planRequired}
                 </Text>
                 <Text
                   style={[styles.btnText, isEnabled && styles.btnTextEnabled]}
                 >
-                  {isEnabled ? "USAR" : "VER PLANOS"}
+                  {isEnabled ? texts.use : texts.seePlans}
                 </Text>
               </View>
             </TouchableOpacity>

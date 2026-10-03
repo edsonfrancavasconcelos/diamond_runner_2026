@@ -46,7 +46,7 @@ export default function FirstAccessScreen() {
 
   const userEmail = route.params?.email || "";
   // Se o ID_DR ainda não chegou, mostramos "PROCESSANDO"
-  const idDr = route.params?.id_dr || "SINCRONIZANDO...";
+  const idDr = route.params?.id_dr || texts.syncing;
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -58,14 +58,11 @@ export default function FirstAccessScreen() {
 
   async function handleCreatePassword() {
     if (!isMinLength) {
-      Alert.alert(
-        texts.errorTitle || "Erro",
-        "A senha deve ter pelo menos 6 caracteres.",
-      );
+      Alert.alert(texts.errorTitle, texts.minLengthError);
       return;
     }
     if (!isMatch) {
-      Alert.alert(texts.errorTitle || "Erro", "As senhas não conferem.");
+      Alert.alert(texts.errorTitle, texts.passwordMismatch);
       return;
     }
 
@@ -85,11 +82,11 @@ export default function FirstAccessScreen() {
       });
 
       Alert.alert(
-        "ACESSO LIBERADO! 💎",
-        "Sua chave mestre foi configurada com sucesso. Bem-vindo à Diamond Runner 2026.",
+        texts.successAlertTitle,
+        texts.successAlertMessage,
         [
           {
-            text: "ENTRAR NO ESCRITÓRIO",
+            text: texts.enterButton,
             onPress: () => {
               navigation.dispatch(
                 CommonActions.reset({
@@ -101,10 +98,10 @@ export default function FirstAccessScreen() {
           },
         ],
       );
-    } catch (err) {
+    } catch {
       Alert.alert(
-        "FALHA NA SEGURANÇA",
-        err.message || "Erro ao definir senha.",
+        texts.securityFailure,
+        texts.setupFailureMessage,
       );
     } finally {
       setLoading(false);
@@ -138,7 +135,7 @@ export default function FirstAccessScreen() {
           ]}
         >
           <View style={styles.idBadge}>
-            <Text style={styles.idBadgeText}>OFFICIAL MEMBER</Text>
+            <Text style={styles.idBadgeText}>{texts.badge}</Text>
           </View>
           <Ionicons
             name="person-circle"
@@ -154,16 +151,16 @@ export default function FirstAccessScreen() {
 
         <View style={styles.titleSection}>
           <Text style={[styles.mainTitle, { color: "#FFF" }]}>
-            CONFIGURAR{"\n"}ACESSO
+            {texts.configureAccess}
           </Text>
           <Text style={[styles.subTitle, { color: "#a4bccc" }]}>
-            Defina sua senha definitiva para proteger sua rede e bônus.
+            {texts.subtitle}
           </Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputWrapper}>
-            <Text style={styles.inputLabel}>NOVA SENHA</Text>
+            <Text style={styles.inputLabel}>{texts.passLabel}</Text>
             <View
               style={[
                 styles.inputBox,
@@ -181,7 +178,7 @@ export default function FirstAccessScreen() {
               />
               <TextInput
                 style={styles.textInput}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={texts.passwordPlaceholder}
                 placeholderTextColor="#666"
                 value={password}
                 onChangeText={setPassword}
@@ -198,7 +195,7 @@ export default function FirstAccessScreen() {
           </View>
 
           <View style={styles.inputWrapper}>
-            <Text style={styles.inputLabel}>CONFIRMAR SENHA</Text>
+            <Text style={styles.inputLabel}>{texts.confirmLabel}</Text>
             <View
               style={[
                 styles.inputBox,
@@ -216,7 +213,7 @@ export default function FirstAccessScreen() {
               />
               <TextInput
                 style={styles.textInput}
-                placeholder="Repita sua senha"
+                placeholder={texts.confirmPasswordPlaceholder}
                 placeholderTextColor="#666"
                 value={confirm}
                 onChangeText={setConfirm}
@@ -240,14 +237,14 @@ export default function FirstAccessScreen() {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.mainBtnText}>ATIVAR CONTA DIAMOND</Text>
+            <Text style={styles.mainBtnText}>{texts.activateAccount}</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.footerNote}>
           <Ionicons name="shield-checkmark" size={14} color={PALETTE.success} />
           <Text style={styles.footerText}>
-            Sistema de segurança Diamond Protocol v2.6
+            {texts.footerSecurity}
           </Text>
         </View>
       </ScrollView>

@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import DiamondLogoDark from "../../assets/images/logodiamond.png";
 
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Animated,
@@ -16,6 +16,8 @@ import {
     View,
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { CountryContext } from "../../i18n/context/CountryContext";
+import { dashboardTexts } from "../../i18n/hooks/texts";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -35,20 +37,23 @@ const SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 export default function DashboardScreen() {
   const navigation = useNavigation();
   const { isDark } = useTheme();
+  const { country } = useContext(CountryContext) || {};
+  const texts =
+    dashboardTexts[country] || dashboardTexts.BR;
   const [scrollY] = useState(() => new Animated.Value(0));
   const retryTimeout = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState({
-    fullName: "CARREGANDO...",
+    fullName: "",
     idDr: null,
     balance: 0,
     networkCount: 0,
     status: "PENDING",
     isPending: true,
     isAdmin: false,
-    rankName: "CONSULTOR",
+    rankName: "",
     avatarUrl: null,
     points: 0,
     email: "",
@@ -122,9 +127,7 @@ export default function DashboardScreen() {
 
       setUserData({
         fullName: (
-          profile?.full_name ||
-          user?.user_metadata?.full_name ||
-          "NOVO MEMBRO"
+          profile?.full_name || user?.user_metadata?.full_name || ""
         ).toUpperCase(),
 
         idDr: profile?.id_dr || null,
@@ -139,7 +142,7 @@ export default function DashboardScreen() {
 
         isAdmin,
 
-        rankName: (profile?.plan_name || "DISTRIBUIDOR").toUpperCase(),
+        rankName: (profile?.plan_name || "").toUpperCase(),
 
         avatarUrl: profile?.avatar_url || null,
 
@@ -227,14 +230,16 @@ export default function DashboardScreen() {
           ) : (
             <View style={styles.avatarPlaceholder}>
               <Text style={styles.avatarLetter}>
-                {userData.fullName.charAt(0)}
+                {(userData.fullName || texts.defaultMember).charAt(0)}
               </Text>
             </View>
           )}
         </Animated.View>
-        <Text style={styles.rankTitle}>{userData.rankName}</Text>
+        <Text style={styles.rankTitle}>
+          {userData.rankName || texts.defaultRank}
+        </Text>
         <Text style={[styles.userName, { color: isDark ? "#FFF" : "#333" }]}>
-          {userData.fullName}
+          {userData.fullName || texts.defaultMember}
         </Text>
       </Animated.View>
 
@@ -266,7 +271,7 @@ export default function DashboardScreen() {
         >
           <View style={styles.cardHeader}>
             <View>
-              <Text style={styles.balanceLabel}>SALDO DISPONÍVEL</Text>
+              <Text style={styles.balanceLabel}>{texts.balanceLabel}</Text>
               <Text
                 style={[styles.currency, { color: isDark ? "#FFF" : "#333" }]}
               >
@@ -285,7 +290,7 @@ export default function DashboardScreen() {
 
           <View style={styles.cardFooter}>
             <Text style={styles.idText}>
-              ID: {userData.idDr ? userData.idDr : "AGUARDANDO ATIVAÇÃO"}
+              ID: {userData.idDr ? userData.idDr : texts.awaitingActivation}
             </Text>
             <View
               style={[
@@ -298,7 +303,7 @@ export default function DashboardScreen() {
               ]}
             >
               <Text style={styles.badgeText}>
-                {userData.isPending ? "PENDENTE" : "ATIVO"}
+                {userData.isPending ? texts.pendingStatus : texts.activeStatus}
               </Text>
             </View>
           </View>
@@ -309,7 +314,7 @@ export default function DashboardScreen() {
               style={styles.activateBtn}
             >
               <Text style={styles.activateBtnText}>
-                ATIVE SUA CONTA / OBTER ID DR
+                {texts.activateAccount}
               </Text>
             </TouchableOpacity>
           )}
@@ -331,7 +336,7 @@ export default function DashboardScreen() {
             >
               {userData.networkCount}
             </Text>
-            <Text style={styles.gridLabel}>DIRETOS</Text>
+            <Text style={styles.gridLabel}>{texts.directReferrals}</Text>
           </TouchableOpacity>
           <View
             style={[
@@ -347,7 +352,7 @@ export default function DashboardScreen() {
             >
               {userData.points}
             </Text>
-            <Text style={styles.gridLabel}>PONTOS</Text>
+            <Text style={styles.gridLabel}>{texts.points}</Text>
           </View>
         </View>
       </Animated.ScrollView>

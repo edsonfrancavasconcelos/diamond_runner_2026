@@ -5,7 +5,7 @@ import {
     DrawerItemList,
 } from "@react-navigation/drawer";
 import { useIsFocused } from "@react-navigation/native";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Image,
@@ -17,8 +17,7 @@ import {
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 
-import { CountryContext } from "../../i18n/context/CountryContext";
-import { officeTexts } from "../../i18n/hooks/texts";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 // 💎 IMPORTAÇÃO DAS TELAS
@@ -50,9 +49,10 @@ const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
 const {} = useTheme();
+  const texts = useTexts("office");
   const isFocused = useIsFocused();
   const [profile, setProfile] = useState({
-    name: "...",
+    name: "",
     id_dr: "...",
     avatar_url: null,
   });
@@ -72,7 +72,7 @@ const {} = useTheme();
 
         if (data) {
           setProfile({
-            name: data.full_name || "EXECUTIVO",
+            name: data.full_name || texts.executiveFallback,
             id_dr: data.id_dr || "---",
             avatar_url: data.avatar_url,
           });
@@ -113,7 +113,11 @@ const {} = useTheme();
             <Ionicons name="person" size={30} color={PALETTE.gold} />
           )}
         </View>
-        <Text style={styles.userName}>{profile.name.toUpperCase()}</Text>
+        <Text style={styles.userName}>
+          {loading
+            ? texts.loading
+            : (profile.name || texts.executiveFallback).toUpperCase()}
+        </Text>
         <Text style={[styles.userRole, { color: PALETTE.gold }]}>
           {profile.id_dr}
         </Text>
@@ -136,7 +140,7 @@ const {} = useTheme();
         onPress={async () => {
           const ok =
             typeof window !== "undefined"
-              ? window.confirm("Deseja realmente sair?")
+              ? window.confirm(texts.confirmLogout)
               : true;
 
           if (!ok) return;
@@ -147,7 +151,7 @@ const {} = useTheme();
         <Text
           style={{ color: "#FFD700", fontWeight: "bold", letterSpacing: 1 }}
         >
-          SAIR
+          {texts.logout}
         </Text>
       </TouchableOpacity>
     </DrawerContentScrollView>
@@ -156,11 +160,7 @@ const {} = useTheme();
 
 export default function OfficeDrawer() {
   const { isDark, toggleTheme } = useTheme();
-  const { country } = useContext(CountryContext);
-  const texts = useMemo(
-    () => officeTexts[country?.toUpperCase()] || officeTexts["BR"],
-    [country],
-  );
+  const texts = useTexts("office");
   const [canUseModules, setCanUseModules] = useState(false);
 
   useEffect(() => {
@@ -212,7 +212,7 @@ export default function OfficeDrawer() {
             }
             style={styles.headerBackButton}
             accessibilityLabel={
-              route.name === "Dashboard" ? "Abrir menu" : "Voltar"
+              route.name === "Dashboard" ? texts.openMenu : texts.back
             }
           >
             <Ionicons
@@ -226,7 +226,9 @@ export default function OfficeDrawer() {
           <TouchableOpacity
             onPress={toggleTheme}
             accessibilityRole="button"
-            accessibilityLabel={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            accessibilityLabel={
+              isDark ? texts.enableLightMode : texts.enableDarkMode
+            }
             style={{ paddingHorizontal: 12, paddingVertical: 8 }}
           >
             <Ionicons
@@ -259,7 +261,7 @@ export default function OfficeDrawer() {
         component={ProfileScreen}
         options={{
           drawerItemStyle: { display: "none" },
-          title: texts.viewProfile || "MEU PERFIL",
+          title: texts.viewProfile,
         }}
       />
 
@@ -290,7 +292,7 @@ export default function OfficeDrawer() {
         name="DiamondStore"
         component={DiamondStoreApps}
         options={{
-          title: "DIAMOND STORE",
+          title: "StoreRunner",
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
             <Ionicons name="cart-outline" size={20} color={PALETTE.gold} />
@@ -326,7 +328,7 @@ export default function OfficeDrawer() {
         name="MarketingPlan"
         component={MarketingPlanScreen}
         options={{
-          title: "PLANO DE MARKETING",
+          title: texts.marketingMenu,
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
             <Ionicons
@@ -370,7 +372,7 @@ export default function OfficeDrawer() {
         name="ProWay"
         component={ProWayScreen}
         options={{
-          title: texts.proway,
+          title: "WayPro",
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
             <Ionicons name="school-outline" size={20} color={PALETTE.gold} />
@@ -394,7 +396,7 @@ export default function OfficeDrawer() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          title: "CONFIGURAÇÕES",
+          title: texts.settings,
           drawerIcon: () => (
             <Ionicons name="settings-outline" size={20} color={PALETTE.gold} />
           ),
@@ -405,7 +407,7 @@ export default function OfficeDrawer() {
         name="Terms"
         component={TermsScreen}
         options={{
-          title: "TERMOS DE USO",
+          title: texts.terms,
           drawerIcon: () => (
             <Ionicons
               name="document-text-outline"
@@ -420,7 +422,7 @@ export default function OfficeDrawer() {
         name="Privacy"
         component={PrivacyScreen}
         options={{
-          title: "PRIVACIDADE",
+          title: texts.privacy,
           drawerIcon: () => (
             <Ionicons
               name="shield-checkmark-outline"
@@ -435,7 +437,7 @@ export default function OfficeDrawer() {
         name="About"
         component={AboutScreen}
         options={{
-          title: "SOBRE / EMPRESA",
+          title: texts.about,
           drawerIcon: () => (
             <Ionicons
               name="information-circle-outline"

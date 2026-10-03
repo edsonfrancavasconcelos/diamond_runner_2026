@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { decode } from "base64-arraybuffer";
 import * as ImagePicker from "expo-image-picker";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -18,7 +18,10 @@ import {
     View,
 } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { CountryContext } from "../../i18n/context/CountryContext";
+import { commonTexts, profileTexts } from "../../i18n/hooks/texts";
 import { supabase } from "../../services/supabase";
+import { isValidBrazilianPhone } from "../../utils/inputValidation";
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -32,8 +35,8 @@ const PALETTE = {
 };
 
 // FUNÇÃO DE FORMATAÇÃO DO WHATSAPP
-const formatWhatsApp = (phone) => {
-  if (!phone) return "Não informado";
+const formatWhatsApp = (phone, notProvided) => {
+  if (!phone) return notProvided;
   const cleaned = ("" + phone).replace(/\D/g, "");
   const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
   if (match) {
@@ -44,6 +47,9 @@ const formatWhatsApp = (phone) => {
 
 export default function ProfileScreen() {
   const { isDark } = useTheme();
+  const { country } = useContext(CountryContext) || {};
+  const texts = profileTexts[country] || profileTexts.BR;
+  const common = commonTexts[country] || commonTexts.BR;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -96,11 +102,20 @@ export default function ProfileScreen() {
 
   const saveField = async (field, text) => {
     if (!text?.trim()) return;
+    if (field === "whatsapp" && !isValidBrazilianPhone(text)) {
+      Alert.alert(
+        texts.invalidWhatsappTitle,
+        texts.invalidWhatsappMessage,
+      );
+      return;
+    }
+
+    const valueToSave =
+      field === "whatsapp" ? text.replace(/\D/g, "") : text.trim();
+    if (!valueToSave) return;
+
     setLoading(true);
     try {
-      const valueToSave =
-        field === "whatsapp" ? text.replace(/\D/g, "") : text.trim();
-      if (!valueToSave) return;
       const result =
         field === "whatsapp"
           ? await supabase.auth.updateUser({ data: { whatsapp: valueToSave } })
@@ -110,8 +125,8 @@ export default function ProfileScreen() {
               .eq("id", userData.id);
       if (result.error) throw result.error;
       await fetchProfile();
-    } catch (error) {
-      Alert.alert("Erro", error.message || "Falha ao atualizar.");
+    } catch {
+      Alert.alert(common.error, texts.updateError);
     } finally {
       setLoading(false);
     }
@@ -124,8 +139,8 @@ export default function ProfileScreen() {
       return;
     }
     Alert.prompt(
-      `Alterar ${label}`,
-      `Digite o novo ${label}:`,
+      texts.changeFieldTitle.replace("{label}", label),
+      texts.enterFieldPrompt.replace("{label}", label),
       (text) => saveField(field, text),
       "plain-text",
       currentValue,
@@ -133,24 +148,26 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
-    Alert.alert("Editar Perfil", "O que deseja alterar?", [
-      { text: "Nome", onPress: () => editField("full_name", "Nome Completo") },
-      { text: "WhatsApp", onPress: () => editField("whatsapp", "WhatsApp") },
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert(texts.editTitle, texts.editPrompt, [
+      { text: texts.name, onPress: () => editField("full_name", texts.fullName) },
+      { text: texts.whatsapp, onPress: () => editField("whatsapp", texts.whatsapp) },
+      { text: texts.cancel, style: "cancel" },
     ]);
   };
 
   const handleAvatarPress = () => {
-    Alert.alert("Foto de Perfil", "Escolha uma opção:", [
-      { text: "Escolher da Galeria", onPress: pickImage },
-      { text: "Remover Foto", onPress: removeImage, style: "destructive" },
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert(texts.photoTitle, texts.photoPrompt, [
+      { text: texts.chooseFromGallery, onPress: pickImage },
+      { text: texts.removePhoto, onPress: removeImage, style: "destructive" },
+      { text: texts.cancel, style: "cancel" },
     ]);
   };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return Alert.alert("Erro", "Sem permissão.");
+    if (status !== "granted") {
+      return Alert.alert(common.error, texts.permissionDenied);
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -169,7 +186,7 @@ export default function ProfileScreen() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Sessão expirada. Entre novamente.");
+      if (!user) throw new Error(texts.sessionExpired);
       const fileName = `avatar_${Date.now()}.png`;
       const filePath = `${user.id}/${fileName}`;
       const fileData = asset.base64
@@ -192,7 +209,12 @@ export default function ProfileScreen() {
       if (profileError) throw profileError;
       await fetchProfile();
     } catch (error) {
-      Alert.alert("Erro", error.message);
+      Alert.alert(
+        common.error,
+        error.message === texts.sessionExpired
+          ? texts.sessionExpired
+          : texts.uploadError,
+      );
     } finally {
       setUploading(false);
     }
@@ -207,8 +229,8 @@ export default function ProfileScreen() {
         .eq("id", userData.id);
       if (error) throw error;
       await fetchProfile();
-    } catch (error) {
-      Alert.alert("Erro", error.message || "Não foi possível remover a foto.");
+    } catch {
+      Alert.alert(common.error, texts.removePhotoError);
     } finally {
       setUploading(false);
     }
@@ -225,15 +247,15 @@ export default function ProfileScreen() {
   }, []);
 
   const handlePasswordReset = () => {
-    Alert.alert("Segurança", "Enviar e-mail para redefinir senha?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Enviar", onPress: sendPasswordReset },
+    Alert.alert(texts.securityTitle, texts.passwordResetPrompt, [
+      { text: texts.cancel, style: "cancel" },
+      { text: texts.send, onPress: sendPasswordReset },
     ]);
   };
 
   const sendPasswordReset = async () => {
     if (!userData?.email) {
-      Alert.alert("Erro", "Não foi possível identificar o e-mail da conta.");
+      Alert.alert(common.error, texts.accountEmailMissing);
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(
@@ -246,10 +268,10 @@ export default function ProfileScreen() {
       },
     );
     if (error) {
-      Alert.alert("Erro", error.message || "Não foi possível enviar o e-mail.");
+      Alert.alert(common.error, texts.passwordEmailError);
       return;
     }
-    Alert.alert("Sucesso", "E-mail para redefinir a senha enviado.");
+    Alert.alert(common.success, texts.passwordEmailSent);
   };
 
   if (loading) {
@@ -273,7 +295,7 @@ export default function ProfileScreen() {
         <View style={styles.modalBackdrop}>
           <View style={[styles.editModal, { backgroundColor: theme.card }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>
-              Alterar {editingField?.label}
+              {texts.changeFieldTitle.replace("{label}", editingField?.label || "")}
             </Text>
             <TextInput
               autoFocus
@@ -292,7 +314,7 @@ export default function ProfileScreen() {
             <View style={styles.modalActions}>
               <TouchableOpacity onPress={() => setEditingField(null)}>
                 <Text style={[styles.modalAction, { color: theme.subtext }]}>
-                  Cancelar
+                  {texts.cancel}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -303,7 +325,7 @@ export default function ProfileScreen() {
                 }}
               >
                 <Text style={[styles.modalAction, { color: PALETTE.gold }]}>
-                  Salvar
+                  {texts.save}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -324,6 +346,8 @@ export default function ProfileScreen() {
           <TouchableOpacity
             onPress={handleAvatarPress}
             style={[styles.avatarCircle, { borderColor: PALETTE.gold }]}
+            accessibilityRole="button"
+            accessibilityLabel={texts.editProfilePhoto}
           >
             {uploading ? (
               <ActivityIndicator color={PALETTE.gold} />
@@ -355,7 +379,7 @@ export default function ProfileScreen() {
               style={{ marginRight: 5 }}
             />
             <Text style={styles.statusText}>
-              {isPaid ? "ASSINATURA ATIVA" : "AGUARDANDO PAGAMENTO"}
+              {isPaid ? texts.activeSubscription : texts.awaitingPayment}
             </Text>
           </View>
         </View>
@@ -375,9 +399,17 @@ export default function ProfileScreen() {
                 { color: theme.subtext, marginBottom: 0 },
               ]}
             >
-              DADOS DA CONTA
+              {texts.accountData}
             </Text>
-            <TouchableOpacity onPress={() => setShowSettings(!showSettings)}>
+            <TouchableOpacity
+              onPress={() => setShowSettings(!showSettings)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                showSettings
+                  ? texts.closeProfileSettings
+                  : texts.openProfileSettings
+              }
+            >
               <Ionicons
                 name={
                   showSettings ? "close-circle-outline" : "settings-outline"
@@ -392,7 +424,7 @@ export default function ProfileScreen() {
             <Ionicons name="mail-outline" size={24} color={PALETTE.primary} />
             <View style={styles.infoTextGroup}>
               <Text style={[styles.label, { color: theme.subtext }]}>
-                E-MAIL
+                {texts.emailLabel}
               </Text>
               <Text style={[styles.value, { color: theme.text }]}>
                 {userData?.email}
@@ -404,14 +436,19 @@ export default function ProfileScreen() {
             <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
             <View style={styles.infoTextGroup}>
               <Text style={[styles.label, { color: theme.subtext }]}>
-                WHATSAPP
+                {texts.whatsappLabel}
               </Text>
               <Text style={[styles.value, { color: theme.text }]}>
-                {formatWhatsApp(userData?.whatsapp)}
+                {formatWhatsApp(userData?.whatsapp, texts.notProvided)}
               </Text>
             </View>
             <TouchableOpacity
-              onPress={() => editField("whatsapp", "WhatsApp")}
+              onPress={() => editField("whatsapp", texts.whatsapp)}
+              accessibilityRole="button"
+              accessibilityLabel={texts.editFieldTitle.replace(
+                "{label}",
+                texts.whatsapp,
+              )}
               style={{ marginLeft: "auto", padding: 10 }}
             >
               <Ionicons name="create-outline" size={22} color={PALETTE.gold} />
@@ -423,7 +460,7 @@ export default function ProfileScreen() {
               <Ionicons name="person" size={24} color={PALETTE.primary} />
               <View style={styles.infoTextGroup}>
                 <Text style={[styles.label, { color: theme.subtext }]}>
-                  PATROCINADOR
+                  {texts.sponsor}
                 </Text>
                 <Text style={[styles.value, { color: theme.text }]}>
                   {userData.sponsorCode || userData.sponsor_id}
@@ -441,7 +478,7 @@ export default function ProfileScreen() {
             />
             <View style={styles.infoTextGroup}>
               <Text style={[styles.label, { color: theme.subtext }]}>
-                CPF CADASTRADO
+                {texts.registeredCpf}
               </Text>
               <Text style={[styles.value, { color: theme.text, opacity: 0.8 }]}>
                 {userData?.document_id || "---"}
@@ -481,7 +518,7 @@ export default function ProfileScreen() {
                     { color: theme.text, marginLeft: 10 },
                   ]}
                 >
-                  Trocar minha senha
+                  {texts.changePassword}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -499,7 +536,7 @@ export default function ProfileScreen() {
                     { color: theme.text, marginLeft: 10 },
                   ]}
                 >
-                  Editar nome do perfil
+                  {texts.editProfileName}
                 </Text>
               </TouchableOpacity>
             </View>

@@ -1,6 +1,6 @@
 // Arquivo: src/onboarding/ForgotPasswordScreen.js
 // Atualizado em 26 de Jan 2026 com a Nova Paleta Blue Diamond
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,19 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { CountryContext } from "../i18n/context/CountryContext";
 import { supabase } from "../services/supabase";
 import { useTheme } from "../i18n/context/ThemeContext";
+import { forgotPasswordTexts } from "../i18n/hooks/texts";
 import Button from "../components/Button";
+import { isValidEmail } from "../utils/inputValidation";
 
 // NOVA PALETA 2026
 const PALETTE = {
@@ -29,12 +35,14 @@ const PALETTE = {
 export default function ForgotPasswordScreen() {
   const navigation = useNavigation();
   const { theme, isDark } = useTheme();
+  const { country } = useContext(CountryContext) || {};
+  const texts = forgotPasswordTexts[country] || forgotPasswordTexts.BR;
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleReset() {
-    if (!email.includes("@")) {
-      Alert.alert("Erro", "Insira um e-mail válido.");
+    if (!isValidEmail(email)) {
+      Alert.alert(texts.errorTitle, texts.invalidEmail);
       return;
     }
 
@@ -50,82 +58,93 @@ export default function ForgotPasswordScreen() {
       if (error) throw error;
 
       Alert.alert(
-        "Sucesso",
-        "Se este e-mail estiver cadastrado, você receberá um link de recuperação.",
-        [{ text: "OK", onPress: () => navigation.goBack() }],
+        texts.successTitle,
+        texts.successMessage,
+        [{ text: texts.ok, onPress: () => navigation.goBack() }],
       );
-    } catch (err) {
-      Alert.alert("Erro", err.message);
+    } catch {
+      Alert.alert(texts.errorTitle, texts.unexpectedError);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.bg }]}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={[styles.container, { backgroundColor: theme.bg }]}
+    >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={[
-          styles.backBtn,
-          { backgroundColor: theme.card, borderColor: theme.border },
-        ]}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>
-          RECUPERAR SENHA
-        </Text>
-        <Text
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
           style={[
-            styles.subtitle,
-            { color: isDark ? PALETTE.softGray : "#8E8E93" },
+            styles.backBtn,
+            { backgroundColor: theme.card, borderColor: theme.border },
           ]}
         >
-          Enviaremos as instruções para o seu e-mail.
-        </Text>
+          <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
+        </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { color: PALETTE.primary }]}>
-            E-MAIL CADASTRADO
+        <View style={styles.content}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            {texts.title}
           </Text>
-          <TextInput
+          <Text
             style={[
-              styles.input,
-              { borderBottomColor: theme.border, color: theme.text },
+              styles.subtitle,
+              { color: isDark ? PALETTE.softGray : "#8E8E93" },
             ]}
-            placeholder="seu@email.com"
-            placeholderTextColor={isDark ? "#444" : "#999"}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+          >
+            {texts.subtitle}
+          </Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, { color: PALETTE.primary }]}>
+              {texts.emailLabel}
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                { borderBottomColor: theme.border, color: theme.text },
+              ]}
+              placeholder={texts.emailPlaceholder}
+              placeholderTextColor={isDark ? "#444" : "#999"}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <Button
+            title={loading ? texts.sending : texts.sendLink}
+            onPress={handleReset}
+            disabled={loading}
+            style={{
+              backgroundColor: PALETTE.primary,
+              height: 55,
+              borderRadius: 14,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            textStyle={{ color: "#FFF", fontWeight: "bold" }}
           />
         </View>
-
-        <Button
-          title={loading ? "ENVIANDO..." : "ENVIAR LINK"}
-          onPress={handleReset}
-          disabled={loading}
-          style={{
-            backgroundColor: PALETTE.primary,
-            height: 55,
-            borderRadius: 14,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          textStyle={{ color: "#FFF", fontWeight: "bold" }}
-        />
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 25 },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   backBtn: {
     marginTop: 50,
     width: 44,
@@ -135,7 +154,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
-  content: { flex: 1, justifyContent: "center" },
+  content: { flexGrow: 1, justifyContent: "center" },
   title: {
     fontSize: 18,
     fontWeight: "900",

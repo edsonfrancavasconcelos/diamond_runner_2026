@@ -8,6 +8,7 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StatusBar,
     StyleSheet,
     Text,
@@ -19,7 +20,7 @@ import {
 import Button from "../components/Button";
 import { CountryContext } from "../i18n/context/CountryContext";
 import { useTheme } from "../i18n/context/ThemeContext";
-import { loginTexts } from "../i18n/hooks/texts";
+import { commonTexts, loginTexts } from "../i18n/hooks/texts";
 import { supabase } from "../services/supabase";
 
 const PALETTE = {
@@ -46,6 +47,7 @@ export default function LoginDiamondScreen() {
   };
 
   const texts = loginTexts[country] || loginTexts.BR || {};
+  const common = commonTexts[country] || commonTexts.BR;
 
   const [loginInput, setLoginInput] = useState(route.params?.email || "");
   const [password, setPassword] = useState("");
@@ -55,7 +57,7 @@ export default function LoginDiamondScreen() {
   async function handleFirstAccess() {
     const inputClean = loginInput.trim();
     if (!inputClean) {
-      Alert.alert("Identificação Necessária", "Insira seu E-mail, ID ou CPF.");
+      Alert.alert(texts.requiredTitle, texts.requiredIdentification);
       return;
     }
 
@@ -69,14 +71,14 @@ export default function LoginDiamondScreen() {
         )
         .maybeSingle();
 
-      if (error || !data) throw new Error("Cadastro não encontrado.");
+      if (error || !data) throw new Error(texts.accountNotFound);
 
       navigation.navigate("FirstAccess", {
         email: data.email,
         id_dr: data.id_dr,
       });
-    } catch (err) {
-      Alert.alert("Atenção", err.message);
+    } catch {
+      Alert.alert(texts.attentionTitle, texts.accountNotFound);
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,7 @@ export default function LoginDiamondScreen() {
   async function handleLogin() {
     const inputClean = loginInput.trim();
     if (!inputClean || !password) {
-      Alert.alert("Erro", "Preencha todos os campos");
+      Alert.alert(common.error, texts.missingFields);
       return;
     }
 
@@ -104,7 +106,7 @@ export default function LoginDiamondScreen() {
           .maybeSingle();
 
         if (searchError || !data?.email)
-          throw new Error("ID ou CPF não encontrado.");
+          throw new Error(texts.idOrCpfNotFound);
         finalEmail = data.email;
       }
 
@@ -114,9 +116,14 @@ export default function LoginDiamondScreen() {
       });
 
       if (authError)
-        throw new Error("Senha incorreta ou acesso não autorizado.");
+        throw new Error(texts.invalidPassword);
     } catch (err) {
-      Alert.alert("Falha de Acesso", err.message);
+      Alert.alert(
+        texts.accessFailure,
+        err.message === texts.idOrCpfNotFound
+          ? texts.idOrCpfNotFound
+          : texts.loginFailedMessage,
+      );
     } finally {
       setLoading(false);
     }
@@ -129,22 +136,26 @@ export default function LoginDiamondScreen() {
     >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={[
-            styles.navButton,
-            { backgroundColor: theme.card, borderColor: theme.border },
-          ]}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
-        </TouchableOpacity>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              { backgroundColor: theme.card, borderColor: theme.border },
+            ]}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
+          </TouchableOpacity>
+        </View>
 
-      </View>
-
-      <View style={styles.content}>
+        <View style={styles.content}>
         <Text style={[styles.title, { color: theme.text }]}>
-          PORTAL DIAMOND
+          {texts.titlePortal}
         </Text>
         <Text
           style={[
@@ -152,20 +163,20 @@ export default function LoginDiamondScreen() {
             { color: isDark ? PALETTE.softGray : "#535355" },
           ]}
         >
-          Acesse sua conta executiva
+          {texts.accountSubtitle}
         </Text>
 
         <View style={styles.form}>
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: PALETTE.primary }]}>
-              IDENTIFICAÇÃO
+              {texts.identificationLabel}
             </Text>
             <TextInput
               style={[
                 styles.input,
                 { borderBottomColor: theme.border, color: theme.text },
               ]}
-              placeholder="E-mail, ID ou CPF"
+              placeholder={texts.identificationPlaceholder}
               placeholderTextColor={isDark ? "#555" : "#999"}
               value={loginInput}
               onChangeText={setLoginInput}
@@ -176,7 +187,7 @@ export default function LoginDiamondScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: PALETTE.primary }]}>
-              SENHA
+              {texts.passwordLabel}
             </Text>
             <TextInput
               style={[
@@ -193,7 +204,7 @@ export default function LoginDiamondScreen() {
         </View>
 
         <Button
-          title={loading ? "PROCESSANDO..." : "ENTRAR"}
+          title={loading ? texts.processing : texts.enterButton.toUpperCase()}
           onPress={handleLogin}
           disabled={loading}
           style={{
@@ -214,7 +225,7 @@ export default function LoginDiamondScreen() {
                 { color: isDark ? PALETTE.grayBlue : "#999" },
               ]}
             >
-              ESQUECI SENHA
+              {texts.forgotPasswordButton}
             </Text>
           </TouchableOpacity>
 
@@ -224,17 +235,20 @@ export default function LoginDiamondScreen() {
 
           <TouchableOpacity onPress={handleFirstAccess}>
             <Text style={[styles.linkText, { color: PALETTE.primary }]}>
-              PRIMEIRO ACESSO
+              {texts.firstAccess.toUpperCase()}
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  scroll: { flex: 1 },
+  scrollContent: { flexGrow: 1 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -249,7 +263,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
-  content: { flex: 1, paddingHorizontal: 40, justifyContent: "center" },
+  content: { flexGrow: 1, paddingHorizontal: 40, justifyContent: "center" },
   title: {
     fontSize: 18,
     fontWeight: "900",

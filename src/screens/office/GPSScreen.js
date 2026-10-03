@@ -31,7 +31,7 @@ const PALETTE = {
 };
 
 export default function GPSScreen() {
-  const texts = useTexts("office");
+  const texts = useTexts("gps");
   const { theme, isDark } = useTheme();
 
   const [location, setLocation] = useState(null);
@@ -74,7 +74,7 @@ export default function GPSScreen() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg(texts.permissionRequired || "ACESSO NEGADO");
+        setErrorMsg(texts.permissionRequired);
         setLoading(false);
         return;
       }
@@ -103,7 +103,7 @@ export default function GPSScreen() {
         <Text style={[styles.headerTag, { color: PALETTE.primary }]}>
           DIAMOND SYSTEM v2.6
         </Text>
-        <Text style={[styles.mainTitle, { color: theme.text }]}>NAVIGATOR</Text>
+        <Text style={[styles.mainTitle, { color: theme.text }]}>{texts.navigator}</Text>
       </View>
 
       {/* RADAR TÁTICO */}
@@ -179,7 +179,7 @@ export default function GPSScreen() {
             { color: errorMsg ? PALETTE.error : PALETTE.success },
           ]}
         >
-          {errorMsg ? errorMsg.toUpperCase() : "CONEXÃO ESTÁVEL (GPS_LOCK)"}
+          {errorMsg ? errorMsg.toUpperCase() : texts.stableConnection}
         </Text>
       </View>
 
@@ -196,13 +196,13 @@ export default function GPSScreen() {
         <View style={styles.cardHeader}>
           <Ionicons name="scan" size={16} color={PALETTE.primary} />
           <Text style={[styles.cardHeaderText, { color: theme.text }]}>
-            TELEMETRIA EM TEMPO REAL
+            {texts.telemetry}
           </Text>
         </View>
 
         <View style={styles.grid}>
           <View style={styles.gridItem}>
-            <Text style={styles.label}>LATITUDE</Text>
+            <Text style={styles.label}>{texts.latitude}</Text>
             <Text style={[styles.value, { color: theme.text }]}>
               {location ? location.coords.latitude.toFixed(6) : "0.000000"}
             </Text>
@@ -211,7 +211,7 @@ export default function GPSScreen() {
             style={[styles.dividerVertical, { backgroundColor: theme.border }]}
           />
           <View style={styles.gridItem}>
-            <Text style={styles.label}>LONGITUDE</Text>
+            <Text style={styles.label}>{texts.longitude}</Text>
             <Text style={[styles.value, { color: theme.text }]}>
               {location ? location.coords.longitude.toFixed(6) : "0.000000"}
             </Text>
@@ -230,7 +230,7 @@ export default function GPSScreen() {
           ]}
         >
           <View style={styles.gridItem}>
-            <Text style={styles.label}>ALTITUDE</Text>
+            <Text style={styles.label}>{texts.altitude}</Text>
             <View style={styles.rowCenter}>
               <Text style={[styles.value, { color: theme.text }]}>
                 {location ? `${Math.round(location.coords.altitude)}` : "0"}
@@ -239,7 +239,7 @@ export default function GPSScreen() {
             </View>
           </View>
           <View style={styles.gridItem}>
-            <Text style={styles.label}>PRECISÃO</Text>
+            <Text style={styles.label}>{texts.accuracy}</Text>
             <View style={styles.rowCenter}>
               <Text style={[styles.value, { color: PALETTE.success }]}>
                 {location ? `${location.coords.accuracy.toFixed(1)}` : "0.0"}
@@ -251,7 +251,7 @@ export default function GPSScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: PALETTE.softGray }]}>
-        © DIAMOND RUNNER GLOBAL TRACKING
+        {texts.footer}
       </Text>
     </View>
   );

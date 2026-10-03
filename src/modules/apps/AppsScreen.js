@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
 export default function AppsScreen() {
+  const texts = useTexts("apps");
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,7 @@ export default function AppsScreen() {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       {loading ? (
-        <Text>Carregando...</Text>
+        <Text>{texts.loading}</Text>
       ) : (
         <FlatList
           data={apps}

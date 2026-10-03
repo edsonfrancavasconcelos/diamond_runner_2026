@@ -1,5 +1,6 @@
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { useTexts } from "../../i18n/hooks/useTexts";
 
 const COLORS = {
   bg: "#0c3c74",
@@ -11,71 +12,66 @@ const COLORS = {
 
 export default function AboutScreen() {
   const { theme } = useTheme();
+  const texts = useTexts("about");
   const styles = createStyles(theme);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>SOBRE / EMPRESA</Text>
+      <Text style={styles.title}>{texts.title}</Text>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>SOBRE O APP</Text>
-        <Text style={styles.label}>Nome</Text>
-        <Text style={styles.value}>Diamond Runner</Text>
-        <Text style={styles.label}>Desenvolvido por</Text>
+        <Text style={styles.sectionTitle}>{texts.appSection}</Text>
+        <Text style={styles.label}>{texts.name}</Text>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={styles.value}>EFVasconcelos Sistemas</Text>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            resizeMode="contain"
+            style={{ width: 36, height: 34, marginRight: 10 }}
+          />
+          <Text style={styles.value}>Diamond Runner</Text>
+        </View>
+        <Text style={styles.label}>{texts.developedBy}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={require("../../assets/images/logo_vasconcelos.png")}
             resizeMode="contain"
-            style={{ width: 36, height: 36, marginLeft: 10 }}
+            style={{ width: 36, height: 36, marginRight: 10 }}
           />
+          <Text style={styles.value}>EFVasconcelos Sistemas</Text>
         </View>
-        <Text style={styles.label}>Versão</Text>
+        <Text style={styles.label}>{texts.version}</Text>
         <Text style={styles.value}>1.0.0</Text>
         <Text style={styles.paragraph}>
-          O Diamond Runner é uma plataforma de aplicativos de alta performance
-          para o dia a dia, com escritório digital, rede de indicação, sistema
-          de vendas e pontuação.
+          {texts.appDescription}
         </Text>
         <Text style={styles.paragraph}>
-          O app é uma ferramenta de operação e acompanhamento. O resultado
-          depende de atividade real.
+          {texts.appDisclaimer}
         </Text>
       </View>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>SOBRE A EMPRESA</Text>
-        <Text style={styles.label}>Nome fantasia</Text>
+        <Text style={styles.sectionTitle}>{texts.companySection}</Text>
+        <Text style={styles.label}>{texts.tradeName}</Text>
         <Text style={styles.value}>Diamond Runner</Text>
-        <Text style={styles.label}>Desenvolvimento / tecnologia</Text>
+        <Text style={styles.label}>{texts.developmentTechnology}</Text>
         <Text style={styles.value}>EFVasconcelos Sistemas</Text>
-        <Text style={styles.label}>Modelo</Text>
+        <Text style={styles.label}>{texts.businessModel}</Text>
         <Text style={styles.value}>
-          Marketing multinível (MMN) focado em aplicativos úteis no cotidiano,
-          com sistema de vendas e pontuação.
+          {texts.modelDescription}
         </Text>
-        <Text style={styles.heading}>Missão</Text>
+        <Text style={styles.heading}>{texts.mission}</Text>
         <Text style={styles.paragraph}>
-          Levar aplicativos de alta performance para o dia a dia e oferecer um
-          modelo transparente de vendas e pontuação, em que a remuneração esteja
-          ligada a produtos e serviços reais.
+          {texts.missionDescription}
         </Text>
-        <Text style={styles.heading}>Visão</Text>
+        <Text style={styles.heading}>{texts.vision}</Text>
         <Text style={styles.paragraph}>
-          Ser referência em MMN de tecnologia no Brasil, com rede sustentável,
-          escritório digital claro e aplicativos que as pessoas realmente usam.
+          {texts.visionDescription}
         </Text>
-        <Text style={styles.heading}>Valores</Text>
+        <Text style={styles.heading}>{texts.values}</Text>
         <Text style={styles.paragraph}>
-          • Transparência{`\n`}• Produto real antes de rede{`\n`}• Ética
-          comercial{`\n`}• Pontuação ligada a venda e uso{`\n`}• Respeito à LGPD
-          {`\n`}• Sem promessa de resultado financeiro
+          {texts.valuesDescription}
         </Text>
-        <Text style={styles.heading}>Compromisso com o modelo</Text>
+        <Text style={styles.heading}>{texts.commitment}</Text>
         <Text style={styles.paragraph}>
-          A Diamond Runner não é pirâmide. Não se paga para “entrar na rede”
-          como único produto. A base do negócio são aplicativos e ferramentas de
-          uso diário. Indicação e pontuação existem para reconhecer vendas e uso
-          reais. Quem apenas recruta, sem atividade ligada aos aplicativos, não
-          tem garantia de ganho.
+          {texts.commitmentDescription}
         </Text>
       </View>
     </ScrollView>

@@ -54,10 +54,10 @@ export default function FindSponsorScreen() {
     ).start();
   }, []);
 
-  const whatsappNumber = "558391630024";
+  const whatsappNumber = "5583986104110";
   const emailAdmin = "comercial@diamondrunner.com.br";
   const openWhatsApp = () => {
-    const msg = `Olá! Preciso de um patrocinador oficial para o Diamond Runner 2026.\n\nMEUS DADOS:\n- Nome:\n- CPF:`;
+    const msg = texts.whatsappMessage;
     const url = `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(msg)}`;
 
     Linking.canOpenURL(url).then((supported) => {
@@ -71,26 +71,13 @@ export default function FindSponsorScreen() {
     });
   };
   const openEmail = () => {
-    const subject = encodeURIComponent(
-      "SOLICITAÇÃO DE PATROCINADOR - DIAMOND RUNNER",
-    );
-    const body = encodeURIComponent(
-      "Olá Suporte Diamond,\n\n" +
-        "Solicito um patrocinador oficial para ativação de conta.\n\n" +
-        "MEUS DADOS:\n" +
-        "- Nome:\n" +
-        "- CPF:\n" +
-        "- Cidade/UF:\n" +
-        "- Telefone:",
-    ).replace(/%0A/g, "%0D%0A");
+    const subject = encodeURIComponent(texts.emailSubject);
+    const body = encodeURIComponent(texts.emailBody).replace(/%0A/g, "%0D%0A");
 
     const url = `mailto:${emailAdmin}?subject=${subject}&body=${body}`;
 
     Linking.openURL(url).catch(() => {
-      Alert.alert(
-        "Erro",
-        "Não encontramos um aplicativo de e-mail configurado.",
-      );
+      Alert.alert(texts.errorTitle, texts.emailAppUnavailable);
     });
   };
 
@@ -117,7 +104,7 @@ export default function FindSponsorScreen() {
             <Ionicons name="arrow-back" size={22} color={theme.text} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: theme.text }]}>
-            SUPORTE AO ATLETA
+            {texts.supportHeader}
           </Text>
         </View>
 
@@ -126,13 +113,12 @@ export default function FindSponsorScreen() {
             <Ionicons name="people" size={40} color={PALETTE.primary} />
           </View>
           <Text style={[styles.title, { color: theme.text }]}>
-            {texts.introTitle || "Precisa de um Patrocinador?"}
+            {texts.introTitle}
           </Text>
           <Text
             style={[styles.subtitle, { color: theme.textSub || "#647c9c" }]}
           >
-            {texts.introSubtitle1 ||
-              "Conecte-se com um líder oficial para receber suporte e estratégias exclusivas."}
+            {texts.introSubtitle1}
           </Text>
         </View>
 
@@ -147,8 +133,8 @@ export default function FindSponsorScreen() {
             onPress={handleAlreadyHaveSponsor}
           >
             <View>
-              <Text style={styles.actionCardTitle}>ESTOU PRONTO!</Text>
-              <Text style={styles.actionCardSub}>JÁ TENHO UM PATROCINADOR</Text>
+              <Text style={styles.actionCardTitle}>{texts.ready}</Text>
+              <Text style={styles.actionCardSub}>{texts.alreadyHaveSponsor}</Text>
             </View>
             <Ionicons name="rocket" size={28} color="#FFF" />
           </TouchableOpacity>
@@ -157,7 +143,7 @@ export default function FindSponsorScreen() {
         <View style={styles.dividerContainer}>
           <View style={[styles.line, { backgroundColor: theme.border }]} />
           <Text style={[styles.dividerText, { color: theme.textSub }]}>
-            OU SOLICITE UM AGORA
+            {texts.requestNow}
           </Text>
           <View style={[styles.line, { backgroundColor: theme.border }]} />
         </View>
@@ -188,7 +174,7 @@ export default function FindSponsorScreen() {
           >
             <Ionicons name="mail" size={32} color={PALETTE.primary} />
             <Text style={[styles.contactLabel, { color: theme.text }]}>
-              E-mail
+              {texts.emailLabel}
             </Text>
           </TouchableOpacity>
         </View>
@@ -200,9 +186,9 @@ export default function FindSponsorScreen() {
           ]}
         >
           <Text style={[styles.infoBoxTitle, { color: PALETTE.primary }]}>
-            DADOS NECESSÁRIOS:
+            {texts.dataLabel}
           </Text>
-          {["Nome Completo", "CPF", "Cidade/Estado", "Telefone"].map(
+          {[texts.fullName, texts.cpf, texts.cityState, texts.phone].map(
             (item, i) => (
               <View key={i} style={styles.infoRow}>
                 <Ionicons

@@ -72,8 +72,8 @@ export default function MarketingPlanScreen() {
   const texts =
     AllTexts.marketingTexts?.[country] || AllTexts.marketingTexts?.BR || {};
 
-  const cur = texts.currency || "R$";
-  const locale = texts.locale || "pt-BR";
+  const cur = texts.currency;
+  const locale = texts.locale;
   const currentRate = texts.rateToBRL || 1;
 
   const formatCurrency = (amountBRL) => {
@@ -93,12 +93,12 @@ export default function MarketingPlanScreen() {
         <Text style={styles.subtitle}></Text>
       </View>
       <Section
-        title="Chave de Ativação Mensal"
+        title={texts.monthlyActivation}
         icon="key-outline"
         color={COLORS.gold}
       >
         <View style={styles.activeCard}>
-          <Text style={styles.activeTitle}>STATUS ATIVO = 5 APPS (50 PTS)</Text>
+          <Text style={styles.activeTitle}>{texts.activeStatusSummary}</Text>
           <View style={{ marginTop: 10 }}>
             <Text
               style={[
@@ -106,29 +106,17 @@ export default function MarketingPlanScreen() {
                 { fontStyle: "normal", color: theme.text },
               ]}
             >
-              Para ser considerado{" "}
+              {texts.activeExplanation}{" "}
               <Text style={{ color: COLORS.gold, fontWeight: "bold" }}>
-                {"ATIVO"}
+                {texts.active}
               </Text>
-              , gere 5 apps ativos (próprios ou clientes), combinando
-              livremente:
+              {texts.activeRequirement}
             </Text>
-            <Text style={styles.planText}>
-              • Apps próprios / Clientes diretos / Novas vendas
-            </Text>
-            <Text style={styles.planText}>
-              • Mínimo: 5 apps = 50 pontos/mês (10 pts por app)
-            </Text>
+            <Text style={styles.planText}>{texts.appClientSales}</Text>
+            <Text style={styles.planText}>{texts.minimumApps}</Text>
           </View>
           <View style={styles.comboTable}>
-            {[
-              "5 apps próprios",
-              "3 próprios + 2 clientes",
-              "1 próprio + 4 clientes",
-              "5 clientes",
-              "5 vendas novas",
-              "2 próprios + 3 vendas",
-            ].map((item, index) => (
+            {texts.activityCombinations.map((item, index) => (
               <View key={index} style={styles.comboRow}>
                 <Text style={styles.comboText}>{item}</Text>
                 <Text style={styles.successIcon}>✅</Text>
@@ -137,13 +125,13 @@ export default function MarketingPlanScreen() {
           </View>
           <View style={styles.financeBox}>
             <View style={{ alignItems: "center" }}>
-              <Text style={styles.financeLabel}>Investimento Máx.</Text>
+              <Text style={styles.financeLabel}>{texts.maxInvestment}</Text>
               <Text style={styles.financeText}>
                 {cur} {formatCurrency(199.75)}
               </Text>
             </View>
             <View style={{ alignItems: "center" }}>
-              <Text style={styles.financeLabel}>Lucro (5 Vendas)</Text>
+              <Text style={styles.financeLabel}>{texts.profitFiveSales}</Text>
               <Text style={[styles.financeText, { color: COLORS.primary }]}>
                 {cur} {formatCurrency(199.75)}
               </Text>
@@ -151,26 +139,23 @@ export default function MarketingPlanScreen() {
           </View>
           <View style={{ marginTop: 15 }}>
             <Text style={styles.complianceFootnote}>
-              {"📌 O plano exige volume, não consumo forçado."}
+              {texts.noForcedConsumption}
             </Text>
           </View>
         </View>
       </Section>
 
       <Section
-        title="Crédito de Vouchers"
+        title={texts.voucherCreditTitle}
         icon="wallet-outline"
         color={COLORS.gold}
       >
         <View style={styles.highlightCard}>
-          <Text style={styles.typeTitle}>REGRA ÚNICA PARA TODOS OS PLANOS</Text>
-          <Text style={styles.infoText}>
-            O crédito de vouchers corresponde a 30% do valor do plano escolhido
-            + R$ 10,00.
-          </Text>
+          <Text style={styles.typeTitle}>{texts.oneRuleAllPlans}</Text>
+          <Text style={styles.infoText}>{texts.voucherCreditFormula}</Text>
           <View style={styles.comboTable}>
             {[
-              ["Afiliado", 99, 39.7],
+              [texts.affiliatePlanName, 99, 39.7],
               ["Builder", 299, 99.7],
               ["Prime", 799, 249.7],
               ["Elite", 1599, 489.7],
@@ -194,7 +179,7 @@ export default function MarketingPlanScreen() {
       </Section>
 
       <Section
-        title={texts.directReferral || "Indicação Direta"}
+        title={texts.directReferral}
         icon="people-outline"
       >
         <View style={styles.highlightCard}>
@@ -216,15 +201,13 @@ export default function MarketingPlanScreen() {
                 { color: "#ff7675", fontWeight: "bold", fontSize: 12 },
               ]}
             >
-              ⚠️ STATUS INATIVO: Pausa o recebimento de comissões, mas preserva
-              seus pontos acumulados.
+              {texts.inactiveNotice}
             </Text>
           </View>
 
-          <Text style={styles.typeTitle}>💰 COMISSÃO POR ADESÃO</Text>
+          <Text style={styles.typeTitle}>{texts.commissionPerSignup}</Text>
           <Text style={[styles.infoText, { marginBottom: 15 }]}>
-            Ganhe sempre que um novo parceiro adquirir um pacote através do seu
-            link ou da sua equipe até o 5º nível.
+            {texts.commissionDescription}
           </Text>
 
           {/* Tabela de Ganhos por Nível */}
@@ -241,7 +224,7 @@ export default function MarketingPlanScreen() {
                   { fontWeight: "bold", color: COLORS.primary, flex: 2 },
                 ]}
               >
-                NÍVEL
+                {texts.level}
               </Text>
               <Text
                 style={[
@@ -267,13 +250,13 @@ export default function MarketingPlanScreen() {
                   },
                 ]}
               >
-                GANHO ESTIMADO
+                {texts.estimatedEarnings}
               </Text>
             </View>
 
             <View style={styles.comboRow}>
               <Text style={[styles.comboText, { flex: 2, fontWeight: "bold" }]}>
-                1º (Diretos)
+                {texts.directLevel}
               </Text>
               <Text
                 style={[styles.comboText, { flex: 1, textAlign: "center" }]}
@@ -291,7 +274,7 @@ export default function MarketingPlanScreen() {
             </View>
 
             <View style={styles.comboRow}>
-              <Text style={[styles.comboText, { flex: 2 }]}>2º Nível</Text>
+              <Text style={[styles.comboText, { flex: 2 }]}>{texts.secondLevel}</Text>
               <Text
                 style={[styles.comboText, { flex: 1, textAlign: "center" }]}
               >
@@ -303,7 +286,7 @@ export default function MarketingPlanScreen() {
             </View>
 
             <View style={styles.comboRow}>
-              <Text style={[styles.comboText, { flex: 2 }]}>3º Nível</Text>
+              <Text style={[styles.comboText, { flex: 2 }]}>{texts.thirdLevel}</Text>
               <Text
                 style={[styles.comboText, { flex: 1, textAlign: "center" }]}
               >
@@ -315,7 +298,7 @@ export default function MarketingPlanScreen() {
             </View>
 
             <View style={[styles.comboRow, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.comboText, { flex: 2 }]}>4º ao 5º</Text>
+              <Text style={[styles.comboText, { flex: 2 }]}>{texts.fourthToFifthLevel}</Text>
               <Text
                 style={[styles.comboText, { flex: 1, textAlign: "center" }]}
               >
@@ -334,15 +317,14 @@ export default function MarketingPlanScreen() {
                 { color: theme.text, textAlign: "center" },
               ]}
             >
-              *Valores baseados no Pacote Elite. Ganhos proporcionais ao pacote
-              de entrada do indicado.
+              {texts.elitePackageNote}
             </Text>
           </View>
         </View>
       </Section>
 
       <Section
-        title={texts.binaryBonus || "Bônus Binário"}
+        title={texts.binaryBonus}
         icon="git-branch-outline"
       >
         <View style={styles.highlightCard}>
@@ -364,7 +346,7 @@ export default function MarketingPlanScreen() {
                   { fontWeight: "bold", color: COLORS.gold, marginLeft: 8 },
                 ]}
               >
-                REQUISITO DE QUALIFICAÇÃO
+                {texts.qualificationRequirement}
               </Text>
             </View>
             <Text
@@ -373,34 +355,32 @@ export default function MarketingPlanScreen() {
                 { marginTop: 5, color: theme.text },
               ]}
             >
-              • Estar {'"Ativo"'} (50 pts pessoais no mês).{"\n"}• Ter 1 direto
-              Ativo na Esquerda e 1 na Direita.
+              {texts.activeMonthlyRequirement}
             </Text>
           </View>
 
           {/* Explicação do Ganhos */}
           <View style={{ marginTop: 15 }}>
-            <Text style={styles.typeTitle}>📊 COMO FUNCIONA</Text>
+            <Text style={styles.typeTitle}>{texts.howItWorks}</Text>
             <Text style={styles.infoText}>
-              Você recebe sobre a pontuação da sua{" "}
+              {texts.binaryEarningsIntro}{" "}
               <Text style={{ fontWeight: "bold", color: COLORS.success }}>
-                Equipe Menor
+                {texts.smallerTeam}
               </Text>
-              . Toda nova adesão ou upgrade na rede gera pontos que se convertem
-              em dinheiro diariamente.
+              {texts.binaryDescription}
             </Text>
           </View>
 
           {/* Tabela de Porcentagem por Pacote */}
           <View style={styles.comboTable}>
             <View style={styles.comboRow}>
-              <Text style={styles.comboText}>Builder / Afiliado</Text>
+              <Text style={styles.comboText}>{texts.builderAffiliate}</Text>
               <Text style={[styles.comboText, { color: COLORS.primary }]}>
                 10%
               </Text>
             </View>
             <View style={styles.comboRow}>
-              <Text style={styles.comboText}>Prime</Text>
+              <Text style={styles.comboText}>{texts.primePackage}</Text>
               <Text style={[styles.comboText, { color: COLORS.primary }]}>
                 15%
               </Text>
@@ -412,7 +392,7 @@ export default function MarketingPlanScreen() {
                   { color: COLORS.gold, fontWeight: "bold" },
                 ]}
               >
-                Elite (Máximo)
+                {texts.eliteMaximum}
               </Text>
               <Text
                 style={[
@@ -431,17 +411,17 @@ export default function MarketingPlanScreen() {
               { marginTop: 10, textAlign: "center" },
             ]}
           >
-            *Os pontos da perna maior acumulam para o dia seguinte.
+            {texts.largerLegNote}
           </Text>
         </View>
       </Section>
 
       <Section
-        title={texts.entryPackages || "Pacotes de Entrada"}
+        title={texts.entryPackages}
         icon="gift-outline"
       >
         <Text style={styles.touchHint}>
-          {texts.touchHint || "Toque para adquirir ou fazer upgrade:"}
+          {texts.touchHint}
         </Text>
 
         {/* Card de Afiliado Premium */}
@@ -479,7 +459,7 @@ export default function MarketingPlanScreen() {
                 <Text
                   style={[styles.pkgTitle, { marginBottom: 0, fontSize: 16 }]}
                 >
-                  {texts.affiliateTitle || "AFILIADO"}
+                  {texts.affiliateTitle}
                 </Text>
               </View>
               <Text
@@ -488,7 +468,7 @@ export default function MarketingPlanScreen() {
                   { textAlign: "left", marginTop: 4, color: theme.text },
                 ]}
               >
-                {texts.uniqueFee || "Taxa Única de Licença Anual"}
+                {texts.affiliateLicenseFee}
               </Text>
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -504,7 +484,7 @@ export default function MarketingPlanScreen() {
                   fontWeight: "bold",
                 }}
               >
-                ATIVO POR 1 ANO
+                {texts.activeForOneYear}
               </Text>
             </View>
           </View>
@@ -562,7 +542,7 @@ export default function MarketingPlanScreen() {
                       color: theme.button,
                     }}
                   >
-                    TOP
+                    {texts.topTag}
                   </Text>
                 </View>
               )}
@@ -588,7 +568,7 @@ export default function MarketingPlanScreen() {
                 {formatCurrency(pkg.v)}
               </Text>
               <Text style={[styles.pkgApps, { fontSize: 9 }]}>
-                {`${pkg.a_val} Apps`}
+                {`${pkg.a_val} ${texts.appUnit}`}
               </Text>
             </TouchableOpacity>
           ))}
@@ -596,7 +576,7 @@ export default function MarketingPlanScreen() {
       </Section>
 
       <Section
-        title={texts.careerTitle || "Plano de Carreira"}
+        title={texts.careerTitle}
         icon="trophy-outline"
         color={COLORS.gold}
       >
@@ -604,20 +584,37 @@ export default function MarketingPlanScreen() {
           <Text
             style={[styles.infoText, { marginBottom: 20, textAlign: "center" }]}
           >
-            Sua evolução é medida pelo volume da sua{" "}
+            {texts.careerVolumeExplanation}{" "}
             <Text style={{ color: COLORS.gold, fontWeight: "bold" }}>
-              Equipe Menor
+              {texts.smallerTeam}
             </Text>{" "}
-            acumulado.
+            {texts.accumulated}
           </Text>
 
           {[
-            { n: texts.rankRunner || "RUNNER", p: "2.000", c: "#a4bccc" },
-            { n: texts.rankBronze || "BRONZE", p: "5.000", c: "#cd7f32" },
-            { n: texts.rankSilver || "SILVER", p: "15.000", c: "#C0C0C0" },
-            { n: texts.rankGold || "GOLD", p: "50.000", c: COLORS.gold },
             {
-              n: texts.rankDiamond || "DIAMOND",
+              n: texts.rankObsidiana,
+              p: "0",
+              c: "#06111f",
+            },
+            {
+              n: texts.rankTopazio,
+              p: "5.000",
+              c: COLORS.gold,
+            },
+            {
+              n: texts.rankSafira,
+              p: "15.000",
+              c: COLORS.primary,
+            },
+            { n: texts.rankRubi, p: "50.000", c: "#e74c3c" },
+            {
+              n: texts.rankEsmeralda,
+              p: "100.000",
+              c: "#2ecc71",
+            },
+            {
+              n: texts.rankDiamante,
               p: "160.000",
               c: "#00f2ff",
               elite: true,
@@ -701,7 +698,7 @@ export default function MarketingPlanScreen() {
                         fontWeight: "bold",
                       }}
                     >
-                      NÍVEL EXECUTIVO
+                      {texts.executiveLevel}
                     </Text>
                   )}
                 </View>
@@ -715,7 +712,7 @@ export default function MarketingPlanScreen() {
                     {item.p}
                   </Text>
                   <Text style={{ fontSize: 9, color: theme.text }}>
-                    PONTOS
+                    {texts.pointsLabel}
                   </Text>
                 </View>
               </View>
@@ -729,14 +726,14 @@ export default function MarketingPlanScreen() {
             ]}
           >
             <Text style={[styles.complianceFootnote, { textAlign: "center" }]}>
-              🚀 Os pontos de carreira nunca zeram para fins de reconhecimento.
+              {texts.careerPointsNeverReset}
             </Text>
           </View>
         </View>
       </Section>
 
       <Section
-        title={texts.generalRules || "Regras de Ouro & Fundamentos"}
+        title={texts.goldenRules}
         icon="shield-checkmark-outline"
         color={COLORS.success}
       >
@@ -764,7 +761,7 @@ export default function MarketingPlanScreen() {
             >
               <Ionicons name="stats-chart" size={20} color={COLORS.primary} />
               <Text style={[styles.infoText, { fontSize: 10, marginTop: 5 }]}>
-                {texts.rulePoint || "VALOR DO PONTO"}
+                {texts.pointValue}
               </Text>
               <Text
                 style={{
@@ -773,7 +770,9 @@ export default function MarketingPlanScreen() {
                   fontSize: 16,
                 }}
               >
-                1 pt = {cur} {formatCurrency(1.0)}
+                {texts.pointEquation
+                  .replace("{currency}", cur)
+                  .replace("{value}", formatCurrency(1.0))}
               </Text>
             </View>
 
@@ -791,7 +790,7 @@ export default function MarketingPlanScreen() {
             >
               <Ionicons name="apps" size={20} color={COLORS.success} />
               <Text style={[styles.infoText, { fontSize: 10, marginTop: 5 }]}>
-                PRODUTIVIDADE
+                {texts.productivity}
               </Text>
               <Text
                 style={{
@@ -800,7 +799,7 @@ export default function MarketingPlanScreen() {
                   fontSize: 16,
                 }}
               >
-                10 pts / App
+                {texts.pointsPerApp}
               </Text>
             </View>
 
@@ -819,10 +818,10 @@ export default function MarketingPlanScreen() {
             >
               <View style={{ alignItems: "center" }}>
                 <Text style={[styles.infoText, { fontSize: 10 }]}>
-                  FECHAMENTO
+                  {texts.closing}
                 </Text>
                 <Text style={{ color: COLORS.gold, fontWeight: "bold" }}>
-                  DIÁRIO
+                  {texts.daily}
                 </Text>
               </View>
               <View
@@ -834,10 +833,10 @@ export default function MarketingPlanScreen() {
               />
               <View style={{ alignItems: "center" }}>
                 <Text style={[styles.infoText, { fontSize: 10 }]}>
-                  PAGAMENTO
+                  {texts.payment}
                 </Text>
                 <Text style={{ color: COLORS.gold, fontWeight: "bold" }}>
-                  SEMANAL
+                  {texts.weekly}
                 </Text>
               </View>
             </View>
@@ -855,7 +854,7 @@ export default function MarketingPlanScreen() {
             ]}
           >
             <Text style={[styles.typeTitle, { fontSize: 12, marginBottom: 5 }]}>
-              ⚡ REQUISITO DE ATIVAÇÃO MENSAL
+              ⚡ {texts.activationMonthlyTitle}
             </Text>
             <Text
               style={[
@@ -863,12 +862,13 @@ export default function MarketingPlanScreen() {
                 { color: theme.text, lineHeight: 18 },
               ]}
             >
-              Para manter o status{" "}
+              {texts.qualifiedStatusDescription}{" "}
               <Text style={{ color: COLORS.success, fontWeight: "bold" }}>
-                QUALIFICADO
+                {texts.qualified}
               </Text>
-              , você precisa gerar no mínimo{" "}
-              <Text style={{ fontWeight: "bold" }}>50 pontos</Text> pessoais.
+              {texts.minimumMonthlyPoints}{" "}
+              <Text style={{ fontWeight: "bold" }}>{texts.minimumPersonalPoints}</Text>{" "}
+              {texts.personalPoints}
             </Text>
 
             <View
@@ -894,11 +894,11 @@ export default function MarketingPlanScreen() {
                     color: "#FFF",
                   }}
                 >
-                  EXEMPLO
+                  {texts.example}
                 </Text>
               </View>
               <Text style={[styles.infoText, { fontSize: 11 }]}>
-                5 Apps Próprios ou 5 Clientes Diretos
+                {texts.ownAppsOrDirectClients}
               </Text>
             </View>
           </View>
@@ -920,10 +920,8 @@ export default function MarketingPlanScreen() {
                 { textAlign: "center", lineHeight: 16 },
               ]}
             >
-              🛡️{" "}
-              <Text style={{ fontWeight: "bold" }}>Nota de Transparência:</Text>{" "}
-              O Diamond Runner é um modelo baseado em volume de produtos reais.
-              Não há ganhos garantidos sem esforço comercial e liderança.
+              🛡️ <Text style={{ fontWeight: "bold" }}>{texts.transparencyNote}</Text>
+              {texts.diamondTransparency}
             </Text>
           </View>
         </View>

@@ -35,28 +35,19 @@ export default function SelectProfileScreen() {
   // Garantia de objeto de texto
   const t = AllTexts.profileTexts?.[country] || AllTexts.profileTexts?.BR || {};
 
-  // ✅ SOLUÇÃO DO ERRO: Fallbacks para cada sub-objeto
-  const localization = t.localization || {
-    symbol: "R$",
-    locale: "pt-BR",
-    rateToBRL: 1,
-  };
-  const types = t.types || {};
-  const pricing = t.pricing || {};
+  const localization = t.localization;
+  const types = t.types;
+  const pricing = t.pricing;
 
-  const cur = localization.symbol || "R$";
-  const locale = localization.locale || "pt-BR";
-  const currentRate = localization.rateToBRL || 1;
+  const cur = localization.symbol;
+  const locale = localization.locale;
+  const currentRate = localization.rateToBRL;
 
   const formatCurrency = (val) => {
-    try {
-      return `${cur} ${Number(val * currentRate).toLocaleString(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`;
-    } catch (e) {
-      return `${cur} ${(val * currentRate).toFixed(2)}`;
-    }
+    return `${cur} ${Number(val * currentRate).toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   const handleNavigation = (basePriceBRL, role, type, screenName, planName) => {
@@ -89,8 +80,8 @@ export default function SelectProfileScreen() {
           <Ionicons name="chevron-back" size={28} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={styles.titleContainer}>
-          <Text style={styles.mainTitle}>{t.welcome || "WELCOME"}</Text>
-          <Text style={styles.subtitle}>{t.flow || "SELECT ACCESS"}</Text>
+          <Text style={styles.mainTitle}>{t.welcome}</Text>
+          <Text style={styles.subtitle}>{t.flow}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -111,7 +102,7 @@ export default function SelectProfileScreen() {
         >
           <View style={styles.headerRow}>
             <Text style={[styles.planName, { color: COLORS.primary }]}>
-              {types.afiliado || "AFILIADO"}
+              {types.afiliado}
             </Text>
             <Ionicons
               name="megaphone-outline"
@@ -121,9 +112,9 @@ export default function SelectProfileScreen() {
           </View>
           <Text style={styles.priceTag}>
             {formatCurrency(99)}{" "}
-            <Text style={styles.unit}>{pricing.yearly || ""}</Text>
+            <Text style={styles.unit}>{pricing.yearly}</Text>
           </Text>
-          <Text style={styles.bulletText}>• {types.afiliadoDesc || ""}</Text>
+          <Text style={styles.bulletText}>• {types.afiliadoDesc}</Text>
         </TouchableOpacity>
 
         {/* DISTRIBUIDOR */}
@@ -141,17 +132,17 @@ export default function SelectProfileScreen() {
         >
           <View style={styles.headerRow}>
             <Text style={[styles.planName, { color: COLORS.gold }]}>
-              {types.distribuidor || "DISTRIBUIDOR"}
+              {types.distribuidor}
             </Text>
             <Ionicons name="diamond-outline" size={24} color={COLORS.gold} />
           </View>
           <Text style={styles.priceTag}>
-            {pricing.starting || ""} {formatCurrency(299)}
+            {pricing.starting} {formatCurrency(299)}
           </Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{t.action || "CONFIRM"}</Text>
+            <Text style={styles.badgeText}>{t.action}</Text>
           </View>
-          <Text style={styles.supportNote}>{types.distribuidorDesc || ""}</Text>
+          <Text style={styles.supportNote}>{types.distribuidorDesc}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

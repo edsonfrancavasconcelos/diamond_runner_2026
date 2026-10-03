@@ -1,6 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
+    Animated,
     Image,
     Platform,
     ScrollView,
@@ -19,6 +20,7 @@ import Safira from "../../assets/images/safira.png";
 import Topazio from "../../assets/images/topazio.png";
 import { CountryContext } from "../../i18n/context/CountryContext";
 import { useTheme } from "../../i18n/context/ThemeContext";
+import { progressTexts } from "../../i18n/hooks/texts";
 import { supabase } from "../../services/supabase";
 
 const PALETTE = {
@@ -83,8 +85,31 @@ export default function ProgressScreen() {
   const { theme, isDark } = useTheme();
   const styles = createStyles(theme);
   const { country = "BR" } = useContext(CountryContext) || {};
+  const texts = progressTexts[country] || progressTexts.BR;
+  const stoneScale = useRef(new Animated.Value(1)).current;
 
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(stoneScale, {
+          toValue: 1.08,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(stoneScale, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    pulse.start();
+
+    return () => pulse.stop();
+  }, [stoneScale]);
 
   const [careerData, setCareerData] = useState({
     currentRank: "",
@@ -148,8 +173,7 @@ export default function ProgressScreen() {
   const currentRank = RANKS[index];
 
 
-  const nextRank =
-    RANKS[index + 1]?.name || "NÍVEL MÁXIMO";
+  const nextRank = RANKS[index + 1]?.name || texts.maxRank;
 
 
   const percent =
@@ -209,6 +233,10 @@ export default function ProgressScreen() {
   const rankImages = [Obsidiana, Topazio, Safira, Rubi, Esmeralda, Diamante];
 
   const currentMedal = rankImages[careerData.rankIndex];
+  const currentRankLabel =
+    texts.ranks[careerData.rankIndex] || careerData.currentRank;
+  const nextRankLabel =
+    texts.ranks[careerData.rankIndex + 1] || texts.maxRank;
 
   return (
       <View style={{ flex: 1, backgroundColor: theme.bg }}>
@@ -219,7 +247,7 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTag}>SISTEMA DE PROGRESSÃO GLOBAL</Text>
+          <Text style={styles.headerTag}>{texts.systemTitle}</Text>
 
           <Text style={styles.mainTitle}>
             DIAMOND
@@ -232,7 +260,7 @@ export default function ProgressScreen() {
             style={[
               styles.outerGlow,
               {
-                shadowColor: rankColor,
+                shadowColor: PALETTE.gold,
               },
             ]}
           >
@@ -240,7 +268,7 @@ export default function ProgressScreen() {
               style={[
                 styles.badgeContainer,
                 {
-                  borderColor: rankColor,
+                  borderColor: PALETTE.gold,
                 },
               ]}
             >
@@ -248,18 +276,21 @@ export default function ProgressScreen() {
                
               />
 
-              <Image
+              <Animated.Image
                 source={currentMedal}
-                style={{
-                  width: 150,
-                  height: 150,
-                  resizeMode: "contain",
-                }}
+                style={[
+                  {
+                    width: 150,
+                    height: 150,
+                    resizeMode: "contain",
+                  },
+                  { transform: [{ scale: stoneScale }] },
+                ]}
               />
             </View>
           </View>
 
-          <Text style={styles.currentRankName}>{careerData.currentRank}</Text>
+          <Text style={styles.currentRankName}>{currentRankLabel}</Text>
 
           <Text
             style={[
@@ -269,7 +300,7 @@ export default function ProgressScreen() {
               },
             ]}
           >
-        PLANO ATUAL ATIVO
+            {texts.currentPlanActive}
           </Text>
         </View>
 
@@ -283,9 +314,9 @@ export default function ProgressScreen() {
         >
           <View style={styles.telemetryHeader}>
             <View>
-              <Text style={styles.teleLabel}>OBJETIVO SEGUINTE</Text>
+              <Text style={styles.teleLabel}>{texts.nextGoal}</Text>
 
-              <Text style={styles.teleGoal}>{careerData.nextRank}</Text>
+              <Text style={styles.teleGoal}>{nextRankLabel}</Text>
             </View>
 
             <View style={styles.percentCircle}>
@@ -316,10 +347,10 @@ backgroundColor:PALETTE.gold
 
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>ATUAL</Text>
+              <Text style={styles.statLabel}>{texts.current}</Text>
 
               <Text style={styles.statValue}>
-                {Number(careerData.points || 0).toLocaleString()}
+                {Number(careerData.points || 0).toLocaleString(texts.locale)}
 
                 <Text style={styles.unit}>PV</Text>
               </Text>
@@ -328,10 +359,10 @@ backgroundColor:PALETTE.gold
             <View style={styles.statDivider} />
 
             <View style={styles.statItem}>
-              <Text style={styles.statLabel}>TARGET</Text>
+              <Text style={styles.statLabel}>{texts.target}</Text>
 
               <Text style={styles.statValue}>
-                {Number(careerData.goal || 0).toLocaleString()}
+                {Number(careerData.goal || 0).toLocaleString(texts.locale)}
 
                 <Text style={styles.unit}>PV</Text>
               </Text>
@@ -340,7 +371,7 @@ backgroundColor:PALETTE.gold
         </View>
 
         <View style={styles.missionCard}>
-          <Text style={styles.missionTitle}>PROTOCOLOS DE QUALIFICAÇÃO</Text>
+          <Text style={styles.missionTitle}>{texts.qualificationProtocols}</Text>
 
           <View style={styles.task}>
             <View
@@ -355,7 +386,7 @@ backgroundColor:PALETTE.gold
             </View>
 
             <View style={styles.taskContent}>
-              <Text style={styles.taskLabel}>CHAVE DE ATIVAÇÃO</Text>
+              <Text style={styles.taskLabel}>{texts.activationKey}</Text>
 
               <Text
                 style={[
@@ -365,7 +396,7 @@ backgroundColor:PALETTE.gold
                   },
                 ]}
               >
-                VERIFICADO (50 PTS)
+                {texts.verifiedPoints}
               </Text>
             </View>
           </View>
@@ -392,7 +423,7 @@ backgroundColor:PALETTE.gold
             </View>
 
             <View style={styles.taskContent}>
-              <Text style={styles.taskLabel}>VOLUME DE IMPACTO</Text>
+              <Text style={styles.taskLabel}>{texts.impactVolume}</Text>
 
               <Text
                 style={[
@@ -403,17 +434,20 @@ backgroundColor:PALETTE.gold
                 ]}
               >
                 {careerData.percent >= 100
-                  ? "PROTOCOLO COMPLETO"
-                  : `PENDENTE: ${(
-                      careerData.goal - careerData.points
-                    ).toLocaleString()} PV`}
+                  ? texts.protocolComplete
+                  : texts.pendingPoints.replace(
+                      "{points}",
+                      (careerData.goal - careerData.points).toLocaleString(
+                        texts.locale,
+                      ),
+                    )}
               </Text>
             </View>
           </View>
         </View>
 
         <Text style={styles.footerNote}>
-          Sincronizado com o satélite Diamond Runner 2026
+          {texts.syncedWith}
         </Text>
       </ScrollView>
     </View>
@@ -459,13 +493,15 @@ const createStyles = (theme) => StyleSheet.create({
 
   outerGlow: {
     shadowOpacity: 0.35,
-    shadowRadius: 10,
+    shadowRadius: 8,
     elevation: 8,
   },
 
   badgeContainer: {
     width: 170,
     height: 170,
+    borderWidth: 2,
+    borderRadius: 85,
     justifyContent: "center",
     alignItems: "center",
   },
