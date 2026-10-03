@@ -237,6 +237,11 @@ export default function NetworkScreen() {
               {texts.headerStatus}
             </Text>
           </View>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38, marginRight: 8 }}
+            resizeMode="contain"
+          />
           <TouchableOpacity onPress={resetPosition} style={styles.resetBtn}>
             <Ionicons name="locate" size={22} color={PALETTE.gold} />
           </TouchableOpacity>

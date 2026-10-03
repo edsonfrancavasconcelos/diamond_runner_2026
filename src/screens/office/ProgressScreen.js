@@ -247,6 +247,11 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38, alignSelf: "center" }}
+            resizeMode="contain"
+          />
           <Text style={styles.headerTag}>{texts.systemTitle}</Text>
 
           <Text style={styles.mainTitle}>

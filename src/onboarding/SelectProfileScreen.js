@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React, { useContext } from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -83,7 +84,11 @@ export default function SelectProfileScreen() {
           <Text style={styles.mainTitle}>{t.welcome}</Text>
           <Text style={styles.subtitle}>{t.flow}</Text>
         </View>
-        <View style={{ width: 40 }} />
+        <Image
+          source={require("../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38 }}
+          resizeMode="contain"
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

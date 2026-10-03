@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
@@ -79,6 +79,11 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/logodiamond.png")}
+        style={{ width: 38, height: 38, alignSelf: "center", marginBottom: 8 }}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>{texts.title}</Text>
       <Text style={styles.subtitle}>
         {texts.subtitle}

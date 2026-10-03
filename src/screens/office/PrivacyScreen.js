@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { Image, ScrollView, StyleSheet, Text } from "react-native";
 import { useTheme } from "../../i18n/context/ThemeContext";
 import { useTexts } from "../../i18n/hooks/useTexts";
 
@@ -16,6 +16,11 @@ export default function PrivacyScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Image
+        source={require("../../assets/images/logodiamond.png")}
+        style={{ width: 38, height: 38, alignSelf: "center" }}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>{texts.title}</Text>
       <Text style={styles.heading}>{texts.controllerHeading}</Text>
       <Text style={styles.paragraph}>

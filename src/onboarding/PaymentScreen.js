@@ -5,6 +5,7 @@ import React, { useContext, useMemo, useState } from "react";
 
 import {
   Alert,
+  Image,
   Linking,
   StatusBar,
   StyleSheet,
@@ -149,6 +150,11 @@ export default function PaymentScreen() {
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
+        <Image
+          source={require("../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38 }}
+          resizeMode="contain"
+        />
         <Ionicons name="diamond" size={60} color={PALETTE.gold} />
 
         <Text style={styles.title}>{texts.checkoutTitle}</Text>

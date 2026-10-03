@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  Image,
   StatusBar,
   StyleSheet,
   Text,
@@ -103,6 +104,11 @@ export default function GPSScreen() {
         <Text style={[styles.headerTag, { color: PALETTE.primary }]}>
           DIAMOND SYSTEM v2.6
         </Text>
+        <Image
+          source={require("../../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38, marginTop: 4 }}
+          resizeMode="contain"
+        />
         <Text style={[styles.mainTitle, { color: theme.text }]}>{texts.navigator}</Text>
       </View>
 

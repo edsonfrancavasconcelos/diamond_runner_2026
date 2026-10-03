@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useContext, useState } from "react";
 import {
     Dimensions,
+    Image,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -89,7 +90,14 @@ export default function MarketingPlanScreen() {
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.headerArea}>
-        <Text style={styles.mainTitle}>DIAMOND RUNNER</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text style={styles.mainTitle}>DIAMOND RUNNER</Text>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
+        </View>
         <Text style={styles.subtitle}></Text>
       </View>
       <Section

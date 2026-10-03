@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext } from "react";
 
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -273,6 +274,12 @@ export default function EarningsScreen() {
               DIAMOND WALLET
             </Text>
           </View>
+
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
 
           <TouchableOpacity
             onPress={fetchFinance}

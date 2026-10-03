@@ -211,6 +211,11 @@ export default function DiamondStoreApps() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
+      <Image
+        source={require("../../assets/images/logodiamond.png")}
+        style={{ width: 38, height: 38, alignSelf: "center" }}
+        resizeMode="contain"
+      />
       <View style={styles.hero}>
         <View style={styles.heroCopy}>
           <Text style={styles.eyebrow}>{texts.ecosystem}</Text>

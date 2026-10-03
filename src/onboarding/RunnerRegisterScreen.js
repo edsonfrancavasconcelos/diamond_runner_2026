@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Image,
   Linking,
   Platform,
   ScrollView,
@@ -301,6 +302,11 @@ export default function RunnerRegisterScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Image
+          source={require("../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38, alignSelf: "center" }}
+          resizeMode="contain"
+        />
         <View
           style={[
             styles.sponsorHeader,

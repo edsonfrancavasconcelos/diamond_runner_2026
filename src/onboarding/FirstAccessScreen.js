@@ -12,6 +12,7 @@ import {
     ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
+    Image,
     Platform,
     ScrollView,
     StatusBar,
@@ -126,6 +127,11 @@ export default function FirstAccessScreen() {
           >
             <Ionicons name="close" size={28} color="#FFF" />
           </TouchableOpacity>
+          <Image
+            source={require("../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
         </View>
 
         <View

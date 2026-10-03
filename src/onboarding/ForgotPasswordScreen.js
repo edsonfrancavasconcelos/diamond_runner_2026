@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Image,
   Platform,
   ScrollView,
   StatusBar,
@@ -81,15 +82,28 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={[
-            styles.backBtn,
-            { backgroundColor: theme.card, borderColor: theme.border },
-          ]}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
-          <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={[
+              styles.backBtn,
+              { backgroundColor: theme.card, borderColor: theme.border },
+            ]}
+          >
+            <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
+          </TouchableOpacity>
+          <Image
+            source={require("../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38, marginTop: 50 }}
+            resizeMode="contain"
+          />
+        </View>
 
         <View style={styles.content}>
           <Text style={[styles.title, { color: theme.text }]}>

@@ -135,7 +135,14 @@ export default function NewsScreen() {
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{texts.headerTitle}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text style={styles.headerTitle}>{texts.headerTitle}</Text>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
+        </View>
         <Text style={styles.headerSub}>{texts.subtitle}</Text>
       </View>
 

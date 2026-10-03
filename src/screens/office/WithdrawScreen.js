@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     Alert,
     Dimensions,
+    Image,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -171,7 +172,11 @@ export default function WithdrawScreen() {
           <Ionicons name="chevron-back" size={28} color={theme.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{texts.requestTitle}</Text>
-        <View style={{ width: 40 }} />
+        <Image
+          source={require("../../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38 }}
+          resizeMode="contain"
+        />
       </View>
 
       <ScrollView

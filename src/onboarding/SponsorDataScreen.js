@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Image,
   Platform,
   ScrollView,
   StatusBar,
@@ -89,6 +90,11 @@ export default function SponsorDataScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
+          <Image
+            source={require("../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38, alignSelf: "center", marginBottom: 12 }}
+            resizeMode="contain"
+          />
           <Text style={[styles.title, { color: theme.text }]}>
             {texts.sponsorDataTitle.toUpperCase()}
           </Text>

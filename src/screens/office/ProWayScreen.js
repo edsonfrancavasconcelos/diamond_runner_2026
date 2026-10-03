@@ -1,9 +1,9 @@
-// Autor: Edson Vasconcelos | Diamond Runner 2026 | Refatorado para expo-video (CORRIGIDO)
+// Autor: Edson Vasconcelos | Diamond Runner 2026 | WayPro — experiência de streaming
 import { Ionicons } from "@expo/vector-icons";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-    Dimensions,
+    Image,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -16,8 +16,6 @@ import { useTheme } from "../../i18n/context/ThemeContext";
 import { useTexts } from "../../i18n/hooks/useTexts";
 
 const videoPrincipal = require("../../assets/videos/DIAMONDRUNNER_UP1.mp4");
-const { width } = Dimensions.get("window");
-const VIDEO_HEIGHT = width * (9 / 16);
 
 const PALETTE = {
   primary: "#2c94bc",
@@ -26,183 +24,211 @@ const PALETTE = {
   softGray: "#a4bccc",
 };
 
+const VIDEO_TITLE = "Diamond Runner";
+
 export default function ProWayScreen() {
   const { theme, isDark } = useTheme();
   const texts = useTexts("proway");
   const styles = createStyles(theme);
 
-  const [currentVideoSource, setCurrentVideoSource] = useState(null);
+  const [playing, setPlaying] = useState(false);
 
-  // Inicializa o Player. O primeiro parâmetro deve ser o source inicial.
-  const player = useVideoPlayer(currentVideoSource, (p) => {
+  const player = useVideoPlayer(videoPrincipal, (p) => {
     p.loop = false;
-    p.autoplay = true;
   });
 
-  // MONITOR DE TROCA: Sempre que selecionar um vídeo novo, força o player a carregar
-  useEffect(() => {
-    if (currentVideoSource) {
-      player.replace(currentVideoSource);
-      player.play();
-    }
-  }, [currentVideoSource]);
-
-  const handleSelectCourse = (video) => {
-    setCurrentVideoSource(video.url);
+  const handleWatch = () => {
+    setPlaying(true);
+    player.play();
   };
 
-  const videos = [
-    {
-      id: "1",
-      title: "DIAMONDRUNNER_UP1.mp4",
-      url: videoPrincipal,
-    },
-  ];
+  const handleClose = () => {
+    player.pause();
+    player.currentTime = 0;
+    setPlaying(false);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.topContainer}>
-        {currentVideoSource ? (
-          <View style={styles.videoBox}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.column}>
+          <View style={styles.hero}>
+            <Image
+              source={require("../../assets/images/logodiamond.png")}
+              style={{ width: 38, height: 38 }}
+              resizeMode="contain"
+            />
+            <Text style={styles.headerTitle}>{texts.screenTitle}</Text>
+          </View>
+
+          <View style={styles.playerBox}>
             <VideoView
               player={player}
               style={styles.videoPlayer}
+              contentFit="contain"
               allowsFullscreen
               allowsPictureInPicture
-              nativeControls={true}
+              nativeControls={playing}
             />
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => {
-                player.pause();
-                setCurrentVideoSource(null);
-              }}
-            >
-              <Ionicons name="close-circle" size={32} color="#FFF" />
-            </TouchableOpacity>
+            {!playing && (
+              <TouchableOpacity
+                style={styles.poster}
+                onPress={handleWatch}
+                activeOpacity={0.9}
+              >
+                <View style={styles.bigPlay}>
+                  <Ionicons name="play" size={36} color={PALETTE.darkBg} />
+                </View>
+                <Text style={styles.posterTitle}>{VIDEO_TITLE}</Text>
+              </TouchableOpacity>
+            )}
+            {playing && (
+              <TouchableOpacity style={styles.closeBtn} onPress={handleClose}>
+                <Ionicons name="close-circle" size={30} color="#FFF" />
+              </TouchableOpacity>
+            )}
           </View>
-        ) : (
-          <View style={styles.header}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="play" size={34} color={PALETTE.gold} />
-            </View>
-            <Text style={styles.headerTitle}>{texts.screenTitle}</Text>
-          </View>
-        )}
-      </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.sectionTitle}>{texts.featured}</Text>
+          <Text style={styles.sectionTitle}>{texts.featured}</Text>
 
-        {videos.map((video) => (
           <TouchableOpacity
-            key={video.id}
-            style={styles.courseCard}
-            onPress={() => handleSelectCourse(video)}
+            style={[styles.courseCard, playing && styles.courseCardActive]}
+            onPress={handleWatch}
             activeOpacity={0.88}
           >
             <View style={styles.cardThumb}>
-              <Ionicons name="play-circle-outline" size={48} color={PALETTE.gold} />
+              <Ionicons name="play-circle" size={40} color={PALETTE.gold} />
             </View>
             <View style={styles.courseInfo}>
               <Text style={styles.catText}>{texts.featuredVideo}</Text>
-              <Text style={styles.courseTitle}>{video.title}</Text>
-            </View>
-            <View style={styles.playBtn}>
-              <Ionicons name="play" size={16} color="#FFF" />
-              <Text style={styles.playBtnText}>{texts.watch}</Text>
+              <Text style={styles.courseTitle} numberOfLines={2}>
+                {VIDEO_TITLE}
+              </Text>
+              <View style={styles.playBtn}>
+                <Ionicons name="play" size={14} color="#FFF" />
+                <Text style={styles.playBtnText}>{texts.watch}</Text>
+              </View>
             </View>
           </TouchableOpacity>
-        ))}
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const createStyles = (theme) => StyleSheet.create({
-  container: { flex: 1 },
-  topContainer: {
-    width: width,
-    height: VIDEO_HEIGHT + 60,
-    backgroundColor: theme.bg,
-    justifyContent: "center",
-  },
-  videoBox: { width: "100%", height: VIDEO_HEIGHT + 40 },
-  videoPlayer: { width: "100%", height: "100%" },
-  closeBtn: {
-    position: "absolute",
-    top: 10,
-    right: 20,
-    zIndex: 99,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 20,
-  },
-  header: {
+  content: { padding: 16, alignItems: "center", flexGrow: 1 },
+  column: { width: "100%", maxWidth: 900 },
+  hero: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  iconCircle: {
-    padding: 15,
-    borderRadius: 50,
+    flexWrap: "wrap",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    marginBottom: 14,
+    borderRadius: 16,
+    backgroundColor: PALETTE.darkBg,
     borderWidth: 1,
-    borderColor: PALETTE.primary,
-    marginBottom: 10,
+    borderColor: PALETTE.gold,
   },
   headerTitle: {
-    color: theme.text,
-    fontSize: 22,
+    color: "#FFF",
+    fontSize: 20,
+    fontWeight: "900",
+    textAlign: "center",
+    flexShrink: 1,
+  },
+  playerBox: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+    backgroundColor: "#000",
+    borderRadius: 14,
+    overflow: "hidden",
+    marginBottom: 22,
+  },
+  videoPlayer: { width: "100%", height: "100%" },
+  poster: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: PALETTE.darkBg,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+  },
+  bigPlay: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: PALETTE.gold,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingLeft: 4,
+    marginBottom: 10,
+  },
+  posterTitle: {
+    color: "#FFF",
+    fontSize: 16,
     fontWeight: "900",
     textAlign: "center",
   },
-  content: { padding: 20 },
+  closeBtn: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    zIndex: 99,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
+  },
   sectionTitle: {
     color: theme.text,
     fontSize: 11,
     fontWeight: "900",
-    marginBottom: 20,
+    marginBottom: 12,
     letterSpacing: 1,
   },
   courseCard: {
+    flexDirection: "row",
+    alignItems: "center",
     overflow: "hidden",
     borderRadius: 16,
-    marginBottom: 18,
     backgroundColor: theme.card,
     borderWidth: 1,
     borderColor: theme.border,
   },
+  courseCardActive: { borderColor: PALETTE.gold },
   cardThumb: {
-    width: "100%",
-    height: 170,
-    backgroundColor: theme.card,
+    width: "36%",
+    aspectRatio: 16 / 9,
+    backgroundColor: PALETTE.darkBg,
     justifyContent: "center",
     alignItems: "center",
   },
-  courseInfo: { paddingHorizontal: 16, paddingTop: 14 },
+  courseInfo: { flex: 1, padding: 12 },
   catText: {
     color: PALETTE.primary,
     fontSize: 9,
     fontWeight: "900",
     marginBottom: 4,
   },
-  courseTitle: { color: theme.text, fontSize: 14, fontWeight: "bold" },
+  courseTitle: { color: theme.text, fontSize: 15, fontWeight: "bold" },
   playBtn: {
     alignSelf: "flex-start",
     flexDirection: "row",
-    minHeight: 38,
+    minHeight: 34,
     backgroundColor: PALETTE.primary,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
-    paddingHorizontal: 16,
-    margin: 16,
+    paddingHorizontal: 14,
+    marginTop: 10,
   },
   playBtnText: {
     color: "#FFF",
     fontSize: 12,
     fontWeight: "800",
-    marginLeft: 7,
+    marginLeft: 6,
   },
 });

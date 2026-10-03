@@ -342,6 +342,11 @@ export default function ProfileScreen() {
           />
         }
       >
+        <Image
+          source={require("../../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38, alignSelf: "center" }}
+          resizeMode="contain"
+        />
         <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
           <TouchableOpacity
             onPress={handleAvatarPress}

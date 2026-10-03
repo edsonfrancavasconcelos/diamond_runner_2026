@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { supabase } from "../../services/supabase";
 
 import {
+    Image,
     Platform,
     SafeAreaView,
     ScrollView,
@@ -122,7 +123,14 @@ export default function PackagesScreen() {
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.mainTitle}>{texts.pageTitle}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text style={styles.mainTitle}>{texts.pageTitle}</Text>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
+        </View>
 
         <Text style={styles.subTitle}>{texts.activationUpgrade}</Text>
       </View>

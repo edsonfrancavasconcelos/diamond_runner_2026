@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
 import {
+    Image,
     StatusBar,
     StyleSheet,
     Text,
@@ -43,6 +44,12 @@ export default function ChooseSponsorScreen() {
         >
           <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
         </TouchableOpacity>
+
+        <Image
+          source={require("../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38 }}
+          resizeMode="contain"
+        />
 
         <View
           style={[

@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import {
     Alert,
     Animated,
+    Image,
     Linking,
     ScrollView,
     StatusBar,
@@ -107,6 +108,12 @@ export default function FindSponsorScreen() {
             {texts.supportHeader}
           </Text>
         </View>
+
+        <Image
+          source={require("../assets/images/logodiamond.png")}
+          style={{ width: 38, height: 38, alignSelf: "center" }}
+          resizeMode="contain"
+        />
 
         <View style={styles.hero}>
           <View style={styles.iconBadge}>

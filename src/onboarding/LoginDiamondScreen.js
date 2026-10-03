@@ -7,6 +7,7 @@ import { useContext, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
+    Image,
     Platform,
     ScrollView,
     StatusBar,
@@ -151,6 +152,11 @@ export default function LoginDiamondScreen() {
           >
             <Ionicons name="chevron-back" size={24} color={PALETTE.primary} />
           </TouchableOpacity>
+          <Image
+            source={require("../assets/images/logodiamond.png")}
+            style={{ width: 38, height: 38 }}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.content}>
