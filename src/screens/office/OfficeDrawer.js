@@ -293,6 +293,7 @@ export default function OfficeDrawer() {
         component={DiamondStoreApps}
         options={{
           title: "StoreRunner",
+          drawerLabel: "STORERUNNER",
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
             <Ionicons name="cart-outline" size={20} color={PALETTE.gold} />
@@ -373,6 +374,7 @@ export default function OfficeDrawer() {
         component={ProWayScreen}
         options={{
           title: "WayPro",
+          drawerLabel: "WAYPRO",
           drawerItemStyle: hideIfPending,
           drawerIcon: () => (
             <Ionicons name="school-outline" size={20} color={PALETTE.gold} />

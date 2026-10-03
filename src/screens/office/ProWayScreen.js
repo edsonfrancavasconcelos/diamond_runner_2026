@@ -1,7 +1,7 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026 | WayPro — experiência de streaming
 import { Ionicons } from "@expo/vector-icons";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Image,
     ScrollView,
@@ -37,6 +37,11 @@ export default function ProWayScreen() {
     p.loop = false;
   });
 
+  // Android: dispara o play após o VideoView estar visível e com controles
+  useEffect(() => {
+    if (playing) player.play();
+  }, [playing, player]);
+
   const handleWatch = () => {
     setPlaying(true);
     player.play();
@@ -68,6 +73,7 @@ export default function ProWayScreen() {
               player={player}
               style={styles.videoPlayer}
               contentFit="contain"
+              surfaceType="textureView"
               allowsFullscreen
               allowsPictureInPicture
               nativeControls={playing}
