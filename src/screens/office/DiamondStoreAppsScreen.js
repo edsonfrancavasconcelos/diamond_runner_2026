@@ -30,7 +30,7 @@ const DIAMOND_APPS = [
   {
     id: "1",
     slug: "fitmommy",
-    name: "FITMOMMY",
+    name: "FitMater",
     icon: "fitness",
     image: require("../../assets/images/FitMommy.png"),
   },
@@ -51,7 +51,7 @@ const DIAMOND_APPS = [
   {
     id: "4",
     slug: "diacare",
-    name: "DIA CARE",
+    name: "GlicoDay",
     icon: "heart",
     image: require("../../assets/images/DiaCare.jpeg"),
   },
@@ -86,14 +86,14 @@ const DIAMOND_APPS = [
   {
     id: "9",
     slug: "glowup",
-    name: "GLOW UP",
+    name: "UpGlow",
     icon: "sparkles",
     image: require("../../assets/images/GlowUP.jpeg"),
   },
   {
     id: "10",
     slug: "neurovita",
-    name: "NEUROVITA",
+    name: "NeuroTime",
     icon: "bulb",
     image: require("../../assets/images/NeuroVita.jpeg"),
   },
@@ -107,7 +107,7 @@ const DIAMOND_APPS = [
   {
     id: "12",
     slug: "nightwave",
-    name: "NIGHTWAVE",
+    name: "NightWell",
     icon: "moon",
     image: require("../../assets/images/NigthWave.jpeg"),
   },
@@ -121,7 +121,7 @@ const DIAMOND_APPS = [
   {
     id: "14",
     slug: "vital-a",
-    name: "VITAL-A",
+    name: "VitallCor",
     icon: "pulse",
     image: require("../../assets/images/Vital-A.jpeg"),
   },
