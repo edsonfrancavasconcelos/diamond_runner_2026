@@ -7,6 +7,7 @@ import {
     FlatList,
     Image,
     InteractionManager,
+    Linking,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -32,7 +33,8 @@ const DIAMOND_APPS = [
     slug: "fitmommy",
     name: "FitMater",
     icon: "fitness",
-    image: require("../../assets/images/FitMommy.png"),
+    url: "https://graceful-fit-mommy-flow.base44.app",
+    image: require("../../assets/images/fitmater.jpeg"),
   },
   {
     id: "2",
@@ -53,7 +55,7 @@ const DIAMOND_APPS = [
     slug: "diacare",
     name: "GlicoDay",
     icon: "heart",
-    image: require("../../assets/images/DiaCare.jpeg"),
+    image: require("../../assets/images/glicoday.jpeg"),
   },
   {
     id: "5",
@@ -72,9 +74,10 @@ const DIAMOND_APPS = [
   {
     id: "7",
     slug: "flulingo",
-    name: "FLULINGO",
+    name: "PortuLingo",
     icon: "language",
-    image: require("../../assets/images/FluLingo.jpeg"),
+    image: require("../../assets/images/mascote_portulingo.png"),
+    url: "https://porto-lingo-flow.base44.app",
   },
   {
     id: "8",
@@ -88,14 +91,15 @@ const DIAMOND_APPS = [
     slug: "glowup",
     name: "UpGlow",
     icon: "sparkles",
-    image: require("../../assets/images/GlowUP.jpeg"),
+    image: require("../../assets/images/upglow.jpeg"),
   },
   {
     id: "10",
     slug: "neurovita",
     name: "NeuroTime",
     icon: "bulb",
-    image: require("../../assets/images/NeuroVita.jpeg"),
+    url: "https://neuro-vita-boost.base44.app",
+    image: require("../../assets/images/neurotime.jpeg"),
   },
   {
     id: "11",
@@ -109,7 +113,8 @@ const DIAMOND_APPS = [
     slug: "nightwave",
     name: "NightWell",
     icon: "moon",
-    image: require("../../assets/images/NigthWave.jpeg"),
+    url: "https://night-wave-flow.base44.app",
+    image: require("../../assets/images/nightwell.jpeg"),
   },
   {
     id: "13",
@@ -123,7 +128,7 @@ const DIAMOND_APPS = [
     slug: "vital-a",
     name: "VitallCor",
     icon: "pulse",
-    image: require("../../assets/images/Vital-A.jpeg"),
+    image: require("../../assets/images/vitallcor.jpeg"),
   },
 ];
 
@@ -200,6 +205,15 @@ export default function DiamondStoreApps() {
     navigation.navigate("Dashboard");
   };
 
+  const openApp = async (url) => {
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.log("Erro ao abrir aplicativo:", error.message);
+      Alert.alert(texts.openAppError);
+    }
+  };
+
   if (loading && !user.type)
     return (
       <View style={styles.center}>
@@ -252,11 +266,15 @@ export default function DiamondStoreApps() {
           return (
             <TouchableOpacity
               style={[styles.appCard, isEnabled && styles.appCardEnabled]}
-              onPress={() =>
-                isEnabled
-                  ? navigation.navigate("Dashboard")
-                  : handleDownload(item)
-              }
+              onPress={() => {
+                if (!isEnabled) {
+                  handleDownload(item);
+                } else if (item.url) {
+                  openApp(item.url);
+                } else {
+                  navigation.navigate("Dashboard");
+                }
+              }}
               activeOpacity={0.86}
             >
               <View style={styles.appTopline}>

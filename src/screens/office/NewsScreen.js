@@ -29,6 +29,79 @@ const COLORS = {
   textSub: "#a4bccc",
 };
 
+const PLATFORM_ANNOUNCEMENTS = [
+  {
+    id: "platform-update",
+    isBuiltin: true,
+    title: "Nova atualização da Plataforma Diamond Runner",
+    description:
+      "O Ecossistema Diamond Runner recebeu uma nova atualização para oferecer mais estabilidade, desempenho e segurança aos usuários. As melhorias incluem otimizações na navegação, aperfeiçoamento dos processos internos e evolução da experiência do Escritório Virtual.",
+  },
+  {
+    id: "waypro-content",
+    isBuiltin: true,
+    title: "WayPro recebe novos conteúdos de capacitação",
+    description:
+      "A plataforma WayPro continua evoluindo como a academia oficial do Ecossistema Diamond Runner. Novos treinamentos serão disponibilizados gradualmente para ajudar parceiros a conhecer melhor os aplicativos, estratégias de divulgação e boas práticas de atendimento.",
+  },
+  {
+    id: "storerunner-apps",
+    isBuiltin: true,
+    title: "Novos aplicativos chegando ao StoreRunner",
+    description:
+      "O StoreRunner está ampliando seu catálogo de soluções digitais. Novos aplicativos funcionais serão disponibilizados para diferentes segmentos, oferecendo mais opções para clientes e parceiros do ecossistema.",
+  },
+  {
+    id: "international-expansion",
+    isBuiltin: true,
+    title: "Expansão Internacional",
+    description:
+      "A Diamond Runner segue expandindo sua atuação para novos mercados. O objetivo é fortalecer a presença internacional do ecossistema e oferecer oportunidades de negócios em diferentes países.",
+  },
+  {
+    id: "responsible-referral",
+    isBuiltin: true,
+    title: "Programa de Indicação Responsável",
+    description:
+      "Foi reforçada a política de divulgação responsável da Diamond Runner. Os parceiros devem apresentar os aplicativos e o plano de negócios com transparência, sempre respeitando as diretrizes oficiais da empresa.",
+  },
+  {
+    id: "account-security",
+    isBuiltin: true,
+    title: "Segurança da Conta",
+    description:
+      "Novas melhorias de segurança foram implementadas para proteger as contas dos usuários. Mantenha seus dados atualizados e nunca compartilhe suas credenciais de acesso.",
+  },
+  {
+    id: "career-evolution",
+    isBuiltin: true,
+    title: "Evolução de Carreira",
+    description:
+      "A evolução dentro do Ecossistema Diamond Runner é baseada no crescimento sustentável da rede e no cumprimento dos critérios oficiais de qualificação. Acompanhe seu progresso na tela Progresso e consulte o Plano de Marketing para conhecer todos os requisitos.",
+  },
+  {
+    id: "virtual-office",
+    isBuiltin: true,
+    title: "Novos Recursos no Escritório Virtual",
+    description:
+      "O Escritório Virtual recebeu melhorias na organização das informações, facilitando o acompanhamento de indicadores, histórico de atividades, carteira digital e desempenho da rede.",
+  },
+  {
+    id: "activation-campaign",
+    isBuiltin: true,
+    title: "Campanha de Ativação",
+    description:
+      "Está em andamento uma campanha voltada para a ativação de novos parceiros e clientes. Consulte os materiais oficiais da empresa para conhecer as regras e condições vigentes.",
+  },
+  {
+    id: "official-announcements",
+    isBuiltin: true,
+    title: "Comunicados Oficiais",
+    description:
+      "Todas as atualizações do Ecossistema Diamond Runner serão publicadas exclusivamente pela área de Notícias & Avisos do aplicativo. Consulte esta seção regularmente para acompanhar novidades, eventos e comunicados oficiais.",
+  },
+];
+
 export default function NewsScreen() {
   const { theme, isDark } = useTheme();
   const texts = useTexts("news");
@@ -37,6 +110,7 @@ export default function NewsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [news, setNews] = useState([]);
   const [dismissedNewsIds, setDismissedNewsIds] = useState(new Set());
+  const [dismissedBuiltinIds, setDismissedBuiltinIds] = useState(new Set());
   const [expandedNewsId, setExpandedNewsId] = useState(null);
   const [dismissingNewsId, setDismissingNewsId] = useState(null);
 
@@ -61,7 +135,7 @@ export default function NewsScreen() {
         .eq("user_id", user.id);
 
       if (dismissalsError) throw dismissalsError;
-      setNews(data || []);
+      setNews([...PLATFORM_ANNOUNCEMENTS, ...(data || [])]);
       setDismissedNewsIds(new Set((dismissals || []).map((row) => row.news_id)));
     } catch (error) {
       console.log("Erro ao carregar notícias:", error.message);
@@ -83,6 +157,13 @@ export default function NewsScreen() {
           style: "destructive",
           onPress: async () => {
             const newsId = String(item.id);
+            if (item.isBuiltin) {
+              setDismissedBuiltinIds((current) =>
+                new Set(current).add(newsId),
+              );
+              setExpandedNewsId(null);
+              return;
+            }
             setDismissingNewsId(newsId);
             try {
               const {
@@ -119,7 +200,10 @@ export default function NewsScreen() {
   }, []);
 
   const visibleNews = news.filter(
-    (item) => !dismissedNewsIds.has(String(item.id)),
+    (item) =>
+      item.isBuiltin
+        ? !dismissedBuiltinIds.has(String(item.id))
+        : !dismissedNewsIds.has(String(item.id)),
   );
 
   if (loading) {
@@ -177,7 +261,9 @@ export default function NewsScreen() {
                       color={COLORS.gold}
                     />
                     <Text style={styles.newsDate}>
-                      {new Date(item.created_at).toLocaleDateString(texts.locale)}
+                      {item.isBuiltin
+                        ? texts.today
+                        : new Date(item.created_at).toLocaleDateString(texts.locale)}
                     </Text>
                   </View>
                   <Text style={styles.newsTitle}>{item.title}</Text>

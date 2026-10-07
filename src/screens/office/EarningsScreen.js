@@ -275,12 +275,6 @@ export default function EarningsScreen() {
             </Text>
           </View>
 
-          <Image
-            source={require("../../assets/images/logodiamond.png")}
-            style={{ width: 38, height: 38 }}
-            resizeMode="contain"
-          />
-
           <TouchableOpacity
             onPress={fetchFinance}
 
@@ -316,13 +310,18 @@ export default function EarningsScreen() {
               <Text style={styles.idBadgeText}>ID: {financeData.idDr}</Text>
             </View>
 
-            <Ionicons
-              name="shield-checkmark"
-
-              size={20}
-
-              color={PALETTE.gold}
-            />
+            <View style={styles.cardBranding}>
+              <Image
+                source={require("../../assets/images/logodiamond.png")}
+                style={styles.diamondLogo}
+                resizeMode="contain"
+              />
+              <Ionicons
+                name="shield-checkmark"
+                size={20}
+                color={PALETTE.gold}
+              />
+            </View>
           </View>
 
           <Text style={styles.cardLabel}>
@@ -353,13 +352,18 @@ export default function EarningsScreen() {
               },
             ]}
           >
-            <Ionicons
-              name="people"
-
-              size={20}
-
-              color={PALETTE.primary}
-            />
+            <View style={styles.miniCardHeader}>
+              <Ionicons
+                name="people"
+                size={20}
+                color={PALETTE.primary}
+              />
+              <Image
+                source={require("../../assets/images/logodiamond.png")}
+                style={styles.miniDiamondLogo}
+                resizeMode="contain"
+              />
+            </View>
 
             <Text style={styles.miniLabel}>{texts.points}</Text>
 
@@ -383,13 +387,18 @@ export default function EarningsScreen() {
               },
             ]}
           >
-            <Ionicons
-              name="trophy"
-
-              size={20}
-
-              color={PALETTE.gold}
-            />
+            <View style={styles.miniCardHeader}>
+              <Ionicons
+                name="trophy"
+                size={20}
+                color={PALETTE.gold}
+              />
+              <Image
+                source={require("../../assets/images/logodiamond.png")}
+                style={styles.miniDiamondLogo}
+                resizeMode="contain"
+              />
+            </View>
 
             <Text style={styles.miniLabel}>{texts.level}</Text>
 
@@ -501,6 +510,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  cardBranding: { flexDirection: "row", alignItems: "center", gap: 10 },
+  diamondLogo: { width: 28, height: 28 },
 
   idBadge: {
     backgroundColor: "rgba(255,255,255,.15)",
@@ -557,6 +568,12 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 22,
   },
+  miniCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  miniDiamondLogo: { width: 22, height: 22 },
 
   miniLabel: {
     color: PALETTE.grayBlue,

@@ -1278,6 +1278,7 @@ export const networkTexts = {
 export const newsTexts = {
   BR: {
     locale: "pt-BR",
+    today: "Hoje",
     title: "Comunicados e Notícias",
     noNews: "Nenhuma novidade no momento.",
     readMore: "Ler mais",
@@ -1298,6 +1299,7 @@ export const newsTexts = {
   },
   EN: {
     locale: "en-US",
+    today: "Today",
     title: "News and Updates",
     noNews: "No updates at the moment.",
     readMore: "Read more",
@@ -1318,6 +1320,7 @@ export const newsTexts = {
   },
   ES: {
     locale: "es-ES",
+    today: "Hoy",
     title: "Comunicados y Noticias",
     noNews: "No hay novedades en este momento.",
     readMore: "Leer más",
@@ -1492,6 +1495,7 @@ export const diamondStoreTexts = {
     payPlanToUnlock: "Pague um plano para liberar os módulos.",
     close: "FECHAR",
     defaultPlan: "CONSULTOR",
+    openAppError: "Não foi possível abrir este aplicativo.",
   },
   EN: {
     ecosystem: "DIAMOND RUNNER ECOSYSTEM",
@@ -1510,6 +1514,7 @@ export const diamondStoreTexts = {
     payPlanToUnlock: "Pay for a plan to unlock the modules.",
     close: "CLOSE",
     defaultPlan: "CONSULTANT",
+    openAppError: "Could not open this app.",
   },
   ES: {
     ecosystem: "ECOSISTEMA DIAMOND RUNNER",
@@ -1528,6 +1533,7 @@ export const diamondStoreTexts = {
     payPlanToUnlock: "Paga un plan para desbloquear los módulos.",
     close: "CERRAR",
     defaultPlan: "CONSULTOR",
+    openAppError: "No se pudo abrir esta aplicación.",
   },
 };
 

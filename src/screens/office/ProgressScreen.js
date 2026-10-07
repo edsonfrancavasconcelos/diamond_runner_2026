@@ -224,7 +224,14 @@ export default function ProgressScreen() {
           },
         ]}
       >
-        <ActivityIndicator size="large" color={PALETTE.success} />
+        <View style={[styles.loadingCard, { backgroundColor: theme.card }]}>
+          <Image
+            source={require("../../assets/images/logodiamond.png")}
+            style={styles.loadingLogo}
+            resizeMode="contain"
+          />
+          <ActivityIndicator size="large" color={PALETTE.success} />
+        </View>
       </View>
     );
   }
@@ -247,11 +254,6 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Image
-            source={require("../../assets/images/logodiamond.png")}
-            style={{ width: 38, height: 38, alignSelf: "center" }}
-            resizeMode="contain"
-          />
           <Text style={styles.headerTag}>{texts.systemTitle}</Text>
 
           <Text style={styles.mainTitle}>
@@ -285,8 +287,8 @@ export default function ProgressScreen() {
                 source={currentMedal}
                 style={[
                   {
-                    width: 150,
-                    height: 150,
+                    width: 170,
+                    height: 170,
                     resizeMode: "contain",
                   },
                   { transform: [{ scale: stoneScale }] },
@@ -467,6 +469,15 @@ const createStyles = (theme) => StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
+  loadingCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    padding: 24,
+    borderRadius: 16,
+  },
+  loadingLogo: { width: 48, height: 48 },
 
   scroll: {
     paddingBottom: 60,
