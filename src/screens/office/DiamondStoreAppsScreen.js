@@ -211,11 +211,6 @@ export default function DiamondStoreApps() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <Image
-        source={require("../../assets/images/logodiamond.png")}
-        style={{ width: 38, height: 38, alignSelf: "center" }}
-        resizeMode="contain"
-      />
       <View style={styles.hero}>
         <View style={styles.heroCopy}>
           <Text style={styles.eyebrow}>{texts.ecosystem}</Text>
@@ -268,9 +263,16 @@ export default function DiamondStoreApps() {
                 <View style={styles.iconCircle}>
                   <Image source={item.image} style={styles.appLogo} />
                 </View>
-                {isEnabled && (
-                  <Ionicons name="checkmark-circle" size={20} color="#57d69a" />
-                )}
+                <View style={styles.appToplineRight}>
+                  <Image
+                    source={require("../../assets/images/logodiamond.png")}
+                    style={styles.diamondLogo}
+                    resizeMode="contain"
+                  />
+                  {isEnabled && (
+                    <Ionicons name="checkmark-circle" size={20} color="#57d69a" />
+                  )}
+                </View>
               </View>
               <Text style={styles.appName}>{item.name}</Text>
               <Text style={styles.appDescription}>{texts.integratedModule}</Text>
@@ -374,6 +376,8 @@ const createStyles = (theme) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  appToplineRight: { flexDirection: "row", alignItems: "center", gap: 6 },
+  diamondLogo: { width: 24, height: 24 },
   iconCircle: {
     width: 64,
     height: 64,
