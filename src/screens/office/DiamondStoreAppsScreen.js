@@ -80,6 +80,14 @@ const DIAMOND_APPS = [
     url: "https://porto-lingo-flow.base44.app",
   },
   {
+    id: "15",
+    slug: "flu-lingo",
+    name: "FluLingo",
+    icon: "language",
+    image: require("../../assets/images/FluLingo.jpeg"),
+    url: "https://efficient-learn-lingo-flow.base44.app",
+  },
+  {
     id: "8",
     slug: "fluxo-financeiro",
     name: "FLUXO FINANCEIRO",
@@ -91,6 +99,7 @@ const DIAMOND_APPS = [
     slug: "glowup",
     name: "UpGlow",
     icon: "sparkles",
+    url: "https://glow-up-aura.base44.app",
     image: require("../../assets/images/upglow.jpeg"),
   },
   {
