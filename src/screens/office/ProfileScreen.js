@@ -155,13 +155,27 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handleAvatarPress = () => {    ;
-    Alert.alert(texts.photoTitle, texts.photoPrompt, [
-      { text: texts.chooseFromGallery, onPress: pickImage },
-      { text: texts.removePhoto, onPress: removeImage, style: "destructive" },
-      { text: texts.cancel, style: "cancel" },
-    ]);
-  };
+const handleAvatarPress = () => {
+  console.log("[avatar] TOCOU NO AVATAR");
+
+  Alert.alert(
+    "TESTE FOTO",
+    "O botão da foto está funcionando",
+    [
+      {
+        text: "Abrir galeria",
+        onPress: () => {
+          console.log("[avatar] clicou galeria");
+          pickImage();
+        },
+      },
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+    ]
+  );
+};
 
   const pickImage = async () => {
      console.log("[avatar] entrou no alerta");
