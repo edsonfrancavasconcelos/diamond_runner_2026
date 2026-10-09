@@ -156,6 +156,7 @@ export default function ProfileScreen() {
   };
 
   const handleAvatarPress = () => {
+      console.log("[avatar] tocou na foto");
     Alert.alert(texts.photoTitle, texts.photoPrompt, [
       { text: texts.chooseFromGallery, onPress: pickImage },
       { text: texts.removePhoto, onPress: removeImage, style: "destructive" },
