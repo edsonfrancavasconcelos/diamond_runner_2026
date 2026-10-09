@@ -155,8 +155,7 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const handleAvatarPress = () => {
-      console.log("[avatar] tocou na foto");
+  const handleAvatarPress = () => {    ;
     Alert.alert(texts.photoTitle, texts.photoPrompt, [
       { text: texts.chooseFromGallery, onPress: pickImage },
       { text: texts.removePhoto, onPress: removeImage, style: "destructive" },
@@ -165,6 +164,7 @@ export default function ProfileScreen() {
   };
 
   const pickImage = async () => {
+      console.log("[avatar] abriu galeria");
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       return Alert.alert(common.error, texts.permissionDenied);
