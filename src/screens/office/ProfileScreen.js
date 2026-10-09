@@ -164,7 +164,7 @@ export default function ProfileScreen() {
   };
 
   const pickImage = async () => {
-      console.log("[avatar] abriu galeria");
+     console.log("[avatar] entrou no alerta");
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       return Alert.alert(common.error, texts.permissionDenied);
