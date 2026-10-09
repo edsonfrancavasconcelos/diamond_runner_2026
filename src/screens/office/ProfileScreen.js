@@ -209,8 +209,10 @@ export default function ProfileScreen() {
         .select();
       // TEMPORÁRIO: diagnóstico do avatar
       console.log("[avatar] publicUrl:", publicUrl);
-      console.log("[avatar] update data:", updatedProfile);
-      console.log("[avatar] update error:", profileError);
+   console.log("[avatar] user.id:", user.id);
+console.log("[avatar] publicUrl:", publicUrl);
+console.log("[avatar] updatedProfile:", JSON.stringify(updatedProfile));
+console.log("[avatar] profileError:", JSON.stringify(profileError));
       if (profileError) throw profileError;
       await fetchProfile();
     } catch (error) {
