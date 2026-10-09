@@ -202,10 +202,15 @@ export default function ProfileScreen() {
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      const { error: profileError } = await supabase
+      const { data: updatedProfile, error: profileError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select();
+      // TEMPORÁRIO: diagnóstico do avatar
+      console.log("[avatar] publicUrl:", publicUrl);
+      console.log("[avatar] update data:", updatedProfile);
+      console.log("[avatar] update error:", profileError);
       if (profileError) throw profileError;
       await fetchProfile();
     } catch (error) {
