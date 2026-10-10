@@ -4,6 +4,7 @@ import {
     Animated,
     Image,
     Platform,
+    RefreshControl,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -89,6 +90,13 @@ export default function ProgressScreen() {
   const stoneScale = useRef(new Animated.Value(1)).current;
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchCareerProgress();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -252,6 +260,13 @@ export default function ProgressScreen() {
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={PALETTE.success}
+          />
+        }
       >
         <View style={styles.header}>
           <Text style={styles.headerTag}>{texts.systemTitle}</Text>

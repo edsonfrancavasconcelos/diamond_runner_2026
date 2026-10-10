@@ -1,18 +1,24 @@
 // Autor: Edson Vasconcelos | Diamond Runner 2026
-// Status: TELA DE NOTÍCIAS - Visual Moderno Blue Diamond
+// Status: NOTÍCIAS & AVISOS - Visual Premium Black & Gold
 
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from "expo-clipboard";
+import { LinearGradient } from "expo-linear-gradient";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
     Alert,
+    Animated,
     Image,
     Linking,
+    Platform,
     RefreshControl,
     ScrollView,
+    Share,
     StatusBar,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -20,122 +26,384 @@ import { useTheme } from "../../i18n/context/ThemeContext";
 import { useTexts } from "../../i18n/hooks/useTexts";
 import { supabase } from "../../services/supabase";
 
-const COLORS = {
-  background: "#0c3c74",
-  primary: "#2c94bc",
-  gold: "#FFD700",
-  white: "#FFFFFF",
-  card: "rgba(255, 255, 255, 0.05)",
-  textSub: "#a4bccc",
+const GOLD = "#D4AF37";
+const GOLD_LIGHT = "#FFD700";
+const FAVORITES_KEY = "news_favorites";
+const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const ALL = "__all__";
+const FAVORITES = "__favorites__";
+
+const getColors = (isDark) =>
+  isDark
+    ? {
+        bg: "#050505",
+        card: "#111111",
+        cardAlt: "#1a1a1a",
+        text: "#FFFFFF",
+        sub: "#B8B8B8",
+        border: "rgba(212,175,55,0.28)",
+        input: "#141414",
+      }
+    : {
+        bg: "#FAF7EE",
+        card: "#FFFFFF",
+        cardAlt: "#F1EAD3",
+        text: "#111111",
+        sub: "#5E5E5E",
+        border: "rgba(212,175,55,0.5)",
+        input: "#FFFFFF",
+      };
+
+const CATEGORY_ICONS = {
+  Plataforma: "rocket-outline",
+  Comunidade: "people-outline",
+  Treinamentos: "school-outline",
+  Tecnologia: "hardware-chip-outline",
+  Institucional: "ribbon-outline",
 };
 
-const PLATFORM_ANNOUNCEMENTS = [
+const iconFor = (category) => CATEGORY_ICONS[category] || "newspaper-outline";
+
+const LOCAL_NEWS = [
   {
-    id: "brand-applauded",
+    id: "platform-evolving",
     isBuiltin: true,
-    title: "Diamond Runner é ovacionada pela comunidade",
+    featured: true,
+    category: "Plataforma",
+    date: "2026-10-10T12:00:00",
+    title: "Plataforma Diamond Runner evoluindo",
     description:
-      "A marca Diamond Runner vem sendo ovacionada por parceiros e usuários pela proposta de um ecossistema digital completo, que une aplicativos funcionais, capacitação e um Escritório Virtual transparente. O reconhecimento da comunidade reforça o compromisso da empresa com inovação e resultados sustentáveis.",
+      "Estamos trabalhando continuamente para oferecer uma experiência mais rápida, segura e intuitiva. Novas melhorias estão sendo preparadas para tornar o Diamond Runner ainda mais completo.",
   },
   {
-    id: "partners-feedback",
+    id: "community-growth",
     isBuiltin: true,
-    title: "Parceiros destacam a qualidade dos aplicativos",
+    featured: true,
+    category: "Comunidade",
+    date: "2026-10-09T12:00:00",
+    title: "Crescimento da Comunidade",
     description:
-      "Os aplicativos do StoreRunner têm recebido elogios pela praticidade e pelo visual moderno. A Diamond Runner segue ouvindo parceiros e clientes para evoluir continuamente o catálogo de soluções digitais.",
+      "A comunidade Diamond Runner continua crescendo e fortalecendo sua presença. Cada novo associado representa mais oportunidades de networking, aprendizado e desenvolvimento.",
   },
   {
-    id: "digital-market",
+    id: "training-soon",
     isBuiltin: true,
-    title: "Mercado de aplicativos e negócios digitais segue em alta",
+    category: "Treinamentos",
+    date: "2026-10-08T12:00:00",
+    title: "Capacitação em breve",
     description:
-      "O avanço do mobile e dos serviços digitais continua abrindo oportunidades para quem atua com tecnologia. Acompanhe as novidades do ecossistema e aproveite os treinamentos do WayPro para se preparar.",
+      "Novos conteúdos educativos estão sendo preparados para ajudar nossos associados a desenvolver habilidades em vendas, liderança e utilização da plataforma.",
   },
   {
-    id: "platform-update",
+    id: "tech-news",
     isBuiltin: true,
-    title: "Nova atualização da Plataforma Diamond Runner",
+    category: "Tecnologia",
+    date: "2026-10-07T12:00:00",
+    title: "Novidades Tecnológicas",
     description:
-      "O Ecossistema Diamond Runner recebeu uma nova atualização para oferecer mais estabilidade, desempenho e segurança aos usuários. As melhorias incluem otimizações na navegação, aperfeiçoamento dos processos internos e evolução da experiência do Escritório Virtual.",
+      "Nossa equipe segue investindo em inovação para trazer novas funcionalidades que facilitem o dia a dia dos associados e melhorem a experiência dentro do aplicativo.",
   },
   {
-    id: "waypro-content",
+    id: "community-highlight",
     isBuiltin: true,
-    title: "WayPro recebe novos conteúdos de capacitação",
+    category: "Comunidade",
+    date: "2026-10-06T12:00:00",
+    title: "Comunidade em Destaque",
     description:
-      "A plataforma WayPro continua evoluindo como a academia oficial do Ecossistema Diamond Runner. Novos treinamentos serão disponibilizados gradualmente para ajudar parceiros a conhecer melhor os aplicativos, estratégias de divulgação e boas práticas de atendimento.",
+      "A participação ativa dos associados fortalece nosso ecossistema. Continue acompanhando os comunicados oficiais e participe das futuras ações da comunidade.",
   },
   {
-    id: "storerunner-apps",
+    id: "special-message",
     isBuiltin: true,
-    title: "Novos aplicativos chegando ao StoreRunner",
+    category: "Institucional",
+    date: "2026-10-05T12:00:00",
+    title: "Mensagem Especial",
     description:
-      "O StoreRunner está ampliando seu catálogo de soluções digitais. Novos aplicativos funcionais serão disponibilizados para diferentes segmentos, oferecendo mais opções para clientes e parceiros do ecossistema.",
-  },
-  {
-    id: "international-expansion",
-    isBuiltin: true,
-    title: "Expansão Internacional",
-    description:
-      "A Diamond Runner segue expandindo sua atuação para novos mercados. O objetivo é fortalecer a presença internacional do ecossistema e oferecer oportunidades de negócios em diferentes países.",
-  },
-  {
-    id: "responsible-referral",
-    isBuiltin: true,
-    title: "Programa de Indicação Responsável",
-    description:
-      "Foi reforçada a política de divulgação responsável da Diamond Runner. Os parceiros devem apresentar os aplicativos e o plano de negócios com transparência, sempre respeitando as diretrizes oficiais da empresa.",
-  },
-  {
-    id: "account-security",
-    isBuiltin: true,
-    title: "Segurança da Conta",
-    description:
-      "Novas melhorias de segurança foram implementadas para proteger as contas dos usuários. Mantenha seus dados atualizados e nunca compartilhe suas credenciais de acesso.",
-  },
-  {
-    id: "career-evolution",
-    isBuiltin: true,
-    title: "Evolução de Carreira",
-    description:
-      "A evolução dentro do Ecossistema Diamond Runner é baseada no crescimento sustentável da rede e no cumprimento dos critérios oficiais de qualificação. Acompanhe seu progresso na tela Progresso e consulte o Plano de Marketing para conhecer todos os requisitos.",
-  },
-  {
-    id: "virtual-office",
-    isBuiltin: true,
-    title: "Novos Recursos no Escritório Virtual",
-    description:
-      "O Escritório Virtual recebeu melhorias na organização das informações, facilitando o acompanhamento de indicadores, histórico de atividades, carteira digital e desempenho da rede.",
-  },
-  {
-    id: "activation-campaign",
-    isBuiltin: true,
-    title: "Campanha de Ativação",
-    description:
-      "Está em andamento uma campanha voltada para a ativação de novos parceiros e clientes. Consulte os materiais oficiais da empresa para conhecer as regras e condições vigentes.",
-  },
-  {
-    id: "official-announcements",
-    isBuiltin: true,
-    title: "Comunicados Oficiais",
-    description:
-      "Todas as atualizações do Ecossistema Diamond Runner serão publicadas exclusivamente pela área de Notícias & Avisos do aplicativo. Consulte esta seção regularmente para acompanhar novidades, eventos e comunicados oficiais.",
+      "O sucesso é construído diariamente com dedicação, aprendizado e colaboração. Agradecemos por fazer parte da comunidade Diamond Runner.",
   },
 ];
 
+const normalizeRemote = (row) => {
+  const category = row.category || "Comunicado";
+  return {
+    id: String(row.id),
+    isBuiltin: false,
+    category,
+    date: row.created_at,
+    title: row.title,
+    description: row.description,
+    image_url: row.image_url,
+    link: row.link,
+  };
+};
+
+const buildShareText = (item) =>
+  `${item.title}\n\n${item.description}\n\n— Diamond Runner`;
+
+const confirmAction = (title, message, confirmLabel, cancelLabel, onConfirm) => {
+  if (Platform.OS === "web") {
+    if (window.confirm(`${title}\n${message}`)) onConfirm();
+    return;
+  }
+  Alert.alert(title, message, [
+    { text: cancelLabel, style: "cancel" },
+    { text: confirmLabel, style: "destructive", onPress: onConfirm },
+  ]);
+};
+
+function Shimmer({ style, color }) {
+  const opacity = useRef(new Animated.Value(0.25)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.25,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [opacity]);
+
+  return (
+    <Animated.View style={[style, { backgroundColor: color, opacity }]} />
+  );
+}
+
+function SkeletonCard({ styles, colors }) {
+  return (
+    <View style={styles.card}>
+      <Shimmer style={styles.skelCover} color={colors.cardAlt} />
+      <View style={styles.cardBody}>
+        <Shimmer style={styles.skelLineShort} color={colors.cardAlt} />
+        <Shimmer style={styles.skelLineTitle} color={colors.cardAlt} />
+        <Shimmer style={styles.skelLine} color={colors.cardAlt} />
+        <Shimmer style={styles.skelLine} color={colors.cardAlt} />
+      </View>
+    </View>
+  );
+}
+
+function NewsCard({
+  item,
+  index,
+  styles,
+  colors,
+  locale,
+  texts,
+  favorite,
+  expanded,
+  dismissing,
+  onToggleFavorite,
+  onToggleExpand,
+  onShare,
+  onCopy,
+  onDismiss,
+}) {
+  const anim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 450,
+      delay: Math.min(index, 8) * 70,
+      useNativeDriver: true,
+    }).start();
+  }, [anim, index]);
+
+  const isNew = Date.now() - new Date(item.date).getTime() <= NEW_WINDOW_MS;
+  const dateLabel = item.date
+    ? new Date(item.date).toLocaleDateString(locale)
+    : "";
+
+  return (
+    <Animated.View
+      style={[
+        styles.card,
+        item.featured && styles.cardFeatured,
+        {
+          opacity: anim,
+          transform: [
+            {
+              translateY: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [24, 0],
+              }),
+            },
+          ],
+        },
+      ]}
+    >
+      {item.image_url ? (
+        <Image source={{ uri: item.image_url }} style={styles.cover} />
+      ) : (
+        <LinearGradient
+          colors={["#000000", "#1c1604", "#3a2b08"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.cover}
+        >
+          <View style={styles.iconGlow}>
+            <Ionicons name={iconFor(item.category)} size={38} color={GOLD_LIGHT} />
+          </View>
+        </LinearGradient>
+      )}
+
+      <View style={styles.cardBody}>
+        <View style={styles.metaRow}>
+          <View style={styles.categoryChip}>
+            <Ionicons name={iconFor(item.category)} size={11} color="#000" />
+            <Text style={styles.categoryText}>{item.category}</Text>
+          </View>
+          <View style={styles.dateRow}>
+            <Ionicons name="calendar-outline" size={12} color={GOLD} />
+            <Text style={styles.dateText}>{dateLabel}</Text>
+          </View>
+          {isNew ? (
+            <View style={styles.newBadge}>
+              <Ionicons name="sparkles" size={10} color="#000" />
+              <Text style={styles.newText}>NOVO</Text>
+            </View>
+          ) : null}
+        </View>
+
+        <Text style={styles.cardTitle}>{item.title}</Text>
+        <Text
+          style={styles.cardDesc}
+          numberOfLines={expanded ? undefined : 3}
+        >
+          {item.description}
+        </Text>
+
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            onPress={onToggleExpand}
+            style={styles.readMoreBtn}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+          >
+            <Text style={styles.readMoreText}>
+              {expanded ? texts.collapse : texts.readMore.toUpperCase()}
+            </Text>
+            <Ionicons
+              name={expanded ? "chevron-up" : "chevron-down"}
+              size={14}
+              color="#000"
+            />
+          </TouchableOpacity>
+
+          <View style={styles.iconActions}>
+            <TouchableOpacity
+              onPress={onToggleFavorite}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Favoritar notícia"
+            >
+              <Ionicons
+                name={favorite ? "heart" : "heart-outline"}
+                size={20}
+                color={favorite ? "#ff4d6d" : colors.sub}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onShare}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Compartilhar notícia"
+            >
+              <Ionicons name="share-social-outline" size={20} color={GOLD} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onCopy}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Copiar texto"
+            >
+              <Ionicons name="copy-outline" size={20} color={colors.sub} />
+            </TouchableOpacity>
+            {item.link ? (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(item.link)}
+                style={styles.iconBtn}
+                accessibilityRole="button"
+                accessibilityLabel={texts.openOfficial}
+              >
+                <Ionicons name="open-outline" size={20} color={GOLD} />
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity
+              onPress={onDismiss}
+              disabled={dismissing}
+              style={styles.iconBtn}
+              accessibilityRole="button"
+              accessibilityLabel={texts.removeFromList}
+            >
+              <Ionicons
+                name="close-circle-outline"
+                size={20}
+                color={colors.sub}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default function NewsScreen() {
-  const { theme, isDark } = useTheme();
+  const { isDark } = useTheme();
   const texts = useTexts("news");
-  const styles = createStyles(theme);
+  const colors = useMemo(() => getColors(isDark), [isDark]);
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [news, setNews] = useState([]);
-  const [dismissedNewsIds, setDismissedNewsIds] = useState(new Set());
+  const [remoteNews, setRemoteNews] = useState([]);
+  const [dismissedIds, setDismissedIds] = useState(new Set());
   const [dismissedBuiltinIds, setDismissedBuiltinIds] = useState(new Set());
-  const [expandedNewsId, setExpandedNewsId] = useState(null);
-  const [dismissingNewsId, setDismissingNewsId] = useState(null);
+  const [dismissingId, setDismissingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const [favorites, setFavorites] = useState(new Set());
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState(ALL);
+  const [toast, setToast] = useState("");
+  const toastTimer = useRef(null);
+  const bannerAnim = useRef(new Animated.Value(0)).current;
 
-  const fetchNews = async () => {
+  const showToast = useCallback((message) => {
+    setToast(message);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2200);
+  }, []);
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  useEffect(() => {
+    Animated.timing(bannerAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, [bannerAnim]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(FAVORITES_KEY)
+      .then((raw) => {
+        if (raw) setFavorites(new Set(JSON.parse(raw)));
+      })
+      .catch(() => {});
+  }, []);
+
+  const fetchNews = useCallback(async () => {
     try {
       const {
         data: { user },
@@ -148,111 +416,171 @@ export default function NewsScreen() {
         .from("news")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
+
       const { data: dismissals, error: dismissalsError } = await supabase
         .from("news_user_dismissals")
         .select("news_id")
         .eq("user_id", user.id);
-
       if (dismissalsError) throw dismissalsError;
-      setNews([...PLATFORM_ANNOUNCEMENTS, ...(data || [])]);
-      setDismissedNewsIds(new Set((dismissals || []).map((row) => row.news_id)));
+
+      setRemoteNews((data || []).map(normalizeRemote));
+      setDismissedIds(new Set((dismissals || []).map((row) => row.news_id)));
     } catch (error) {
       console.log("Erro ao carregar notícias:", error.message);
-      Alert.alert(texts.error, texts.loadError);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  const dismissNews = (item) => {
-    Alert.alert(
-      texts.removeTitle,
-      texts.removeConfirmation,
-      [
-        { text: texts.cancel, style: "cancel" },
-        {
-          text: texts.remove,
-          style: "destructive",
-          onPress: async () => {
-            const newsId = String(item.id);
-            if (item.isBuiltin) {
-              setDismissedBuiltinIds((current) =>
-                new Set(current).add(newsId),
-              );
-              setExpandedNewsId(null);
-              return;
-            }
-            setDismissingNewsId(newsId);
-            try {
-              const {
-                data: { user },
-                error: userError,
-              } = await supabase.auth.getUser();
-              if (userError) throw userError;
-              if (!user) throw new Error("Usuário não autenticado.");
-
-              const { error } = await supabase
-                .from("news_user_dismissals")
-                .insert({ user_id: user.id, news_id: newsId });
-
-              if (error) throw error;
-
-              setDismissedNewsIds((current) =>
-                new Set(current).add(newsId),
-              );
-              setExpandedNewsId(null);
-            } catch (error) {
-              console.log("Erro ao remover aviso:", error.message);
-              Alert.alert(texts.error, texts.removeError);
-            } finally {
-              setDismissingNewsId(null);
-            }
-          },
-        },
-      ],
-    );
-  };
+  }, []);
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [fetchNews]);
 
-  const visibleNews = news.filter(
-    (item) =>
+  const toggleFavorite = (id) => {
+    setFavorites((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify([...next])).catch(
+        () => {},
+      );
+      return next;
+    });
+  };
+
+  const copyItem = async (item) => {
+    try {
+      await Clipboard.setStringAsync(buildShareText(item));
+      showToast("Texto copiado!");
+    } catch {
+      showToast("Não foi possível copiar.");
+    }
+  };
+
+  const shareItem = async (item) => {
+    try {
+      await Share.share({ title: item.title, message: buildShareText(item) });
+    } catch {
+      await copyItem(item);
+    }
+  };
+
+  const dismissItem = (item) => {
+    confirmAction(
+      texts.removeTitle,
+      texts.removeConfirmation,
+      texts.remove,
+      texts.cancel,
+      async () => {
+        if (item.isBuiltin) {
+          setDismissedBuiltinIds((current) => new Set(current).add(item.id));
+          setExpandedId(null);
+          return;
+        }
+        setDismissingId(item.id);
+        try {
+          const {
+            data: { user },
+            error: userError,
+          } = await supabase.auth.getUser();
+          if (userError) throw userError;
+          if (!user) throw new Error("Usuário não autenticado.");
+
+          const { error } = await supabase
+            .from("news_user_dismissals")
+            .insert({ user_id: user.id, news_id: item.id });
+          if (error) throw error;
+
+          setDismissedIds((current) => new Set(current).add(item.id));
+          setExpandedId(null);
+        } catch (error) {
+          console.log("Erro ao remover aviso:", error.message);
+          showToast(texts.removeError);
+        } finally {
+          setDismissingId(null);
+        }
+      },
+    );
+  };
+
+  const allNews = useMemo(() => {
+    const visible = [...LOCAL_NEWS, ...remoteNews].filter((item) =>
       item.isBuiltin
-        ? !dismissedBuiltinIds.has(String(item.id))
-        : !dismissedNewsIds.has(String(item.id)),
+        ? !dismissedBuiltinIds.has(item.id)
+        : !dismissedIds.has(item.id),
+    );
+    return visible.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [remoteNews, dismissedIds, dismissedBuiltinIds]);
+
+  const categories = useMemo(
+    () => [...new Set(allNews.map((item) => item.category))],
+    [allNews],
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
+  const normalizedQuery = query.trim().toLowerCase();
+  const isFiltering =
+    normalizedQuery.length > 0 || filter !== ALL;
+
+  const filtered = useMemo(
+    () =>
+      allNews.filter((item) => {
+        if (filter === FAVORITES && !favorites.has(item.id)) return false;
+        if (filter !== ALL && filter !== FAVORITES && item.category !== filter)
+          return false;
+        if (!normalizedQuery) return true;
+        return `${item.title} ${item.description} ${item.category}`
+          .toLowerCase()
+          .includes(normalizedQuery);
+      }),
+    [allNews, filter, favorites, normalizedQuery],
+  );
+
+  const featuredItems = filtered.filter((item) => item.featured);
+  const recentItems = filtered.filter((item) => !item.featured);
+  const shareTarget = allNews[0] || LOCAL_NEWS[0];
+
+  const renderCard = (item, index) => (
+    <NewsCard
+      key={item.id}
+      item={item}
+      index={index}
+      styles={styles}
+      colors={colors}
+      locale={texts.locale}
+      texts={texts}
+      favorite={favorites.has(item.id)}
+      expanded={expandedId === item.id}
+      dismissing={dismissingId === item.id}
+      onToggleFavorite={() => toggleFavorite(item.id)}
+      onToggleExpand={() =>
+        setExpandedId(expandedId === item.id ? null : item.id)
+      }
+      onShare={() => shareItem(item)}
+      onCopy={() => copyItem(item)}
+      onDismiss={() => dismissItem(item)}
+    />
+  );
+
+  const chips = [
+    { key: ALL, label: "Todas", icon: "apps-outline" },
+    { key: FAVORITES, label: "Favoritas", icon: "heart-outline" },
+    ...categories.map((category) => ({
+      key: category,
+      label: category,
+      icon: iconFor(category),
+    })),
+  ];
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.header}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <Text style={styles.headerTitle}>{texts.headerTitle}</Text>
-          <Image
-            source={require("../../assets/images/logodiamond.png")}
-            style={{ width: 38, height: 38 }}
-            resizeMode="contain"
-          />
-        </View>
-        <Text style={styles.headerSub}>{texts.subtitle}</Text>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -260,179 +588,471 @@ export default function NewsScreen() {
               setRefreshing(true);
               fetchNews();
             }}
-            tintColor={COLORS.primary}
+            tintColor={GOLD_LIGHT}
           />
         }
       >
-        {visibleNews.map((item) => {
-            const isExpanded = expandedNewsId === String(item.id);
-            return (
-              <View key={item.id} style={styles.newsCard}>
-                {item.image_url ? (
-                  <Image
-                    source={{ uri: item.image_url }}
-                    style={styles.newsImage}
-                  />
-                ) : null}
-                <View style={styles.newsContent}>
-                  <View style={styles.dateRow}>
-                    <Ionicons
-                      name="calendar-outline"
-                      size={12}
-                      color={COLORS.gold}
-                    />
-                    <Text style={styles.newsDate}>
-                      {item.isBuiltin
-                        ? texts.today
-                        : new Date(item.created_at).toLocaleDateString(texts.locale)}
-                    </Text>
-                  </View>
-                  <Text style={styles.newsTitle}>{item.title}</Text>
-                  <Text
-                    style={styles.newsDesc}
-                    numberOfLines={isExpanded ? undefined : 3}
-                  >
-                    {item.description}
-                  </Text>
-
-                  <View style={styles.cardFooter}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setExpandedNewsId(isExpanded ? null : String(item.id))
-                      }
-                      activeOpacity={0.75}
-                      accessibilityRole="button"
-                      accessibilityLabel={
-                        isExpanded
-                          ? texts.collapse
-                          : texts.readMore
-                      }
-                    >
-                      <Text style={styles.readMore}>
-                        {isExpanded ? texts.collapse : texts.readMore.toUpperCase()}
-                      </Text>
-                    </TouchableOpacity>
-                    {item.link ? (
-                      <TouchableOpacity
-                        onPress={() => Linking.openURL(item.link)}
-                        activeOpacity={0.75}
-                        accessibilityRole="button"
-                        accessibilityLabel={texts.openOfficial}
-                      >
-                        <Ionicons
-                          name="open-outline"
-                          size={16}
-                          color={COLORS.primary}
-                        />
-                      </TouchableOpacity>
-                    ) : null}
-                    <TouchableOpacity
-                      onPress={() => dismissNews(item)}
-                      disabled={dismissingNewsId === String(item.id)}
-                      activeOpacity={0.75}
-                      accessibilityRole="button"
-                      accessibilityLabel={texts.removeFromList}
-                      style={styles.dismissButton}
-                    >
-                      {dismissingNewsId === String(item.id) ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={COLORS.textSub}
-                        />
-                      ) : (
-                        <>
-                          <Ionicons
-                            name="close-circle-outline"
-                            size={16}
-                            color={COLORS.textSub}
-                          />
-                          <Text style={styles.dismissText}>{texts.remove.toUpperCase()}</Text>
-                        </>
-                      )}
-                    </TouchableOpacity>
-                  </View>
+        <View style={styles.column}>
+          <Animated.View
+            style={{
+              opacity: bannerAnim,
+              transform: [
+                {
+                  translateY: bannerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-18, 0],
+                  }),
+                },
+              ],
+            }}
+          >
+            <LinearGradient
+              colors={["#000000", "#16120a", "#3a2b08"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.banner}
+            >
+              <View style={styles.bannerTop}>
+                <View style={styles.bannerIcon}>
+                  <Ionicons name="newspaper" size={26} color={GOLD_LIGHT} />
                 </View>
+                <Image
+                  source={require("../../assets/images/logodiamond.png")}
+                  style={styles.bannerLogo}
+                  resizeMode="contain"
+                />
               </View>
-            );
-          })}
+              <Text style={styles.bannerTitle}>Notícias & Avisos</Text>
+              <Text style={styles.bannerSubtitle}>
+                Fique por dentro das novidades do Diamond Runner
+              </Text>
+              <Text style={styles.bannerDesc}>
+                Aqui você acompanha comunicados oficiais, novidades da
+                plataforma, atualizações, campanhas e conteúdos exclusivos para
+                toda a comunidade Diamond Runner.
+              </Text>
+              <TouchableOpacity
+                onPress={() => shareItem(shareTarget)}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                accessibilityLabel="Compartilhar novidade"
+              >
+                <LinearGradient
+                  colors={[GOLD_LIGHT, GOLD]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.shareButton}
+                >
+                  <Ionicons name="share-social" size={18} color="#000" />
+                  <Text style={styles.shareButtonText}>
+                    Compartilhar Novidade
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </LinearGradient>
+          </Animated.View>
 
-        {visibleNews.length === 0 && (
-          <Text style={styles.emptyText}>
-            {news.length > 0
-              ? texts.removedAll
-              : texts.noPublishedNews}
-          </Text>
-        )}
+          <View style={styles.searchBox}>
+            <Ionicons name="search" size={18} color={GOLD} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Pesquisar notícias"
+              placeholderTextColor={colors.sub}
+              style={styles.searchInput}
+              returnKeyType="search"
+              accessibilityLabel="Pesquisar notícias"
+            />
+            {query ? (
+              <TouchableOpacity
+                onPress={() => setQuery("")}
+                accessibilityRole="button"
+                accessibilityLabel="Limpar pesquisa"
+              >
+                <Ionicons name="close-circle" size={18} color={colors.sub} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsRow}
+          >
+            {chips.map((chip) => {
+              const active = filter === chip.key;
+              return (
+                <TouchableOpacity
+                  key={chip.key}
+                  onPress={() => setFilter(chip.key)}
+                  activeOpacity={0.85}
+                  style={[styles.chip, active && styles.chipActive]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons
+                    name={chip.icon}
+                    size={13}
+                    color={active ? "#000" : GOLD}
+                  />
+                  <Text
+                    style={[styles.chipText, active && styles.chipTextActive]}
+                  >
+                    {chip.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          {loading ? (
+            <>
+              <SkeletonCard styles={styles} colors={colors} />
+              <SkeletonCard styles={styles} colors={colors} />
+              <SkeletonCard styles={styles} colors={colors} />
+            </>
+          ) : (
+            <>
+              {isFiltering ? (
+                <>
+                  <Text style={styles.sectionTitle}>
+                    Resultados ({filtered.length})
+                  </Text>
+                  {filtered.map(renderCard)}
+                </>
+              ) : (
+                <>
+                  {featuredItems.length > 0 && (
+                    <>
+                      <View style={styles.sectionHeader}>
+                        <Ionicons name="star" size={16} color={GOLD_LIGHT} />
+                        <Text style={styles.sectionTitle}>Em destaque</Text>
+                      </View>
+                      {featuredItems.map(renderCard)}
+                    </>
+                  )}
+                  {recentItems.length > 0 && (
+                    <>
+                      <View style={styles.sectionHeader}>
+                        <Ionicons name="time" size={16} color={GOLD_LIGHT} />
+                        <Text style={styles.sectionTitle}>Recentes</Text>
+                      </View>
+                      {recentItems.map((item, index) =>
+                        renderCard(item, index + featuredItems.length),
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              {filtered.length === 0 && (
+                <View style={styles.empty}>
+                  <Ionicons name="newspaper-outline" size={40} color={GOLD} />
+                  <Text style={styles.emptyText}>
+                    {allNews.length === 0
+                      ? texts.removedAll
+                      : "Nenhuma notícia encontrada."}
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
+          <LinearGradient
+            colors={["#000000", "#16120a", "#3a2b08"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.footer}
+          >
+            <Image
+              source={require("../../assets/images/logodiamond.png")}
+              style={styles.footerLogo}
+              resizeMode="contain"
+            />
+            <Text style={styles.footerBrand}>Diamond Runner</Text>
+            <Text style={styles.footerText}>
+              Tecnologia, inovação e oportunidades para fortalecer nossa
+              comunidade todos os dias.
+            </Text>
+          </LinearGradient>
+        </View>
       </ScrollView>
+
+      {toast ? (
+        <View style={styles.toast} pointerEvents="none">
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
 
-const createStyles = (theme) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.bg },
-  center: { justifyContent: "center", alignItems: "center" },
-  header: { paddingHorizontal: 25, paddingTop: 60, paddingBottom: 20 },
-  headerTitle: {
-    color: theme.text,
-    fontSize: 22,
-    fontWeight: "900",
-    letterSpacing: 1,
-  },
-  headerSub: {
-    color: COLORS.primary,
-    fontSize: 12,
-    fontWeight: "bold",
-    marginTop: 4,
-  },
-  scroll: { paddingHorizontal: 20, paddingBottom: 40 },
-  newsCard: {
-    backgroundColor: theme.card,
-    borderRadius: 25,
-    overflow: "hidden",
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-  },
-  newsImage: { width: "100%", height: 180, resizeMode: "cover" },
-  newsContent: { padding: 20 },
-  dateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    marginBottom: 8,
-  },
-  newsDate: { color: COLORS.gold, fontSize: 11, fontWeight: "bold" },
-  newsTitle: {
-    color: theme.text,
-    fontSize: 18,
-    fontWeight: "900",
-    marginBottom: 8,
-  },
-  newsDesc: {
-    color: theme.text,
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 15,
-  },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 2,
-  },
-  readMore: { color: COLORS.primary, fontSize: 11, fontWeight: "900" },
-  dismissButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginLeft: "auto",
-    paddingVertical: 4,
-  },
-  dismissText: { color: COLORS.textSub, fontSize: 10, fontWeight: "800" },
-  emptyText: {
-    color: theme.text,
-    textAlign: "center",
-    marginTop: 50,
-    fontSize: 14,
-  },
-});
+const glow = {
+  shadowColor: GOLD_LIGHT,
+  shadowOffset: { width: 0, height: 0 },
+  shadowRadius: 14,
+};
+
+const createStyles = (c) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    scroll: { padding: 16, paddingBottom: 48, alignItems: "center" },
+    column: { width: "100%", maxWidth: 900 },
+
+    banner: {
+      borderRadius: 24,
+      padding: 22,
+      borderWidth: 1,
+      borderColor: GOLD,
+      marginBottom: 18,
+      ...glow,
+      shadowOpacity: 0.35,
+      elevation: 8,
+    },
+    bannerTop: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 14,
+    },
+    bannerIcon: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: GOLD,
+      backgroundColor: "rgba(212,175,55,0.12)",
+    },
+    bannerLogo: { width: 44, height: 44 },
+    bannerTitle: {
+      color: "#FFFFFF",
+      fontSize: 28,
+      fontWeight: "900",
+      letterSpacing: 0.5,
+    },
+    bannerSubtitle: {
+      color: GOLD_LIGHT,
+      fontSize: 15,
+      fontWeight: "800",
+      marginTop: 6,
+    },
+    bannerDesc: {
+      color: "#E4E4E4",
+      fontSize: 13,
+      lineHeight: 20,
+      marginTop: 12,
+      marginBottom: 18,
+    },
+    shareButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      borderRadius: 30,
+      ...glow,
+      shadowOpacity: 0.6,
+      elevation: 6,
+    },
+    shareButtonText: {
+      color: "#000",
+      fontSize: 14,
+      fontWeight: "900",
+      letterSpacing: 0.5,
+    },
+
+    searchBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: c.input,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      minHeight: 48,
+      marginBottom: 12,
+    },
+    searchInput: {
+      flex: 1,
+      color: c.text,
+      fontSize: 14,
+      paddingVertical: 10,
+      outlineStyle: "none",
+    },
+    chipsRow: { gap: 8, paddingBottom: 14, paddingRight: 8 },
+    chip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+    },
+    chipActive: { backgroundColor: GOLD_LIGHT, borderColor: GOLD_LIGHT },
+    chipText: { color: c.text, fontSize: 12, fontWeight: "700" },
+    chipTextActive: { color: "#000" },
+
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 6,
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      color: c.text,
+      fontSize: 15,
+      fontWeight: "900",
+      letterSpacing: 1,
+      marginBottom: 0,
+    },
+
+    card: {
+      backgroundColor: c.card,
+      borderRadius: 22,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: c.border,
+      marginBottom: 18,
+      ...glow,
+      shadowOpacity: 0.15,
+      elevation: 3,
+    },
+    cardFeatured: { borderColor: GOLD, shadowOpacity: 0.4, elevation: 7 },
+    cover: {
+      width: "100%",
+      height: 130,
+      alignItems: "center",
+      justifyContent: "center",
+      resizeMode: "cover",
+    },
+    iconGlow: {
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: GOLD,
+      backgroundColor: "rgba(212,175,55,0.1)",
+      ...glow,
+      shadowOpacity: 0.7,
+    },
+    cardBody: { padding: 18 },
+    metaRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 10,
+      marginBottom: 10,
+    },
+    categoryChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: GOLD_LIGHT,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    categoryText: { color: "#000", fontSize: 11, fontWeight: "900" },
+    dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+    dateText: { color: c.sub, fontSize: 11, fontWeight: "700" },
+    newBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+      backgroundColor: "#FFFFFF",
+      borderWidth: 1,
+      borderColor: GOLD,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 10,
+    },
+    newText: { color: "#000", fontSize: 10, fontWeight: "900" },
+    cardTitle: {
+      color: c.text,
+      fontSize: 19,
+      fontWeight: "900",
+      marginBottom: 8,
+    },
+    cardDesc: { color: c.sub, fontSize: 14, lineHeight: 22 },
+    actionsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      gap: 10,
+      marginTop: 16,
+    },
+    readMoreBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: GOLD_LIGHT,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 20,
+    },
+    readMoreText: { color: "#000", fontSize: 11, fontWeight: "900" },
+    iconActions: { flexDirection: "row", alignItems: "center", gap: 2 },
+    iconBtn: {
+      width: 38,
+      height: 38,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    skelCover: { width: "100%", height: 130 },
+    skelLineShort: { width: "35%", height: 14, borderRadius: 7, marginBottom: 12 },
+    skelLineTitle: { width: "75%", height: 20, borderRadius: 8, marginBottom: 12 },
+    skelLine: { width: "100%", height: 12, borderRadius: 6, marginBottom: 8 },
+
+    empty: { alignItems: "center", gap: 10, paddingVertical: 40 },
+    emptyText: { color: c.sub, fontSize: 14, textAlign: "center" },
+
+    footer: {
+      alignItems: "center",
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: GOLD,
+      padding: 24,
+      marginTop: 8,
+      ...glow,
+      shadowOpacity: 0.3,
+      elevation: 6,
+    },
+    footerLogo: { width: 46, height: 46, marginBottom: 8 },
+    footerBrand: {
+      color: GOLD_LIGHT,
+      fontSize: 18,
+      fontWeight: "900",
+      letterSpacing: 1,
+    },
+    footerText: {
+      color: "#E4E4E4",
+      fontSize: 13,
+      lineHeight: 20,
+      textAlign: "center",
+      marginTop: 8,
+    },
+
+    toast: {
+      position: "absolute",
+      bottom: 28,
+      alignSelf: "center",
+      backgroundColor: "#000",
+      borderWidth: 1,
+      borderColor: GOLD,
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderRadius: 22,
+    },
+    toastText: { color: GOLD_LIGHT, fontSize: 13, fontWeight: "800" },
+  });

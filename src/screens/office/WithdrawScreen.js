@@ -9,6 +9,7 @@ import {
     Alert,
     Dimensions,
     Image,
+    RefreshControl,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -46,6 +47,7 @@ export default function WithdrawScreen() {
   const [amount, setAmount] = useState("");
   const [pixKey, setPixKey] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
 
@@ -98,6 +100,12 @@ export default function WithdrawScreen() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
 
   const handleWithdraw = async () => {
     const value = parseFloat(amount.replace(",", "."));
@@ -182,6 +190,13 @@ export default function WithdrawScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={PALETTE.gold}
+          />
+        }
       >
         {/* CARD DE SALDO */}
         <View style={styles.megaBalanceCard}>

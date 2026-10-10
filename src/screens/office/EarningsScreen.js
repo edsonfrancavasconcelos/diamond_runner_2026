@@ -4,6 +4,7 @@ import React, { useEffect, useState, useContext } from "react";
 import {
   ActivityIndicator,
   Image,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -62,13 +63,21 @@ export default function EarningsScreen() {
     idDr: "---",
   });
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     fetchFinance();
   }, []);
 
-  async function fetchFinance() {
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchFinance(true);
+    setRefreshing(false);
+  };
+
+  async function fetchFinance(silent = false) {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
 
       const {
         data: { user },
@@ -243,6 +252,14 @@ export default function EarningsScreen() {
         style={styles.container}
 
         showsVerticalScrollIndicator={false}
+
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={PALETTE.gold}
+          />
+        }
 
         contentContainerStyle={{
           paddingBottom: 40,

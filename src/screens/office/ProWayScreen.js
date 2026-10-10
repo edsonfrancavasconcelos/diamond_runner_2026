@@ -25,6 +25,7 @@ const PALETTE = {
 };
 
 const VIDEO_TITLE = "Diamond Runner";
+const COVER = require("../../assets/images/capa_video_1.jpg");
 
 export default function ProWayScreen() {
   const { theme, isDark } = useTheme();
@@ -85,8 +86,8 @@ export default function ProWayScreen() {
                 activeOpacity={0.9}
               >
                 <Image
-                  source={require("../../assets/images/capa_video_1.jpg")}
-                  style={StyleSheet.absoluteFillObject}
+                  source={COVER}
+                  style={styles.coverImage}
                   resizeMode="cover"
                 />
                 <View style={styles.bigPlay}>
@@ -109,7 +110,14 @@ export default function ProWayScreen() {
             activeOpacity={0.88}
           >
             <View style={styles.cardThumb}>
-              <Ionicons name="play-circle" size={40} color={PALETTE.gold} />
+              <Image
+                source={COVER}
+                style={styles.coverImage}
+                resizeMode="cover"
+              />
+              <View style={styles.thumbPlay}>
+                <Ionicons name="play" size={18} color={PALETTE.darkBg} />
+              </View>
             </View>
             <View style={styles.courseInfo}>
               <Text style={styles.catText}>{texts.featuredVideo}</Text>
@@ -167,6 +175,24 @@ const createStyles = (theme) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
+    zIndex: 5,
+    elevation: 5,
+  },
+  coverImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
+  thumbPlay: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: PALETTE.gold,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingLeft: 2,
   },
   bigPlay: {
     width: 64,
@@ -189,6 +215,7 @@ const createStyles = (theme) => StyleSheet.create({
     top: 8,
     left: 8,
     zIndex: 99,
+    elevation: 10,
     backgroundColor: "rgba(0,0,0,0.4)",
     borderRadius: 20,
   },

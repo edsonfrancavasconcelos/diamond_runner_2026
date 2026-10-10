@@ -8,6 +8,7 @@ import {
     Image,
     InteractionManager,
     Linking,
+    RefreshControl,
     SafeAreaView,
     StatusBar,
     StyleSheet,
@@ -153,6 +154,13 @@ export default function DiamondStoreApps() {
     type: "",
   });
   const [enabledApps, setEnabledApps] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserData();
+    setRefreshing(false);
+  };
 
   const fetchUserData = async () => {
     try {
@@ -267,6 +275,13 @@ export default function DiamondStoreApps() {
         data={DIAMOND_APPS}
         keyExtractor={(item) => item.id}
         numColumns={2}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={PALETTE.gold}
+          />
+        }
         columnWrapperStyle={styles.row}
         renderItem={({ item }) => {
           const isEnabled =

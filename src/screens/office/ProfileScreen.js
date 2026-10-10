@@ -580,7 +580,7 @@ console.log("[avatar] profileError:", JSON.stringify(profileError));
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingCenter: { flex: 1, justifyContent: "center", alignItems: "center" },
-  headerCard: { padding: 30, alignItems: "center" },
+  headerCard: { padding: 30, paddingHorizontal: 20, alignItems: "center" },
   avatarCircle: {
     width: 100,
     height: 100,
@@ -592,12 +592,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   avatarImg: { width: "100%", height: "100%" },
-  userName: { fontSize: 18, fontWeight: "bold" },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    alignSelf: "stretch",
+  },
   userID: {
     color: PALETTE.gold,
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 5,
+    textAlign: "center",
   },
   statusBadge: {
     marginTop: 12,
@@ -606,8 +612,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    maxWidth: "100%",
   },
-  statusText: { color: "white", fontSize: 11, fontWeight: "bold" },
+  statusText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "bold",
+    textAlign: "center",
+    flexShrink: 1,
+  },
   infoSection: { padding: 20 },
   sectionTitle: {
     fontSize: 12,
@@ -616,11 +630,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 25 },
-  infoTextGroup: { marginLeft: 15 },
+  infoTextGroup: { marginLeft: 15, flex: 1, flexShrink: 1 },
   label: { fontSize: 11 },
   value: { fontSize: 16, fontWeight: "bold" },
   passwordRow: { flexDirection: "row", alignItems: "center" },
-  actionLabel: { fontSize: 14, fontWeight: "bold" },
+  actionLabel: { fontSize: 14, fontWeight: "bold", flexShrink: 1 },
   modalBackdrop: {
     flex: 1,
     justifyContent: "center",
