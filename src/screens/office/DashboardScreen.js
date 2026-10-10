@@ -396,8 +396,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
     marginTop: 10,
+    textAlign: "center",
   },
-  userName: { fontSize: 16, fontWeight: "bold" },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    alignSelf: "stretch",
+    paddingHorizontal: 20,
+  },
   balanceCard: {
     marginHorizontal: 20,
     borderRadius: 15,
