@@ -287,8 +287,8 @@ export default function ProgressScreen() {
                 source={currentMedal}
                 style={[
                   {
-                    width: 170,
-                    height: 170,
+                    width: 210,
+                    height: 210,
                     resizeMode: "contain",
                   },
                   { transform: [{ scale: stoneScale }] },
@@ -514,10 +514,10 @@ const createStyles = (theme) => StyleSheet.create({
   },
 
   badgeContainer: {
-    width: 170,
-    height: 170,
+    width: 210,
+    height: 210,
     borderWidth: 2,
-    borderRadius: 85,
+    borderRadius: 105,
     justifyContent: "center",
     alignItems: "center",
   },

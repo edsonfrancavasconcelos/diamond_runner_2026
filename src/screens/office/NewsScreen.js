@@ -31,6 +31,27 @@ const COLORS = {
 
 const PLATFORM_ANNOUNCEMENTS = [
   {
+    id: "brand-applauded",
+    isBuiltin: true,
+    title: "Diamond Runner é ovacionada pela comunidade",
+    description:
+      "A marca Diamond Runner vem sendo ovacionada por parceiros e usuários pela proposta de um ecossistema digital completo, que une aplicativos funcionais, capacitação e um Escritório Virtual transparente. O reconhecimento da comunidade reforça o compromisso da empresa com inovação e resultados sustentáveis.",
+  },
+  {
+    id: "partners-feedback",
+    isBuiltin: true,
+    title: "Parceiros destacam a qualidade dos aplicativos",
+    description:
+      "Os aplicativos do StoreRunner têm recebido elogios pela praticidade e pelo visual moderno. A Diamond Runner segue ouvindo parceiros e clientes para evoluir continuamente o catálogo de soluções digitais.",
+  },
+  {
+    id: "digital-market",
+    isBuiltin: true,
+    title: "Mercado de aplicativos e negócios digitais segue em alta",
+    description:
+      "O avanço do mobile e dos serviços digitais continua abrindo oportunidades para quem atua com tecnologia. Acompanhe as novidades do ecossistema e aproveite os treinamentos do WayPro para se preparar.",
+  },
+  {
     id: "platform-update",
     isBuiltin: true,
     title: "Nova atualização da Plataforma Diamond Runner",

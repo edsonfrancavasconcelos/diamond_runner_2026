@@ -84,10 +84,14 @@ export default function ProWayScreen() {
                 onPress={handleWatch}
                 activeOpacity={0.9}
               >
+                <Image
+                  source={require("../../assets/images/capa_video_1.jpg")}
+                  style={StyleSheet.absoluteFillObject}
+                  resizeMode="cover"
+                />
                 <View style={styles.bigPlay}>
                   <Ionicons name="play" size={36} color={PALETTE.darkBg} />
                 </View>
-                <Text style={styles.posterTitle}>{VIDEO_TITLE}</Text>
               </TouchableOpacity>
             )}
             {playing && (

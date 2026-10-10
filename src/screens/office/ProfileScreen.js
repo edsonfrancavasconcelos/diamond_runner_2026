@@ -149,6 +149,11 @@ export default function ProfileScreen() {
   };
 
   const handleEditProfile = () => {
+    // Alert.alert com botões não funciona no web
+    if (Platform.OS === "web") {
+      editField("full_name", texts.fullName);
+      return;
+    }
     Alert.alert(texts.editTitle, texts.editPrompt, [
       { text: texts.name, onPress: () => editField("full_name", texts.fullName) },
       { text: texts.whatsapp, onPress: () => editField("whatsapp", texts.whatsapp) },
@@ -260,7 +265,18 @@ console.log("[avatar] profileError:", JSON.stringify(profileError));
     return () => task.cancel();
   }, []);
 
+  const notify = (title, message) => {
+    if (Platform.OS === "web") window.alert(`${title}\n${message}`);
+    else Alert.alert(title, message);
+  };
+
   const handlePasswordReset = () => {
+    if (Platform.OS === "web") {
+      if (window.confirm(`${texts.securityTitle}\n${texts.passwordResetPrompt}`)) {
+        sendPasswordReset();
+      }
+      return;
+    }
     Alert.alert(texts.securityTitle, texts.passwordResetPrompt, [
       { text: texts.cancel, style: "cancel" },
       { text: texts.send, onPress: sendPasswordReset },
@@ -269,7 +285,7 @@ console.log("[avatar] profileError:", JSON.stringify(profileError));
 
   const sendPasswordReset = async () => {
     if (!userData?.email) {
-      Alert.alert(common.error, texts.accountEmailMissing);
+      notify(common.error, texts.accountEmailMissing);
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(
@@ -282,10 +298,10 @@ console.log("[avatar] profileError:", JSON.stringify(profileError));
       },
     );
     if (error) {
-      Alert.alert(common.error, texts.passwordEmailError);
+      notify(common.error, texts.passwordEmailError);
       return;
     }
-    Alert.alert(common.success, texts.passwordEmailSent);
+    notify(common.success, texts.passwordEmailSent);
   };
 
   if (loading) {
@@ -356,11 +372,6 @@ console.log("[avatar] profileError:", JSON.stringify(profileError));
           />
         }
       >
-        <Image
-          source={require("../../assets/images/logodiamond.png")}
-          style={{ width: 38, height: 38, alignSelf: "center" }}
-          resizeMode="contain"
-        />
         <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
           <TouchableOpacity
             onPress={handleAvatarPress}

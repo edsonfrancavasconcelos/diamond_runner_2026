@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Image,
     InteractionManager,
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -162,6 +163,15 @@ export default function OfficeDrawer() {
   const { isDark, toggleTheme } = useTheme();
   const texts = useTexts("office");
   const [canUseModules, setCanUseModules] = useState(false);
+  const [syncKey, setSyncKey] = useState(0);
+
+  const handleSync = () => {
+    if (Platform.OS === "web") {
+      window.location.reload();
+      return;
+    }
+    setSyncKey((key) => key + 1);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -192,12 +202,13 @@ export default function OfficeDrawer() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [syncKey]);
 
   const hideIfPending = canUseModules ? undefined : { display: "none" };
 
   return (
     <Drawer.Navigator
+      key={syncKey}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={({ navigation, route }) => ({
         headerStyle: { backgroundColor: PALETTE.darkBlue },
@@ -223,20 +234,37 @@ export default function OfficeDrawer() {
           </TouchableOpacity>
         ),
         headerRight: () => (
-          <TouchableOpacity
-            onPress={toggleTheme}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isDark ? texts.enableLightMode : texts.enableDarkMode
-            }
-            style={{ paddingHorizontal: 12, paddingVertical: 8 }}
-          >
-            <Ionicons
-              name={isDark ? "sunny-outline" : "moon-outline"}
-              size={22}
-              color={PALETTE.gold}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {["MyProfile", "Progress"].includes(route.name) && (
+              <Image
+                source={require("../../assets/images/logodiamond.png")}
+                style={{ width: 28, height: 28 }}
+                resizeMode="contain"
+              />
+            )}
+            <TouchableOpacity
+              onPress={handleSync}
+              accessibilityRole="button"
+              accessibilityLabel="Sincronizar"
+              style={{ paddingHorizontal: 8, paddingVertical: 8 }}
+            >
+              <Ionicons name="sync-outline" size={22} color={PALETTE.gold} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={toggleTheme}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isDark ? texts.enableLightMode : texts.enableDarkMode
+              }
+              style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+            >
+              <Ionicons
+                name={isDark ? "sunny-outline" : "moon-outline"}
+                size={22}
+                color={PALETTE.gold}
+              />
+            </TouchableOpacity>
+          </View>
         ),
         drawerActiveTintColor: "#FFF",
         drawerActiveBackgroundColor: PALETTE.primary,
